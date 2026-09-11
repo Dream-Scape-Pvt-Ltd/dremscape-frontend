@@ -1,0 +1,10 @@
+export * from "./types";
+export * from "./schemas";
+export * from "./utils";
+export { treksApi, MOCK_TREKS } from "./api/treks";
+export { TrekCard } from "./components/trek-card";
+export { TrekHero } from "./components/trek-hero";
+export { TrekQuickFacts } from "./components/trek-quick-facts";
+export { TrekStickyCTA } from "./components/trek-sticky-cta";
+export { TrekJsonLd } from "./components/trek-json-ld";
+export { TrekFilterDrawer } from "./components/trek-filter-drawer";
