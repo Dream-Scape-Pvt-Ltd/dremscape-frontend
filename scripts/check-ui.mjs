@@ -31,9 +31,10 @@ await page.getByText('No journeys match these filters yet.').waitFor();
 await page.getByRole('link',{name:'View All Journeys'}).click();
 await page.waitForURL('**/treks');
 await page.goto('http://127.0.0.1:3000');
-await page.locator('#newsletter-email').fill('preview@example.com');
-await page.getByRole('button',{name:'Subscribe',exact:true}).click();
-await page.getByText('Newsletter signup is not connected yet.',{exact:false}).waitFor();
+await page.getByRole('link',{name:'Explore the Journal',exact:false}).click();
+await page.waitForURL('**/blog');
+await page.locator('.journal-card').first().waitFor();
+await page.goto('http://127.0.0.1:3000');
 await page.evaluate(async()=>{for(let y=0;y<document.body.scrollHeight;y+=650){window.scrollTo({top:y,behavior:"instant"});await new Promise(r=>setTimeout(r,70));}window.scrollTo({top:0,behavior:"instant"});});
 await page.waitForTimeout(800);
 await page.screenshot({path:'test-results/desktop-full.png',fullPage:true});
@@ -54,6 +55,6 @@ await page.emulateMedia({reducedMotion:'reduce'});
 assert.equal(await page.locator('html').evaluate(el=>getComputedStyle(el).scrollBehavior),'auto');
 assert.deepEqual(errors,[]);
 await browser.close();
-console.log('PASS: desktop/mobile layout, assets, filters, dialogs, inquiry failure, newsletter, reduced motion, no runtime errors.');
+console.log('PASS: desktop/mobile layout, assets, filters, dialogs, inquiry failure, journal links, reduced motion, no runtime errors.');
 
 

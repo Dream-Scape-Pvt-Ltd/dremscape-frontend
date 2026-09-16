@@ -5,24 +5,102 @@ export const activities=[
  {slug:'private-journeys',name:'Private journeys',line:'A little more you.',image:'222-370-imgTrekkersSmilingWithHimalayanSnowPeaksBackground',category:'',description:'Travel with your people, at your pace. Start with an idea rather than a fixed package, and shape the days around what matters to your group.',moments:['Dates shaped around your group','Room for personal interests','One conversation, a shared adventure'],question:'Share your dates, group size, interests and preferred level of comfort. We’ll use those details to start a personal itinerary.'},
 ] as const;
 export const journalPosts=[
- {slug:'finding-your-own-pace',title:'Finding your own pace in the Himalaya',category:'THE ART OF TRAVEL',excerpt:'The most memorable journey is not always the longest one. Start with the kind of days you want to remember.',image:'222-370-imgHimalayanMountainPassTrekkerReflection',reading:'4 min',sections:[
-  {title:'Begin with a feeling',body:'Before you open a route map, think about a day you would love to have. Perhaps it begins with a quiet cup of tea and a long view. Perhaps it is a full day of walking with friends, followed by a conversation that carries on after dinner. Both are good places to start.\n\nA destination gives a journey a name. The shape of each day gives it a personality. Leave room in your first conversation for the things that rarely appear in a package title: how you like to spend a morning, what makes you curious, and when you prefer to pause.'},
-  {title:'Make time visible',body:'Count the days you can actually spend travelling, including the beginning and the return. Share that whole window with the team. A route that looks appealing in isolation may feel very different when placed inside the rest of your trip.\n\nThink about the time between headline moments, too. Moving between places, settling into a new room, or taking a walk without a particular destination can become part of the experience rather than a gap to fill.'},
-  {title:'Talk about the ordinary details',body:'Your previous walking experience, the company you travel with, and the comfort you enjoy are useful parts of the conversation. There is no need to make those answers sound more adventurous than they are. An honest description helps the team discuss a suitable plan.\n\nIf you are travelling as a group, give everyone a chance to describe what they hope for. A shared journey works best when it makes space for more than one idea of a good day.'},
-  {title:'Keep a little room for discovery',body:'A plan can give your journey structure without scripting every memory. The light across a courtyard, a conversation over tea, or the first clear view after a bend in the path cannot be scheduled with precision.\n\nChoose your trail thoughtfully. Then leave a little space to be surprised by it.'},
- ]},
- {slug:'the-spaces-between-the-peaks',title:'The spaces between the peaks',category:'PEOPLE & PLACE',excerpt:'Courtyards, cups of tea and everyday moments. Looking beyond the mountain postcard.',image:'222-465-imgAncientSkyCavesAndGompasInMustangNepal',reading:'3 min',sections:[
-  {title:'Look a little closer',body:'A mountain can hold your attention from a long way away. The smaller details ask you to slow down: a doorway in afternoon light, a worn stone step, a street beginning its morning. They do not compete with the view. They give it context.\n\nWhen you imagine your journey, make room for both. The wide landscape and the close detail tell different parts of the same story.'},
-  {title:'Let curiosity become conversation',body:'Being curious does not mean knowing the right question in advance. You might begin with something simple: a material, a piece of food, a pattern you have noticed. Your guide can help you understand what is appropriate to ask and when a moment is best left uninterrupted.\n\nYou do not need to collect an explanation for everything. Sometimes listening, and accepting what you do not yet understand, is a valuable way to be present.'},
-  {title:'A place is someone’s everyday',body:'For a visitor, a courtyard or village path may feel like a discovery. For the people who live there, it belongs to ordinary life. Keep that perspective with you when you stop, photograph, or move through a space.\n\nAsk before making someone the subject of a picture. Respect a declined invitation. A meaningful travel memory does not require another person to become part of it.'},
-  {title:'Bring home more than a picture',body:'Write down one small thing at the end of the day: a sound, a colour, a conversation, or the way the light changed. These details often hold a journey together after the route names begin to blur.\n\nThe peaks may be what brings you to Nepal. Leave room for the life between them to stay with you, too.'},
- ]},
- {slug:'a-mountain-photo-journal',title:'Making a mountain photo journal',category:'FIELD NOTES',excerpt:'A different way to remember a journey: one wide view, one small detail, one moment worth keeping.',image:'222-370-imgTibetanPrayerFlagsFlyingOnMountainRidge',reading:'3 min',sections:[
-  {title:'Give each day a small story',body:'A photo journal does not need to include every view. Try choosing a handful of images that say something about the day: where you were, what caught your attention, and how it felt to be there.\n\nA photograph of your notebook beside a cup of tea may carry as much meaning as the widest landscape. The collection becomes personal through the connections between its images.'},
-  {title:'Change the scale',body:'Look for a wide view, a scene at human scale, and a small detail. This simple rhythm can help you notice more without turning the day into a search for photographs.\n\nYou might choose a valley, a path disappearing around a corner, and the texture of a wall. Let the place suggest the sequence rather than insisting that every day follow the same formula.'},
-  {title:'Keep people in the conversation',body:'If you want to photograph another person, ask first. Show the photograph when appropriate, and treat their preference as more important than your collection. A camera should not make a conversation feel like an obligation.\n\nSome of your favourite moments may remain unphotographed. A few words in a journal can hold them just as well.'},
-  {title:'Put words beside the images',body:'Add a short note while a memory is still fresh. It can be a sentence, a place name you have checked with your guide, or a detail outside the frame.\n\nWhen you return, resist the urge to keep only the most dramatic photographs. A journey has quiet pages, too. Often those are the pages that make it yours.'},
- ]},
+  {
+    "slug": "finding-your-own-pace",
+    "title": "The climb. The flags. The people.",
+    "category": "SHARED TRAILS",
+    "excerpt": "A rocky path, a pause beneath the peaks, and the people who make the view a memory.",
+    "image": "/images/trek-memories/together-in-the-mountains.jpg",
+    "reading": "3 min",
+    "photoIds": [
+      "stone-path",
+      "a-pause-on-the-ridge",
+      "prayer-flags-and-friends",
+      "high-trail"
+    ],
+    "sections": [
+      {
+        "title": "The journey between the photographs",
+        "body": "The camera catches a pause. Around it, the path keeps going: over uneven stones, around the hillside, into the next stretch of open sky. In these photographs from past treks, the people are often small against the landscape. Yet they are the part that makes each frame feel personal.\n\nA line of walkers on a stone path tells a different story from a mountain on its own. It gives the view a rhythm. One person steps ahead; another takes a moment to look back."
+      },
+      {
+        "title": "Room for a pause",
+        "body": "On the hillside, a few walkers have stopped beneath a wide white skyline. There is no need for a dramatic pose. The space around them does the talking.\n\nSome pictures matter because they hold an ordinary part of a bigger day: sitting for a moment, setting down a bag, taking in the distance. Those small pauses belong in the story as much as the climb."
+      },
+      {
+        "title": "A photograph with your people",
+        "body": "Under a web of prayer flags, the group gathers around a viewpoint marker. Walking clothes, sunglasses, backpacks and bright sky: the frame keeps the small details together.\n\nThe mountain gives this photograph its setting. The people give it something to return to. Long after a trek, a group picture can bring the whole day a little closer."
+      },
+      {
+        "title": "More than a point on a map",
+        "body": "These images are memories of old treks, brought together from the Dreamscape collection. They leave space for the stories that do not fit into a caption.\n\nFor the next journey, the invitation is simple: bring your curiosity, make room for your own pace, and keep a few photographs of the people beside you."
+      }
+    ]
+  },
+  {
+    "slug": "the-spaces-between-the-peaks",
+    "title": "The quieter half of the journey.",
+    "category": "ALONG THE WAY",
+    "excerpt": "Forest paths, blue doorways and tiny flowers. The details that make a mountain journey feel lived in.",
+    "image": "/images/trek-memories/forest-footsteps.jpg",
+    "reading": "3 min",
+    "photoIds": [
+      "forest-light",
+      "mountain-teahouse",
+      "blue-doorway",
+      "blue-flowers"
+    ],
+    "sections": [
+      {
+        "title": "Before the wide-open view",
+        "body": "Not every trekking photograph needs a snow peak. Here, the path runs beneath trees. Backpacks bring little flashes of colour into the green, and sunlight finds its way through the canopy.\n\nThese quieter frames give the collection depth. They show a different texture of the journey: roots, stones, leaves and a trail that disappears around the next bend."
+      },
+      {
+        "title": "A place to stop",
+        "body": "A small building stands beside a rock face, with blue window frames and tables outside. It is the kind of scene that sits between the larger views in a photo collection.\n\nIts blue window frames and outdoor tables bring a human scale to the rock face behind it. The buildings along a trail become part of its character: places to look towards, pause beside, and remember."
+      },
+      {
+        "title": "Colour at the doorway",
+        "body": "Turquoise paint, weathered stone and handwritten signs fill another frame. The close view asks for a different kind of attention from the mountain panorama.\n\nA remembered journey is made from both. There is the view you expected to photograph, and there is the doorway you stopped beside because its colour caught your eye."
+      },
+      {
+        "title": "Leave space for small things",
+        "body": "Blue flowers grow close to the ground among dry leaves. Beside all the wide skies in this collection, their small scale feels like a pause.\n\nLook through your own photographs after a trip and these details often bring variety to the story. Keep them. A journey is more than its most spectacular frame."
+      }
+    ]
+  },
+  {
+    "slug": "a-mountain-photo-journal",
+    "title": "When the mountains catch the light.",
+    "category": "MOUNTAIN LIGHT",
+    "excerpt": "Clear blue skies, shadowed valleys and a pink-lit summit. A photo story about looking a little longer.",
+    "image": "/images/trek-memories/sunlit-summits.jpg",
+    "reading": "3 min",
+    "photoIds": [
+      "sunlit-summits",
+      "valley-tree",
+      "mountain-path",
+      "last-light"
+    ],
+    "sections": [
+      {
+        "title": "A skyline in two colours",
+        "body": "Light rests on the snow while the valley below stays in shadow. The photograph holds both at once: warm edges on the skyline and a deep blue landscape underneath.\n\nThere is no single way for the mountains to look. Across these older trek photographs, even the colour of the sky changes the feeling of a frame."
+      },
+      {
+        "title": "Give the view a foreground",
+        "body": "A tree stands above layers of mountain valleys. Its branches break up the open blue and draw the eye back towards the trail.\n\nA photograph does not need an unobstructed panorama to feel expansive. Sometimes the tree, the path or the rough edge of a hillside helps us understand how far the view goes."
+      },
+      {
+        "title": "A person in the landscape",
+        "body": "On a hillside path, a walker sits within a much larger scene. The mountain rises behind them, bright against the blue.\n\nThat small human presence gives the frame scale. It also connects this collection to the act of travelling through a place, rather than simply looking at it from a distance."
+      },
+      {
+        "title": "The frame you return to",
+        "body": "In one photograph, pink light touches the summit while the lower ridges darken. The sky has softened, and the last warm colour makes the mountain stand apart from everything below.\n\nSome views invite a longer look. Return to this frame after the forests, the village streets and the group photographs, and it becomes another part of the same collection: a small window into time spent in the mountains."
+      }
+    ]
+  }
 ] as const;
 export const galleryPhotos=[
  {image:'heroContext-imgHimalayanAlpineSunriseWithPrayerFlagsAndSnowPeaks',title:'A horizon worth pausing for',group:'Landscapes'},

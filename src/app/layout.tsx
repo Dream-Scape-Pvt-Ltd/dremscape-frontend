@@ -5,5 +5,24 @@ import './editorial.css';
 import './destinations.css';
 import './journeys.css';
 import './pages.css';
-export const metadata: Metadata = { title:'Dreamscape Treks — Beyond the Horizon', description:'Explore the sacred Himalayas of Nepal. Discover trekking journeys through Everest, Annapurna, Mustang and Manaslu with Dreamscape Treks.' };
-export default function RootLayout({children}:{children:React.ReactNode}) { return <html lang="en"><body>{children}</body></html>; }
+import './memories.css';
+import './refinements.css';
+import './refined-ui.css';
+import './ui-polish.css';
+
+export const metadata: Metadata = {
+  title: 'Dreamscape Treks — Beyond the Horizon',
+  description: 'Explore the sacred Himalayas of Nepal. Discover trekking journeys through Everest, Annapurna, Mustang and Manaslu with Dreamscape Treks.',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en" data-scroll-behavior="smooth">
+      <body>{children}</body>
+    </html>
+  );
+}

@@ -1,39 +1,145 @@
-import { MetadataRoute } from "next";
-import { siteConfig } from "@/config/site";
-import { treksApi } from "@/features/treks/api/treks";
-import { destinationsApi } from "@/features/destinations/api/destinations";
+import { MetadataRoute } from 'next';
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const treks = await treksApi.getAllSlugs();
-  const destinations = await destinationsApi.list();
+export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://dreamscapetrek.com';
+  const currentDate = new Date();
 
-  const trekUrls: MetadataRoute.Sitemap = treks.map((item) => ({
-    url: `${siteConfig.url}/treks/${item.slug}`,
-    lastModified: new Date(item.updatedAt),
-    changeFrequency: "weekly",
-    priority: 0.9,
-  }));
-
-  const destinationUrls: MetadataRoute.Sitemap = destinations.map((d) => ({
-    url: `${siteConfig.url}/destinations/${d.slug}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly",
-    priority: 0.85,
-  }));
-
-  const staticUrls: MetadataRoute.Sitemap = [
-    { url: siteConfig.url, lastModified: new Date(), changeFrequency: "daily", priority: 1.0 },
-    { url: `${siteConfig.url}/treks`, lastModified: new Date(), changeFrequency: "daily", priority: 0.95 },
-    { url: `${siteConfig.url}/destinations`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
-    { url: `${siteConfig.url}/regions`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${siteConfig.url}/activities`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${siteConfig.url}/blog`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.85 },
-    { url: `${siteConfig.url}/reviews`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.75 },
-    { url: `${siteConfig.url}/gallery`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteConfig.url}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteConfig.url}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteConfig.url}/inquire`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+  // Static pages
+  const staticPages: MetadataRoute.Sitemap = [
+    {
+      url: baseUrl,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 1,
+    },
+    {
+      url: `${baseUrl}/about`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/contact`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/gallery`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/reviews`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/journal`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/inquire`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/privacy-policy`,
+      lastModified: currentDate,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/terms-conditions`,
+      lastModified: currentDate,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
   ];
 
-  return [...staticUrls, ...destinationUrls, ...trekUrls];
+  // Authentication pages
+  const authPages: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/login`,
+      lastModified: currentDate,
+      changeFrequency: 'yearly',
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/register`,
+      lastModified: currentDate,
+      changeFrequency: 'yearly',
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/forgot-password`,
+      lastModified: currentDate,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+  ];
+
+  // Destination pages
+  const destinations = ['everest', 'annapurna', 'manaslu', 'dolpo'];
+  const destinationPages: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/destinations`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    ...destinations.map((slug) => ({
+      url: `${baseUrl}/destinations/${slug}`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    })),
+  ];
+
+  // Activity pages
+  const activities = ['trekking', 'cultural-journeys', 'expeditions', 'private-journeys'];
+  const activityPages: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/activities`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    ...activities.map((slug) => ({
+      url: `${baseUrl}/activities/${slug}`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
+  ];
+
+  // Trek catalog
+  const trekPages: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/treks`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+  ];
+
+  // Combine all pages
+  return [
+    ...staticPages,
+    ...authPages,
+    ...destinationPages,
+    ...activityPages,
+    ...trekPages,
+  ];
 }
