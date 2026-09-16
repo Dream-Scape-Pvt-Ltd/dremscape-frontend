@@ -1,0 +1,13 @@
+import Link from 'next/link';
+import {cache} from 'react';
+import {notFound} from 'next/navigation';
+import JourneyShell from '@/components/journey-shell';
+import {PlanInvitation} from '@/components/editorial';
+import {getGuide} from '@/lib/guides';
+import {BackendError} from '@/lib/backend';
+const load=cache(getGuide);
+export const dynamic='force-dynamic';
+export async function generateMetadata({params}:{params:Promise<{slug:string}>}){try{const g=await load((await params).slug);return {title:`${g.title} | Dreamscape journal`,description:g.excerpt};}catch{return {title:'Journal | Dreamscape'};}}
+// Render a conservative Markdown subset as React text; CMS HTML is never executed.
+function Markdown({text}:{text:string}){return <>{text.split(/\n\s*\n/).map((block,i)=>{const b=block.trim();if(/^#{1,4}\s/.test(b))return <h2 key={i}>{b.replace(/^#{1,4}\s+/,'')}</h2>;if(/^[-*]\s/.test(b))return <ul key={i}>{b.split('\n').map((line,j)=><li key={j}>{line.replace(/^[-*]\s+/,'')}</li>)}</ul>;return <p className="preserve-lines" key={i}>{b}</p>;})}</>;}
+export default async function Page({params}:{params:Promise<{slug:string}>}){let g;try{g=await load((await params).slug);}catch(e){if(e instanceof BackendError&&e.status===404)notFound();return <JourneyShell page="journal"><section className="utility-page container status" role="alert"><h1>This story will be back soon.</h1><Link href="/blog" className="button green">Back to the journal</Link></section></JourneyShell>;}return <JourneyShell page="journal"><article className="journal-article"><header className="article-masthead container"><Link className="text-link" href="/blog">← The journal</Link><p className="eyebrow">{g.category}</p><h1>{g.title}</h1><p>{g.excerpt}</p><div className="article-byline"><span>{g.author||'Dreamscape journal'}</span>{g.reading&&<span>{g.reading} read</span>}</div></header>{g.image&&<div className="article-cover container"><img src={g.image} alt="" fetchPriority="high"/></div>}<div className="article-reading container"><aside><p className="eyebrow">IN THIS STORY</p>{g.sections?.map((s,i)=><a key={s.title} href={`#chapter-${i}`}>{s.title}</a>)}<Link href="/contact" className="article-aside-cta">Have a journey in mind?<br/>Let’s talk ↗</Link></aside><div className="article-prose">{g.sections?g.sections.map((s,i)=><section key={s.title} id={`chapter-${i}`}><span className="chapter-number">0{i+1}</span><h2>{s.title}</h2>{s.body.split('\n\n').map(p=><p key={p}>{p}</p>)}</section>):<Markdown text={g.markdown||'This article’s text is not available yet.'}/>}<div className="article-endnote"><span>BEYOND THE HORIZON</span><Link href="/blog">More from the journal ↗</Link></div></div></div></article><PlanInvitation/></JourneyShell>;}

@@ -1,0 +1,5 @@
+import {cookies} from 'next/headers';
+import {NextResponse} from 'next/server';
+import {backend,apiError,BackendError,noStore} from '@/lib/backend';
+import type {BookingReceipt} from '@/lib/booking';
+export async function GET(_:Request,{params}:{params:Promise<{reference:string}>}){try{const token=(await cookies()).get('dreamscape_session')?.value;if(!token)throw new BackendError('Sign in to view this booking. You can also email the team with your reference.',401);const {reference}=await params;if(!/^[\w-]{1,100}$/.test(reference))throw new BackendError('Invalid booking reference.',400);const data=await backend<BookingReceipt>(`bookings/${reference}/`,{headers:{Authorization:`Bearer ${token}`}});if(!data.booking_reference)throw new BackendError('The booking response was incomplete.');const {booking_reference,trip_title,trip_start_date,num_travelers,currency,total_amount_usd,deposit_amount_usd,amount_paid_usd,status}=data;return NextResponse.json({receipt:{booking_reference,trip_title,trip_start_date,num_travelers,currency,total_amount_usd,deposit_amount_usd,amount_paid_usd,status}},{headers:noStore});}catch(e){return apiError(e);}}
