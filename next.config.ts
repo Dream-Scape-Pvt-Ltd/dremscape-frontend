@@ -24,6 +24,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/images/:path*.svg",
+        destination: "/svg/:path*.svg",
+      },
+    ];
+  },
 };
+
 
 export default nextConfig;

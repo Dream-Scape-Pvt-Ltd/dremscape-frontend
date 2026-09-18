@@ -6,7 +6,7 @@ export class BackendError extends Error {
 export function backendConfigured() { return Boolean(process.env.BACKEND_API_URL); }
 export async function backend<T>(path: string, options: RequestInit = {}): Promise<T> {
   const base = process.env.BACKEND_API_URL?.replace(/\/$/, '');
-  if (!base) throw new BackendError('This preview is not connected to the team yet. Your request has not been sent.', 503);
+  if (!base) throw new BackendError('Backend service is not configured. Please contact the team.', 503);
   let response: Response;
   try {
     response = await fetch(`${base}/${path}`, {...options, headers: {'Content-Type':'application/json', ...options.headers}, cache:'no-store', signal:AbortSignal.timeout(15000), redirect:'error'});
@@ -16,8 +16,8 @@ export async function backend<T>(path: string, options: RequestInit = {}): Promi
     const unavailable=options.method==='POST'?'We could not confirm whether your request was saved. Please contact the team before trying again.':'The service is temporarily unavailable. Please try again later.';
     throw new BackendError(response.status >= 500 ? unavailable : body?.error?.message || 'The request could not be completed.', response.ok ? 502 : response.status, response.status<500?body?.error?.details:undefined);
   }
-  if (body?.success !== true || body.data == null) throw new BackendError('The server returned an unexpected response. We could not confirm the result.');
-  return body.data as T;
+  if (body?.success !== true) throw new BackendError('The server returned an unexpected response. We could not confirm the result.');
+  return (body.data ?? {success: true}) as T;
 }
 export function apiError(error: unknown) {
   const known = error instanceof BackendError;

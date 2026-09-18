@@ -1,4 +1,4 @@
-import {trips, type Trip} from './catalog';
+import type {Trip} from './catalog';
 import {backend, backendConfigured, BackendError} from './backend';
 
 export type Departure={id:string; start_date:string; end_date:string; price_usd:string; available_seats:number; status:string};
@@ -22,19 +22,15 @@ export async function allPages<T>(path:string):Promise<T[]> {
   throw new BackendError('The catalog is too large to load. Please contact the team.');
 }
 export async function listJourneys() {
-  if (!backendConfigured()) return {trips, demo:true};
+  if (!backendConfigured()) return {trips:[] as Trip[], demo:false};
   // Follow numbered pages, never an arbitrary URL supplied by an upstream response.
   return {trips:(await allPages<RawTrip>('trips/')).map(normalizeTrip),demo:false};
 }
 export async function getJourney(slug:string) {
   if(!/^[\w-]+$/.test(slug)) throw new BackendError('Journey not found.',404);
-  if(!backendConfigured()) {
-    const sample=trips.find(t=>t.slug===slug);
-    if(!sample) throw new BackendError('Journey not found.',404);
-    const journey:Journey={...sample,overview:`Explore ${sample.destination_name} on ${sample.title}. This sample journey shows the kind of adventure you can plan with Dreamscape. Ask the team for a confirmed day-by-day itinerary, inclusions and departure dates.`, min_group_size:1,max_group_size:14,best_seasons:[],inclusions:[],exclusions:[],packing_list:[],itinerary_days:[],departures:[]};
-    return {journey,demo:true};
-  }
+  if(!backendConfigured()) throw new BackendError('Journey not found.',404);
   const raw=await backend<Journey & RawTrip>(`trips/${encodeURIComponent(slug)}/`);
+
   if(!Array.isArray(raw.itinerary_days)||!Array.isArray(raw.departures)) throw new BackendError('The itinerary response is incomplete.');
   for(const key of ['inclusions','exclusions','best_seasons','packing_list'] as const)if(!Array.isArray(raw[key])||!raw[key].every(v=>typeof v==='string'))throw new BackendError('The itinerary response is incomplete.');
   if(typeof raw.overview!=='string')throw new BackendError('The itinerary response is incomplete.');

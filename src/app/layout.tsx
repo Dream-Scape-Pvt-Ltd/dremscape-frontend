@@ -15,6 +15,8 @@ export const metadata: Metadata = {
   description: 'Explore the sacred Himalayas of Nepal. Discover trekking journeys through Everest, Annapurna, Mustang and Manaslu with Dreamscape Treks.',
 };
 
+import {AuthProvider} from '@/context/AuthContext';
+
 export default function RootLayout({
   children,
 }: {
@@ -22,7 +24,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
+

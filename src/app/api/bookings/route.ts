@@ -6,8 +6,7 @@ import {passengerFields,type BookingReceipt} from '@/lib/booking';
 export async function POST(request:Request) {
   try {
     const input=await readInput(request);
-    const {journey,demo}=await getJourney(requiredText(input,'trek_slug'));
-    if(demo)throw new BackendError('Sample journeys cannot be booked. Please ask the team about a confirmed departure.',503);
+    const {journey}=await getJourney(requiredText(input,'trek_slug'));
     const departure=journey.departures.find(d=>d.id===input.departure_id);
     if(!departure||!bookable(departure))throw new BackendError('This departure is no longer available. Please choose another date.',409);
     if(!Array.isArray(input.passengers)||!input.passengers.length||input.passengers.length>Math.min(departure.available_seats,journey.max_group_size))throw new BackendError('Please check the number of travellers and available seats.',400);
