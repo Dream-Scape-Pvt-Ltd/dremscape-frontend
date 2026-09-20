@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import {StoryPhoto,MemoryReveal} from '@/components/trek-memories';
+import {StoryPhoto,MemoryReveal} from '../components/trek-memories';
 import {cache} from 'react';
 import {notFound} from 'next/navigation';
 import JourneyShell from '@/components/journey-shell';

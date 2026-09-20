@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import {getJourney,bookable} from '@/lib/journeys';
-import BookingForm from '@/components/booking-form';
+import BookingForm from './components/booking-form';
 import JourneyShell from '@/components/journey-shell';
 export const dynamic='force-dynamic';
 export const metadata={title:'Your booking request | Dreamscape',robots:{index:false,follow:false}};

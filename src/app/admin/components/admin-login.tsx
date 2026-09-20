@@ -1,14 +1,14 @@
 'use client';
 
-import {useState, type FormEvent} from 'react';
+import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
-import styles from '@/app/admin/admin.module.css';
+import styles from '../admin.module.css';
 
 interface AdminLoginProps {
   onLoginSuccess: (user: { full_name: string; role: string; email: string }) => void;
 }
 
-export default function AdminLogin({onLoginSuccess}: AdminLoginProps) {
+export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -23,7 +23,7 @@ export default function AdminLogin({onLoginSuccess}: AdminLoginProps) {
     try {
       const response = await fetch('/api/admin/login', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: email.trim(),
           password,
@@ -83,7 +83,7 @@ export default function AdminLogin({onLoginSuccess}: AdminLoginProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@dreamscapetreks.com"
                 disabled={loading}
-                style={{color: '#000000', backgroundColor: '#ffffff'}}
+                style={{ color: '#000000', backgroundColor: '#ffffff' }}
               />
             </div>
           </div>
@@ -101,7 +101,7 @@ export default function AdminLogin({onLoginSuccess}: AdminLoginProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter admin password"
                 disabled={loading}
-                style={{color: '#000000', backgroundColor: '#ffffff'}}
+                style={{ color: '#000000', backgroundColor: '#ffffff' }}
               />
               <button
                 type="button"
