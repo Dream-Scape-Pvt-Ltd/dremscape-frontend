@@ -7,10 +7,15 @@ export function backendConfigured() { return Boolean(process.env.BACKEND_API_URL
 export async function backend<T>(path: string, options: RequestInit = {}): Promise<T> {
   const base = process.env.BACKEND_API_URL?.replace(/\/$/, '');
   if (!base) throw new BackendError('Backend service is not configured. Please contact the team.', 503);
+  const headers = new Headers(options.headers);
+  if (!(options.body instanceof FormData) && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
   let response: Response;
   try {
-    response = await fetch(`${base}/${path}`, {...options, headers: {'Content-Type':'application/json', ...options.headers}, cache:'no-store', signal:AbortSignal.timeout(15000), redirect:'error'});
+    response = await fetch(`${base}/${path}`, {...options, headers, cache:'no-store', signal:AbortSignal.timeout(30000), redirect:'error'});
   } catch { throw new BackendError(options.method === 'POST' ? 'We could not confirm whether your request was saved. Please contact the team before trying again.' : 'The service is temporarily unavailable. Please try again.'); }
+  if (response.ok && response.status === 204) return {} as T;
   const body = await response.json().catch(() => null);
   if (!response.ok || body?.success === false) {
     const unavailable=options.method==='POST'?'We could not confirm whether your request was saved. Please contact the team before trying again.':'The service is temporarily unavailable. Please try again later.';
@@ -23,12 +28,14 @@ export function apiError(error: unknown) {
   const known = error instanceof BackendError;
   return NextResponse.json({error:known ? error.message : 'The request could not be completed.', fields:known ? error.fields : undefined}, {status:known ? error.status : 500, headers:{'Cache-Control':'no-store'}});
 }
-export async function readInput(request: Request): Promise<Record<string, unknown>> {
+export function assertSameOrigin(request: Request) {
   const origin=request.headers.get('origin');
-  // Next may use its internal bind hostname in request.url. Match the browser-facing host.
   const protocol=request.headers.get('x-forwarded-proto') || new URL(request.url).protocol.slice(0,-1);
   const expectedOrigin=`${protocol}://${request.headers.get('host') || new URL(request.url).host}`;
   if (origin && origin !== expectedOrigin) throw new BackendError('Please submit this form from the Dreamscape website.',403);
+}
+export async function readInput(request: Request): Promise<Record<string, unknown>> {
+  assertSameOrigin(request);
   if (!request.headers.get('content-type')?.includes('application/json')) throw new BackendError('Please submit a valid form.',415);
   const text=await request.text();
   if (text.length>60000) throw new BackendError('The form is too large.',413);

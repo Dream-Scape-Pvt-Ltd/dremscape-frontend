@@ -18,7 +18,7 @@ export default function JournalIndex({ guides }: { guides: Guide[] }) {
         <div className="filter-chips" role="group" aria-label="Article categories">
           <button aria-pressed={!category} onClick={() => setCategory('')}>All stories</button>
           {categories.map(c => (
-            <button aria-pressed={category === c} key={c} onClick={() => setCategory(c)}>{c}</button>
+            <button aria-pressed={category === c} key={c} onClick={() => setCategory(c)}>{c.replaceAll('_', ' ')}</button>
           ))}
         </div>
         <label>
@@ -52,7 +52,7 @@ export default function JournalIndex({ guides }: { guides: Guide[] }) {
                   )}
                 </div>
                 <section>
-                  <p className="eyebrow">{g.category}</p>
+                  <p className="eyebrow">{g.category.replaceAll('_', ' ')}</p>
                   <h2>{g.title}</h2>
                   <p>{g.excerpt}</p>
                   <span className="journal-card-foot">

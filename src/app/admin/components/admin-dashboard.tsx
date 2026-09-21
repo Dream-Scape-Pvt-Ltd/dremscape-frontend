@@ -8,11 +8,11 @@ import type {TravelGuideAdminItem, TravelGuideDetail, GuidePayload} from '@/type
 import AdminLogin from './admin-login';
 import styles from '@/app/admin/admin.module.css';
 
-type Tab = 'dashboard' | 'treks' | 'revenue' | 'journal' | 'inquiries' | 'reviews' | 'media' | 'settings' | 'destinations';
+type Tab = 'dashboard' | 'treks' | 'revenue' | 'journal' | 'inquiries' | 'reviews' | 'settings' | 'destinations';
 type Page<T> = {count: number; next: string | null; previous: string | null; results: T[]};
 interface AdminProfile {full_name: string; role: string; email?: string;}
 const statuses: InquiryStatus[] = ['NEW','ASSIGNED','IN_CONTACT','TRAVELING','COMPLETED','CLOSED'];
-const emptyGuide: GuidePayload = {title: '', slug: '', summary: '', body_markdown: '', category: 'CULTURE', is_published: false};
+const emptyGuide: GuidePayload = {title: '', slug: '', country: 'NEPAL', body_markdown: '', category: 'ADVENTURE', hero_image_url: '', gallery_images: [], is_published: false};
 
 export interface AnalyticsMetrics {
   total_treks: number;
@@ -168,9 +168,13 @@ const difficultyGrades = [
 ];
 
 async function api<T>(path: string, options?: RequestInit): Promise<T> {
+  const headers = new Headers(options?.headers);
+  if (!(options?.body instanceof FormData) && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
   const response = await fetch(path, {
-    headers: {'Content-Type': 'application/json', ...(options?.headers || {})},
-    ...options
+    ...options,
+    headers,
   });
   const body = await response.json().catch(() => null);
   if (!response.ok) throw new Error(body?.error || 'The request could not be completed.');
@@ -615,26 +619,26 @@ export default function AdminDashboard() {
         }))
       };
 
+      let savedSlug = selectedTrekDetail.slug;
+      let successMessage = '';
       if (selectedTrekDetail.id && selectedTrekSlug !== 'new') {
         const updated = await api<{slug?: string}>(`/api/admin/treks/${selectedTrekSlug}`, {
           method: 'PATCH',
           body: JSON.stringify(payload)
         });
-        setMessage(`Trek "${selectedTrekDetail.title}" updated successfully with ${payload.itinerary_days.length} itinerary days.`);
-        if (updated?.slug) {
-          setSelectedTrekSlug(updated.slug);
-        }
+        savedSlug = updated?.slug || savedSlug;
+        successMessage = `Trek "${selectedTrekDetail.title}" updated successfully with ${payload.itinerary_days.length} itinerary days.`;
       } else {
         const created = await api<{slug?: string}>('/api/admin/treks', {
           method: 'POST',
           body: JSON.stringify(payload)
         });
-        setMessage(`Trek "${selectedTrekDetail.title}" created successfully.`);
-        if (created?.slug) {
-          setSelectedTrekSlug(created.slug);
-        }
+        savedSlug = created?.slug || savedSlug;
+        successMessage = `Trek "${selectedTrekDetail.title}" created successfully. It is now loaded for editing.`;
       }
-      void loadTreks();
+      await loadTreks();
+      if (savedSlug) await loadTrekDetail(savedSlug);
+      setMessage(successMessage);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to save trek details.');
     } finally {
@@ -769,12 +773,14 @@ export default function AdminDashboard() {
         method: editor.id ? 'PATCH' : 'POST',
         body: JSON.stringify(payload)
       });
+      const verified = await api<TravelGuideDetail>(`/api/admin/guides/${saved.slug}`);
       setGuides(current => current && {
         ...current,
-        results: editor.id ? current.results.map(item => item.slug === saved.slug ? saved : item) : [saved, ...current.results],
+        results: editor.id ? current.results.map(item => item.slug === verified.slug ? verified : item) : [verified, ...current.results],
         count: editor.id ? current.count : current.count + 1
       });
       setEditor(null);
+      setMessage(verified.is_published ? `“${verified.title}” is saved and live on the blog.` : `“${verified.title}” is saved in the database as a draft.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to save the guide.');
     } finally {
@@ -795,6 +801,21 @@ export default function AdminDashboard() {
       setEditor(null);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to archive the guide.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function deleteGuideComment(commentId: string) {
+    if (!editor?.id || !window.confirm('Remove this comment?')) return;
+    setSaving(true);
+    setMessage('');
+    try {
+      await api(`/api/admin/guides/${editor.slug}/comments/${commentId}`, {method: 'DELETE'});
+      setEditor(current => current ? {...current, comments: (current.comments || []).filter(comment => comment.id !== commentId), comment_count: Math.max(0, (current.comment_count || 1) - 1)} : current);
+      setGuides(current => current ? {...current, results: current.results.map(item => item.slug === editor.slug ? {...item, comment_count: Math.max(0, (item.comment_count || 1) - 1)} : item)} : current);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to remove the comment.');
     } finally {
       setSaving(false);
     }
@@ -834,7 +855,7 @@ export default function AdminDashboard() {
     },
     {
       id: 'journal',
-      label: 'Journal Posts',
+      label: 'Blog Management',
       icon: (
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M12 20h9"/>
@@ -858,17 +879,6 @@ export default function AdminDashboard() {
       icon: (
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        </svg>
-      )
-    },
-    {
-      id: 'media',
-      label: 'Media Library',
-      icon: (
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="3" width="18" height="18" rx="2"/>
-          <circle cx="9" cy="9" r="2"/>
-          <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
         </svg>
       )
     },
@@ -1163,14 +1173,14 @@ export default function AdminDashboard() {
                     <button
                       type="button"
                       className={styles.quickActionBtn}
-                      onClick={() => setMessage('Media staging workspace active. Drag and drop assets to catalog.')}
+                      onClick={() => {setTab('journal'); void editGuide();}}
                     >
                       <svg className={styles.quickActionIcon} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                         <polyline points="17 8 12 3 7 8"/>
                         <line x1="12" y1="3" x2="12" y2="15"/>
                       </svg>
-                      Upload Media
+                      New Blog Post
                     </button>
                   </div>
                 </section>
@@ -1216,7 +1226,7 @@ export default function AdminDashboard() {
                         <div className={styles.timelineItem}>
                           <div className={styles.timelineDot} />
                           <div className={styles.timelineContent}>
-                            <strong>New high-res map uploaded to Media Library.</strong>
+                            <strong>A reader commented on a published blog post.</strong>
                             <small>Yesterday at 14:30</small>
                           </div>
                         </div>
@@ -1313,7 +1323,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Placeholders for other tabs with clean mockups & catalog links */}
-        {(tab === 'reviews' || tab === 'media' || tab === 'settings' || tab === 'destinations') && (
+        {(tab === 'reviews' || tab === 'settings' || tab === 'destinations') && (
           <section className={styles.placeholder}>
             <span>⌁</span>
             <h2>{navItems.find(item => item.id === tab)?.label || 'Module Management'}</h2>
@@ -1356,6 +1366,7 @@ export default function AdminDashboard() {
           onClose={() => setEditor(null)}
           onSave={saveGuide}
           onDelete={() => void deleteGuide()}
+          onDeleteComment={commentId => void deleteGuideComment(commentId)}
         />
       )}
 
@@ -1462,9 +1473,9 @@ function JournalView({guides, loading, onCreate, onEdit}: {guides: TravelGuideAd
       <div className={styles.panelHead}>
         <div>
           <p style={{fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1.4px', color: '#74897d', fontWeight: 800, margin: '0 0 4px'}}>CMS</p>
-          <h2>Travel guides</h2>
+          <h2>Blog posts</h2>
         </div>
-        <button className={styles.primary} onClick={onCreate}>+ New guide</button>
+        <button className={styles.primary} onClick={onCreate}>+ New blog post</button>
       </div>
       {loading ? (
         <p className={styles.empty}>Loading guides…</p>
@@ -1473,9 +1484,11 @@ function JournalView({guides, loading, onCreate, onEdit}: {guides: TravelGuideAd
           <table>
             <thead>
               <tr>
-                <th>Guide</th>
+                <th>Blog post</th>
                 <th>Category</th>
                 <th>State</th>
+                <th>Views</th>
+                <th>Comments</th>
                 <th>Updated</th>
                 <th></th>
               </tr>
@@ -1493,6 +1506,8 @@ function JournalView({guides, loading, onCreate, onEdit}: {guides: TravelGuideAd
                       {guide.is_published ? 'Published' : 'Draft'}
                     </em>
                   </td>
+                  <td>{(guide.view_count || 0).toLocaleString()}</td>
+                  <td>{guide.comment_count || 0}</td>
                   <td>{date(guide.updated_at || guide.published_at)}</td>
                   <td>
                     <button onClick={() => onEdit(guide)}>Edit</button>
@@ -1503,7 +1518,7 @@ function JournalView({guides, loading, onCreate, onEdit}: {guides: TravelGuideAd
           </table>
         </div>
       ) : (
-        <p className={styles.empty}>No guides found.</p>
+        <p className={styles.empty}>No blog posts found.</p>
       )}
     </section>
   );
@@ -1566,42 +1581,105 @@ function InquiryDrawer({inquiry, notes, noteText, saving, onClose, onStatus, onN
   );
 }
 
-function GuideEditor({guide, saving, onChange, onClose, onSave, onDelete}: {guide: TravelGuideDetail; saving: boolean; onChange: (guide: TravelGuideDetail) => void; onClose: () => void; onSave: (event: FormEvent) => void; onDelete: () => void}) {
+function GuideEditor({guide, saving, onChange, onClose, onSave, onDelete, onDeleteComment}: {guide: TravelGuideDetail; saving: boolean; onChange: (guide: TravelGuideDetail) => void; onClose: () => void; onSave: (event: FormEvent) => void; onDelete: () => void; onDeleteComment: (commentId: string) => void}) {
+  const [uploadingHero, setUploadingHero] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [mediaError, setMediaError] = useState('');
   const field = (key: keyof TravelGuideDetail) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     onChange({...guide, [key]: event.target.type === 'checkbox' ? (event.target as HTMLInputElement).checked : event.target.value});
 
+  async function uploadImages(files: File[]) {
+    const form = new FormData();
+    files.forEach(file => form.append('files', file));
+    return api<{files:Array<{id:string;url:string;name:string;size:number}>}>('/api/admin/guides/media', {method:'POST', body:form});
+  }
+
+  async function uploadHero(file?: File) {
+    if (!file) return;
+    setUploadingHero(true); setMediaError('');
+    try {
+      const result = await uploadImages([file]);
+      if (result.files[0]) onChange({...guide, hero_image_url:result.files[0].url});
+    } catch (error) { setMediaError(error instanceof Error ? error.message : 'The hero image could not be uploaded.'); }
+    finally { setUploadingHero(false); }
+  }
+
+  async function uploadGallery(files: File[]) {
+    if (!files.length) return;
+    setUploadingGallery(true); setMediaError('');
+    try {
+      const result = await uploadImages(files);
+      onChange({...guide, gallery_images:[...(guide.gallery_images || []), ...result.files.map(file => file.url)]});
+    } catch (error) { setMediaError(error instanceof Error ? error.message : 'The story images could not be uploaded.'); }
+    finally { setUploadingGallery(false); }
+  }
+
   return (
-    <div className={styles.modalBackdrop} role="presentation">
-      <form className={styles.editor} onSubmit={onSave}>
+    <div className={styles.modalBackdrop} role="dialog" aria-modal="true" aria-label={guide.id ? 'Edit blog post' : 'Create blog post'}>
+      <form className={`${styles.editor} ${styles.blogEditor}`} onSubmit={onSave}>
         <button type="button" className={styles.close} onClick={onClose}>×</button>
-        <p style={{fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1.4px', color: '#74897d', fontWeight: 800}}>CMS / {guide.id ? 'Edit guide' : 'New guide'}</p>
-        <h2>{guide.id ? guide.title : 'Create a guide'}</h2>
-        <label>Title<input required value={guide.title} onChange={field('title')} maxLength={180} /></label>
-        <label>Slug<input required value={guide.slug} onChange={field('slug')} pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
-        <div className={styles.formGrid}>
-          <label>Category
-            <select value={guide.category || 'CULTURE'} onChange={field('category')}>
-              {['VISAS','PERMITS','ALTITUDE','CULTURE','BEST_TIME'].map(value => (
-                <option key={value}>{value}</option>
-              ))}
-            </select>
+        <header className={styles.blogEditorHeader}>
+          <div><p>Blog studio</p><h2>{guide.id ? guide.title : 'Create a new story'}</h2><span>Build a clear, visual post for the Dreamscape journal.</span></div>
+          {guide.id && <div className={styles.blogStats}><span><strong>{guide.view_count || 0}</strong> Views</span><span><strong>{guide.comment_count || 0}</strong> Comments</span></div>}
+        </header>
+
+        <section className={styles.blogEditorSection}>
+          <div className={styles.blogSectionHeading}><span>01</span><div><h3>Story details</h3><p>The post address is created automatically from the title.</p></div></div>
+          <div className={styles.formGrid}>
+            <label>Post title<input required value={guide.title} onChange={field('title')} maxLength={180} placeholder="A memorable day above the clouds" /></label>
+            <label>Category
+              <select value={guide.category || 'ADVENTURE'} onChange={field('category')}>
+                <option value="ADVENTURE">Adventure</option>
+                <option value="TRAVEL_TIPS">Travel Tips</option>
+                <option value="CULTURE">Culture</option>
+                <option value="NATURE">Nature</option>
+                <option value="FOOD">Food</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section className={styles.blogEditorSection}>
+          <div className={styles.blogSectionHeading}><span>02</span><div><h3>Photos</h3><p>Choose a hero image and supporting images from your computer.</p></div></div>
+          <div className={styles.blogMediaColumns}>
+            <div className={styles.blogMediaPanel}>
+              <div className={styles.blogMediaLabel}><strong>Hero image</strong><small>Shown on the blog card and at the top of the post</small></div>
+              {guide.hero_image_url ? <div className={styles.blogHeroPreview}><img src={guide.hero_image_url} alt="Hero preview"/><button type="button" onClick={() => onChange({...guide, hero_image_url:''})}>Remove</button></div> : <div className={styles.blogImageEmpty}><span>◇</span><p>No hero image selected</p></div>}
+              <label className={styles.blogUploadButton}><input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploadingHero} onChange={event => {void uploadHero(event.currentTarget.files?.[0]); event.currentTarget.value='';}}/>{uploadingHero ? 'Uploading…' : guide.hero_image_url ? 'Replace hero image' : 'Choose hero image'}</label>
+            </div>
+            <div className={styles.blogMediaPanel}>
+              <div className={styles.blogMediaLabel}><strong>Story images</strong><small>Add up to 12 supporting photos at a time</small></div>
+              <label className={`${styles.blogUploadButton} ${styles.blogUploadSecondary}`}><input type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={uploadingGallery} onChange={event => {void uploadGallery(Array.from(event.currentTarget.files || [])); event.currentTarget.value='';}}/>{uploadingGallery ? 'Uploading…' : 'Choose story images'}</label>
+              <div className={styles.blogGalleryGrid}>{(guide.gallery_images || []).map((url,index)=><div key={`${url}-${index}`}><img src={url} alt={`Story image ${index+1}`}/><button type="button" aria-label={`Remove story image ${index+1}`} onClick={() => onChange({...guide, gallery_images:(guide.gallery_images || []).filter((_,itemIndex)=>itemIndex!==index)})}>×</button></div>)}</div>
+              {!(guide.gallery_images || []).length && <div className={styles.blogGalleryEmpty}>Supporting images will appear here.</div>}
+            </div>
+          </div>
+          {mediaError && <p className={styles.mediaError} role="alert">{mediaError}</p>}
+          <p className={styles.blogUploadHint}>JPG, PNG or WebP · maximum 10 MB per image</p>
+        </section>
+
+        <section className={styles.blogEditorSection}>
+          <div className={styles.blogSectionHeading}><span>03</span><div><h3>Article</h3><p>Write the story using plain text or simple Markdown headings and lists.</p></div></div>
+          <label className={styles.blogBodyLabel}>Article content<textarea required className={styles.markdown} value={guide.body_markdown || ''} onChange={field('body_markdown')} placeholder={'## Begin the story\n\nWrite your article here…'} /></label>
+        </section>
+
+        <section className={`${styles.blogEditorSection} ${styles.blogPublishSection}`}>
+          <div><h3>Ready to share?</h3><p>Drafts stay private. Published posts appear on the public blog.</p></div>
+          <label className={styles.publishSwitch}>
+            <input type="checkbox" checked={Boolean(guide.is_published)} onChange={field('is_published')} /><span aria-hidden="true"/><strong>{guide.is_published ? 'Published' : 'Draft'}</strong>
           </label>
-          <label>Hero image URL<input value={guide.hero_image_url || ''} onChange={field('hero_image_url')} type="url" /></label>
-        </div>
-        <label>Summary<textarea value={guide.summary || ''} onChange={field('summary')} maxLength={500} /></label>
-        <label>Markdown content<textarea className={styles.markdown} value={guide.body_markdown || ''} onChange={field('body_markdown')} /></label>
-        <div className={styles.formGrid}>
-          <label>SEO title<input value={guide.meta_title || ''} onChange={field('meta_title')} maxLength={180} /></label>
-          <label>SEO description<input value={guide.meta_description || ''} onChange={field('meta_description')} maxLength={300} /></label>
-        </div>
-        <label className={styles.checkbox}>
-          <input type="checkbox" checked={Boolean(guide.is_published)} onChange={field('is_published')} /> Publish this guide
-        </label>
+        </section>
+
+        {guide.id && <section className={`${styles.blogEditorSection} ${styles.editorComments}`}>
+          <div className={styles.blogSectionHeading}><span>04</span><div><h3>Reader comments</h3><p>Review and remove comments from this post.</p></div></div>
+          {(guide.comments || []).length ? guide.comments!.map(comment => <article key={comment.id}><div><strong>{comment.author_name}</strong><small>{date(comment.created_at)}</small></div><p>{comment.body}</p><button type="button" className={styles.danger} disabled={saving} onClick={() => onDeleteComment(comment.id)}>Remove</button></article>) : <p className={styles.blogGalleryEmpty}>No comments on this post yet.</p>}
+        </section>}
         <footer>
           {guide.id && <button type="button" className={styles.danger} disabled={saving} onClick={onDelete}>Archive</button>}
           <span />
           <button type="button" onClick={onClose}>Cancel</button>
-          <button className={styles.primary} disabled={saving}>
+          <button className={styles.primary} disabled={saving || uploadingHero || uploadingGallery}>
             {saving ? 'Saving…' : guide.is_published ? 'Save & publish' : 'Save draft'}
           </button>
         </footer>
@@ -2363,6 +2441,48 @@ function TrekFullDetailEditor({
     trek.itinerary_days.some(d => d.elevation_meters !== null && d.elevation_meters !== '' && Number(d.elevation_meters) > 0)
   );
   const [isGraphExpanded, setIsGraphExpanded] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [mediaError, setMediaError] = useState('');
+
+  const uploadImages = async (files: File[]) => {
+    const form = new FormData();
+    files.forEach(file => form.append('files', file));
+    return api<{files: Array<{id: string; url: string; name: string; size: number}>}>('/api/admin/treks/media', {
+      method: 'POST',
+      body: form,
+    });
+  };
+
+  const handleCoverUpload = async (file?: File) => {
+    if (!file) return;
+    setMediaError('');
+    setUploadingCover(true);
+    try {
+      const result = await uploadImages([file]);
+      const uploaded = result.files[0];
+      if (uploaded) onChange(prev => prev ? {...prev, hero_image_url: uploaded.url} : null);
+    } catch (error) {
+      setMediaError(error instanceof Error ? error.message : 'The cover image could not be uploaded.');
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
+  const handleGalleryUpload = async (files: File[]) => {
+    if (!files.length) return;
+    setMediaError('');
+    setUploadingGallery(true);
+    try {
+      const result = await uploadImages(files);
+      const urls = result.files.map(file => file.url);
+      onChange(prev => prev ? {...prev, gallery_images: [...(prev.gallery_images || []), ...urls]} : null);
+    } catch (error) {
+      setMediaError(error instanceof Error ? error.message : 'The gallery images could not be uploaded.');
+    } finally {
+      setUploadingGallery(false);
+    }
+  };
 
   const handleTitleChange = (val: string) => {
     if (!trek.id) {
@@ -2723,9 +2843,34 @@ function TrekFullDetailEditor({
           {/* Main Hero / Cover Image */}
           <div className={styles.formFieldFull}>
             <label className={styles.formLabel}>
-              <span>Main Hero / Cover Image URL</span>
+              <span>Main Hero / Cover Image</span>
               <span className={styles.formLabelHint}>Primary banner image for trek hero and catalog cards</span>
             </label>
+            <div className={styles.uploadRow}>
+              <label className={styles.uploadButton}>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className={styles.visuallyHiddenInput}
+                  disabled={uploadingCover}
+                  onChange={event => {
+                    void handleCoverUpload(event.currentTarget.files?.[0]);
+                    event.currentTarget.value = '';
+                  }}
+                />
+                {uploadingCover ? 'Uploading cover…' : 'Upload cover image'}
+              </label>
+              {trek.hero_image_url && (
+                <button
+                  type="button"
+                  className={styles.secondaryMediaButton}
+                  onClick={() => onChange(prev => prev ? {...prev, hero_image_url: ''} : null)}
+                >
+                  Remove custom cover
+                </button>
+              )}
+              <span className={styles.uploadHint}>JPG, PNG or WebP · maximum 10 MB</span>
+            </div>
             <div className={styles.inputAffixWrapper}>
               <span className={styles.inputPrefix}>Cover URL</span>
               <input
@@ -2733,7 +2878,7 @@ function TrekFullDetailEditor({
                 className={styles.formInput}
                 value={trek.hero_image_url || ''}
                 onChange={e => onChange(prev => prev ? {...prev, hero_image_url: e.target.value} : null)}
-                placeholder="e.g. /images/222-242-imgEverestBaseCampChoLaPassTrekkingRoute.png or https://..."
+                placeholder="Upload an image above or paste an existing image URL"
               />
             </div>
 
@@ -2769,6 +2914,25 @@ function TrekFullDetailEditor({
               </p>
             </div>
           </div>
+
+          <div className={styles.galleryUploadBar}>
+            <label className={styles.uploadButton}>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className={styles.visuallyHiddenInput}
+                disabled={uploadingGallery}
+                onChange={event => {
+                  void handleGalleryUpload(Array.from(event.currentTarget.files || []));
+                  event.currentTarget.value = '';
+                }}
+              />
+              {uploadingGallery ? 'Uploading gallery…' : 'Upload gallery images'}
+            </label>
+            <span className={styles.uploadHint}>Select up to 12 images per upload</span>
+          </div>
+          {mediaError && <p className={styles.mediaError} role="alert">{mediaError}</p>}
 
           <div className={styles.mediaGrid}>
             {(trek.gallery_images || []).map((imgUrl, idx) => (
@@ -2816,13 +2980,13 @@ function TrekFullDetailEditor({
             {/* Add New Gallery Photo Card */}
             <div className={styles.addGalleryCard}>
               <strong style={{fontSize: '13px', color: '#154a36', textAlign: 'center'}}>
-                + Add Photo to Gallery
+                + Add image by URL
               </strong>
               <input
                 type="text"
                 id="new-gallery-image-input"
                 className={styles.galleryCardInput}
-                placeholder="Paste Image URL / Path..."
+                placeholder="Paste image URL or path..."
                 onKeyDown={e => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -3306,5 +3470,3 @@ function RevenueAnalyticsView({
     </div>
   );
 }
-
-

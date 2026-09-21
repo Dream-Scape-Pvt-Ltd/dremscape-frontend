@@ -233,3 +233,28 @@
     margin-bottom: 24px;
   }
 }
+
+.blog-story-gallery {
+  display: grid;
+  gap: 18px;
+  margin: 38px 0;
+}
+
+.blog-story-gallery img {
+  width: 100%;
+  height: auto;
+  max-height: 560px;
+  object-fit: cover;
+  border-radius: 13px;
+}
+
+.blog-story-gallery img:nth-child(even) {
+  width: 88%;
+  margin-left: auto;
+}
+
+@media (max-width: 560px) {
+  .blog-story-gallery img:nth-child(even) {
+    width: 100%;
+  }
+}

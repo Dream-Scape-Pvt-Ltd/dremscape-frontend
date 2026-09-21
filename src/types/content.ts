@@ -1,4 +1,11 @@
-export type GuideCategory = 'VISAS' | 'PERMITS' | 'ALTITUDE' | 'CULTURE' | 'BEST_TIME' | string;
+export type GuideCategory = 'ADVENTURE' | 'TRAVEL_TIPS' | 'CULTURE' | 'NATURE' | 'FOOD' | 'OTHER' | string;
+
+export interface BlogComment {
+  id: string;
+  author_name: string;
+  body: string;
+  created_at: string;
+}
 
 export interface TravelGuideAdminItem {
   id: string;
@@ -10,16 +17,20 @@ export interface TravelGuideAdminItem {
   category?: GuideCategory;
   summary?: string;
   hero_image_url?: string | null;
+  gallery_images?: string[];
   is_published?: boolean;
   published_at?: string | null;
   updated_at?: string;
   author_name?: string;
+  view_count?: number;
+  comment_count?: number;
 }
 
 export interface TravelGuideDetail extends TravelGuideAdminItem {
   body_markdown?: string;
   meta_title?: string;
   meta_description?: string;
+  comments?: BlogComment[];
 }
 
 export interface GuidePayload {
@@ -31,6 +42,7 @@ export interface GuidePayload {
   category?: GuideCategory;
   summary?: string;
   hero_image_url?: string;
+  gallery_images?: string[];
   body_markdown?: string;
   meta_title?: string;
   meta_description?: string;

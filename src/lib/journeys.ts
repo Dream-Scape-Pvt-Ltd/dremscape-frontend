@@ -3,11 +3,16 @@ import {backend, backendConfigured, BackendError} from './backend';
 
 export type Departure={id:string; start_date:string; end_date:string; price_usd:string; available_seats:number; status:string};
 export type ItineraryDay={day_number:number; title:string; description:string; overnight_stay:string; elevation_meters:number|null; is_acclimatization_day:boolean};
-export type Journey=Trip & {overview:string; min_group_size:number; max_group_size:number; best_seasons:string[]; inclusions:string[]; exclusions:string[]; packing_list:string[]; itinerary_days:ItineraryDay[]; departures:Departure[]};
+export type Journey=Trip & {overview:string; min_group_size:number; max_group_size:number; best_seasons:string[]; inclusions:string[]; exclusions:string[]; packing_list:string[]; gallery_images:string[]; itinerary_days:ItineraryDay[]; departures:Departure[]};
 type RawTrip=Trip & {destination?:{name:string;slug:string};category?:{name:string;slug:string}};
+function publicImage(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const image = value.trim();
+  return /^(https?:\/\/|\/)/.test(image) ? image : undefined;
+}
 export function normalizeTrip(raw:RawTrip):Trip {
   if (!raw || typeof raw.slug!=='string' || !/^[\w-]+$/.test(raw.slug) || typeof raw.title!=='string' || !Number.isFinite(raw.duration_days) || !Number.isFinite(Number(raw.starting_price_usd))) throw new BackendError('The journey data is incomplete. Please contact the team.');
-  const trip={...raw, destination_name:raw.destination?.name??raw.destination_name, destination_slug:raw.destination?.slug??raw.destination_slug, category_name:raw.category?.name??raw.category_name, category_slug:raw.category?.slug??raw.category_slug, image:undefined};
+  const trip={...raw, destination_name:raw.destination?.name??raw.destination_name, destination_slug:raw.destination?.slug??raw.destination_slug, category_name:raw.category?.name??raw.category_name, category_slug:raw.category?.slug??raw.category_slug, hero_image_url:publicImage(raw.hero_image_url), gallery_images:Array.isArray(raw.gallery_images)?raw.gallery_images.map(publicImage).filter((image):image is string=>Boolean(image)):[], image:publicImage(raw.hero_image_url)};
   if(![trip.destination_name,trip.destination_slug,trip.category_name,trip.category_slug,trip.difficulty_grade].every(v=>typeof v==='string')||raw.starting_price_usd==null||Number(raw.starting_price_usd)<0)throw new BackendError('The journey data is incomplete. Please contact the team.');
   return trip;
 }

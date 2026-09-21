@@ -48,6 +48,7 @@ export default function JourneyDetail({ journey: t }: { journey: Journey; demo?:
           <article className="trek-story">
             <nav className="trek-section-nav" aria-label="Journey sections">
               <a href="#overview">The journey</a>
+              {t.gallery_images.length > 0 && <a href="#gallery">Gallery</a>}
               <a href="#itinerary">Itinerary</a>
               <a href="#included">Inclusions</a>
               <a href="#departures">Dates</a>
@@ -58,6 +59,22 @@ export default function JourneyDetail({ journey: t }: { journey: Journey; demo?:
               <p className="preserve-lines">{t.overview}</p>
               {t.best_seasons?.length > 0 && <p className="season-note">Best seasons: {t.best_seasons.join(' · ')}</p>}
             </section>
+            {t.gallery_images.length > 0 && (
+              <section id="gallery" className="trek-gallery-section">
+                <p className="eyebrow">MOMENTS FROM THE TRAIL</p>
+                <h2>A glimpse of<br /><em>the journey.</em></h2>
+                <div className="trek-gallery-grid">
+                  {t.gallery_images.map((image, index) => (
+                    <img
+                      key={`${image}-${index}`}
+                      src={asset(image)}
+                      alt={`${t.title} gallery image ${index + 1}`}
+                      loading="lazy"
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
             <section id="itinerary">
               <p className="eyebrow">DAY BY DAY</p>
               <h2>The path ahead.</h2>

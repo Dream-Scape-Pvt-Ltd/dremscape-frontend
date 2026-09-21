@@ -1,4 +1,4 @@
-export type Trip = { id?: string; slug: string; title: string; destination_name: string; destination_slug: string; category_name: string; category_slug: string; duration_days: number; starting_price_usd: string; altitude_max_meters: number; difficulty_grade: string; image?: string; tags?: string; overview?: string };
+export type Trip = { id?: string; slug: string; title: string; destination_name: string; destination_slug: string; category_name: string; category_slug: string; duration_days: number; starting_price_usd: string; altitude_max_meters: number; difficulty_grade: string; hero_image_url?: string; gallery_images?: string[]; image?: string; tags?: string; overview?: string };
 export const trips: Trip[] = [];
 
 export function filterTrips(items: Trip[], destination: string, category: string, duration: string) {
