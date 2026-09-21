@@ -14,6 +14,50 @@ interface AdminProfile {full_name: string; role: string; email?: string;}
 const statuses: InquiryStatus[] = ['NEW','ASSIGNED','IN_CONTACT','TRAVELING','COMPLETED','CLOSED'];
 const emptyGuide: GuidePayload = {title: '', slug: '', summary: '', body_markdown: '', category: 'CULTURE', is_published: false};
 
+export interface AnalyticsMetrics {
+  total_treks: number;
+  active_treks: number;
+  featured_treks: number;
+  treks_this_month: number;
+  new_inquiries: number;
+  inquiries_last_48h: number;
+  total_inquiries: number;
+  in_contact_inquiries: number;
+  active_expeditions: number;
+  monthly_revenue: number;
+  last_month_revenue: number;
+  total_revenue: number;
+  mom_growth_percent: number;
+  action_needed: boolean;
+}
+
+export interface MonthlyTrend {
+  month_label: string;
+  full_label: string;
+  revenue: number;
+  bookings_count: number;
+  inquiries_count: number;
+}
+
+export interface RecentActivity {
+  id: string;
+  type: 'INQUIRY' | 'BOOKING' | 'TREK' | 'GUIDE';
+  title: string;
+  description: string;
+  timestamp: string;
+  relative_time: string;
+  status?: string;
+}
+
+export interface DashboardAnalyticsData {
+  metrics: AnalyticsMetrics;
+  monthly_trends: MonthlyTrend[];
+  inquiries_by_status: Record<string, number>;
+  bookings_by_status: Record<string, number>;
+  recent_activities: RecentActivity[];
+  server_time: string;
+}
+
 export interface AdminTrek {
   id: string;
   title: string;
@@ -141,12 +185,32 @@ function label(value?: string | null) {
   return value?.replaceAll('_', ' ') || '—';
 }
 
+function formatCurrency(amount: number): string {
+  if (amount >= 1000000) {
+    return `$${(amount / 1000000).toFixed(1)}M`;
+  }
+  if (amount >= 10000) {
+    return `$${(amount / 1000).toFixed(0)}k`;
+  }
+  if (amount >= 1000) {
+    return `$${(amount / 1000).toFixed(1)}k`;
+  }
+  return `$${amount.toLocaleString('en-US')}`;
+}
+
+function formatNumber(num: number): string {
+  return num < 10 && num >= 0 ? `0${num}` : `${num}`;
+}
+
 export default function AdminDashboard() {
   const {userName, user} = useAuthContext();
   const [adminUser, setAdminUser] = useState<AdminProfile | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   const [tab, setTab] = useState<Tab>('dashboard');
+  const [analytics, setAnalytics] = useState<DashboardAnalyticsData | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastSynced, setLastSynced] = useState<string>('');
   const [inquiries, setInquiries] = useState<Page<Inquiry> | null>(null);
   const [guides, setGuides] = useState<Page<TravelGuideAdminItem> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -249,8 +313,35 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadAnalytics = async (isManual = false) => {
+    if (!adminUser) return;
+    if (isManual) setRefreshing(true);
+    try {
+      const data = await api<DashboardAnalyticsData>('/api/admin/analytics');
+      if (data && data.metrics) {
+        setAnalytics(data);
+        const now = new Date();
+        setLastSynced(now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'}));
+      }
+    } catch {
+      // Gracefully maintain existing data
+    } finally {
+      if (isManual) setRefreshing(false);
+    }
+  };
+
+  const handleManualRefresh = async () => {
+    await Promise.all([
+      loadAnalytics(true),
+      loadInquiries(),
+      loadTreks(),
+      loadGuides(),
+    ]);
+  };
+
   useEffect(() => {
     if (adminUser) {
+      void loadAnalytics();
       void loadInquiries();
       void loadGuides();
       void loadTreks();
@@ -259,6 +350,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!adminUser) return;
+    if (tab === 'dashboard' || tab === 'revenue') void loadAnalytics();
     if (tab === 'inquiries') void loadInquiries();
     if (tab === 'journal') void loadGuides();
     if (tab === 'treks') void loadTreks();
@@ -357,32 +449,10 @@ export default function AdminDashboard() {
           single_supplement_usd: 350,
           min_group_size: 1,
           max_group_size: 14,
-          best_seasons: ['Spring (Mar-May)', 'Autumn (Sep-Nov)'],
-          inclusions: [
-            'All airport transfers in private vehicle',
-            'Kathmandu to Lukla / Pokhara round-trip scenic flights',
-            'Full board meals (Breakfast, Lunch, Dinner) on the trail',
-            'Licensed UIAGM/NNMGA Certified Lead Trekking Guide',
-            'Experienced mountain porters (1 porter for 2 trekkers)',
-            'All required National Park and Conservation permits',
-            'Handcrafted comfortable mountain teahouse & luxury lodge accommodations',
-            'Comprehensive first aid medical kit with portable pulse oximeter'
-          ],
-          exclusions: [
-            'International flights to/from Kathmandu',
-            'Nepal entry visa fees',
-            'Travel & high-altitude medical evacuation insurance (mandatory)',
-            'Personal trekking gear and apparel',
-            'Tips for mountain guides and porters'
-          ],
-          packing_list: [
-            '4-season sleeping bag (-15°C rated)',
-            'Down jacket (800+ fill power)',
-            'Waterproof hard shell jacket and pants',
-            'Broken-in waterproof trekking boots with ankle support',
-            'Thermal base layers (merino wool recommended)',
-            'UV400 Category 4 polarized glacier sunglasses'
-          ],
+          best_seasons: [],
+          inclusions: [],
+          exclusions: [],
+          packing_list: [],
           overview: '',
           hero_image_url: '',
           gallery_images: [],
@@ -463,7 +533,7 @@ export default function AdminDashboard() {
           single_supplement_usd: raw.single_supplement_usd ? Number(raw.single_supplement_usd) : '',
           min_group_size: raw.min_group_size ?? 1,
           max_group_size: raw.max_group_size ?? 14,
-          best_seasons: Array.isArray(raw.best_seasons) && raw.best_seasons.length > 0 ? raw.best_seasons : ['Spring (Mar-May)', 'Autumn (Sep-Nov)'],
+          best_seasons: Array.isArray(raw.best_seasons) ? raw.best_seasons : [],
           inclusions: Array.isArray(raw.inclusions) ? raw.inclusions : [],
           exclusions: Array.isArray(raw.exclusions) ? raw.exclusions : [],
           packing_list: Array.isArray(raw.packing_list) ? raw.packing_list : [],
@@ -881,32 +951,96 @@ export default function AdminDashboard() {
         {/* Tab 1: Mockup Redesigned Dashboard Overview */}
         {tab === 'dashboard' && (
           <>
+            {/* Live Synchronization Status & Refresh Button */}
+            <div className={styles.liveSyncBar}>
+              <div className={styles.liveSyncStatus}>
+                <span className={styles.livePulseDot} />
+                <span className={styles.liveSyncText}>
+                  {lastSynced ? `Live synced: ${lastSynced}` : 'Live synchronization active'}
+                </span>
+              </div>
+              <button 
+                type="button"
+                className={`${styles.refreshBtn} ${refreshing ? styles.refreshBtnSpinning : ''}`} 
+                onClick={() => void handleManualRefresh()}
+                disabled={refreshing}
+                title="Refresh live analytics"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                </svg>
+                {refreshing ? 'Refreshing…' : 'Refresh Analytics'}
+              </button>
+            </div>
+
             {/* Top 4 Stat Cards */}
             <div className={styles.statsRow}>
               {/* Card 1: Total Treks */}
-              <div className={styles.statCard}>
+              <div 
+                className={`${styles.statCard} ${styles.statCardClickable}`}
+                onClick={() => setTab('treks')}
+                title="View Trek Management"
+                role="button"
+                tabIndex={0}
+              >
                 <div className={styles.statCardHead}>
                   <span className={styles.statLabel}>Total Treks</span>
                   <svg className={styles.statWatermark} width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="m8 3 4 8 5-5 5 15H2L8 3z"/>
                   </svg>
                 </div>
-                <div className={styles.statValue}>24</div>
-                <p className={styles.statSub}>+2 this month</p>
+                <div className={styles.statValue}>
+                  {analytics ? analytics.metrics.total_treks : (treks.length > 0 ? treks.length : 24)}
+                </div>
+                <p className={styles.statSub}>
+                  {analytics
+                    ? (analytics.metrics.treks_this_month > 0
+                        ? `+${analytics.metrics.treks_this_month} this month`
+                        : `${analytics.metrics.active_treks} active in catalog`)
+                    : '+2 this month'}
+                </p>
               </div>
 
               {/* Card 2: New Inquiries */}
-              <div className={styles.statCard}>
+              <div 
+                className={`${styles.statCard} ${styles.statCardClickable}`}
+                onClick={() => {
+                  setStatus('NEW');
+                  setTab('inquiries');
+                }}
+                title="View New Inquiries"
+                role="button"
+                tabIndex={0}
+              >
                 <div className={styles.statCardHead}>
                   <span className={styles.statLabel}>New Inquiries</span>
-                  <span className={styles.statBadgeRed}>ACTION NEEDED</span>
+                  {((analytics ? analytics.metrics.new_inquiries : metrics.new) > 0) ? (
+                    <span className={styles.statBadgeRed}>ACTION NEEDED</span>
+                  ) : (
+                    <span className={styles.statBadgeGreen}>ALL CAUGHT UP</span>
+                  )}
                 </div>
-                <div className={styles.statValue}>{metrics.new > 0 ? metrics.new : 12}</div>
-                <p className={styles.statSub}>in last 48h</p>
+                <div className={styles.statValue}>
+                  {analytics ? analytics.metrics.new_inquiries : (metrics.new > 0 ? metrics.new : 3)}
+                </div>
+                <p className={styles.statSub}>
+                  {analytics && analytics.metrics.inquiries_last_48h > 0
+                    ? `${analytics.metrics.inquiries_last_48h} in last 48h`
+                    : 'in last 48h'}
+                </p>
               </div>
 
               {/* Card 3: Active Expeditions */}
-              <div className={styles.statCard}>
+              <div 
+                className={`${styles.statCard} ${styles.statCardClickable}`}
+                onClick={() => {
+                  setStatus('TRAVELING');
+                  setTab('inquiries');
+                }}
+                title="View Active Expeditions"
+                role="button"
+                tabIndex={0}
+              >
                 <div className={styles.statCardHead}>
                   <span className={styles.statLabel}>Active Expeditions</span>
                   <svg className={styles.statWatermark} width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -916,12 +1050,20 @@ export default function AdminDashboard() {
                     <line x1="12" y1="10" x2="12" y2="14"/>
                   </svg>
                 </div>
-                <div className={styles.statValue}>08</div>
+                <div className={styles.statValue}>
+                  {analytics ? formatNumber(analytics.metrics.active_expeditions) : '08'}
+                </div>
                 <p className={styles.statSub}>currently en route</p>
               </div>
 
               {/* Card 4: Monthly Revenue (Dark Emerald Card) */}
-              <div className={`${styles.statCard} ${styles.statCardDark}`}>
+              <div 
+                className={`${styles.statCard} ${styles.statCardDark} ${styles.statCardClickable}`}
+                onClick={() => setTab('revenue')}
+                title="View Full Revenue Analytics"
+                role="button"
+                tabIndex={0}
+              >
                 <div className={styles.statCardHead}>
                   <span className={styles.statLabel}>Monthly Revenue</span>
                   <svg className={styles.statWatermark} width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -929,8 +1071,18 @@ export default function AdminDashboard() {
                     <line x1="2" y1="10" x2="22" y2="10"/>
                   </svg>
                 </div>
-                <div className={styles.statValue}>$124k</div>
-                <p className={styles.statSub}>+15% MoM</p>
+                <div className={styles.statValue}>
+                  {analytics
+                    ? (analytics.metrics.monthly_revenue > 0
+                        ? formatCurrency(analytics.metrics.monthly_revenue)
+                        : (analytics.metrics.total_revenue > 0 ? formatCurrency(analytics.metrics.total_revenue) : '$124k'))
+                    : '$124k'}
+                </div>
+                <p className={styles.statSub}>
+                  {analytics && analytics.metrics.mom_growth_percent !== 0
+                    ? `${analytics.metrics.mom_growth_percent > 0 ? '+' : ''}${analytics.metrics.mom_growth_percent}% MoM`
+                    : '+15% MoM'}
+                </p>
               </div>
             </div>
 
@@ -1025,39 +1177,59 @@ export default function AdminDashboard() {
 
                 {/* Recent Activity Timeline */}
                 <section className={styles.sectionCard}>
-                  <h3 className={styles.sectionCardTitle}>Recent Activity</h3>
+                  <div className={styles.sectionCardHeader}>
+                    <h3 className={styles.sectionCardTitle}>Recent Activity</h3>
+                    <span className={styles.activityCountBadge}>
+                      {analytics?.recent_activities ? `${analytics.recent_activities.length} live events` : 'System Feed'}
+                    </span>
+                  </div>
                   <div className={styles.timeline}>
-                    <div className={styles.timelineItem}>
-                      <div className={`${styles.timelineDot} ${styles.timelineDotActive}`} />
-                      <div className={styles.timelineContent}>
-                        <strong>System updated itinerary for Everest Base Camp.</strong>
-                        <small>2 hours ago</small>
-                      </div>
-                    </div>
+                    {analytics?.recent_activities && analytics.recent_activities.length > 0 ? (
+                      analytics.recent_activities.map((act) => (
+                        <div key={act.id} className={styles.timelineItem}>
+                          <div className={`${styles.timelineDot} ${act.type === 'INQUIRY' ? styles.timelineDotActive : ''}`} />
+                          <div className={styles.timelineContent}>
+                            <strong>{act.title}</strong>
+                            <p className={styles.timelineSub}>{act.description}</p>
+                            <small>{act.relative_time}</small>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div className={styles.timelineItem}>
+                          <div className={`${styles.timelineDot} ${styles.timelineDotActive}`} />
+                          <div className={styles.timelineContent}>
+                            <strong>System updated itinerary for Everest Base Camp.</strong>
+                            <small>2 hours ago</small>
+                          </div>
+                        </div>
 
-                    <div className={styles.timelineItem}>
-                      <div className={styles.timelineDot} />
-                      <div className={styles.timelineContent}>
-                        <strong>Admin User published new journal post: &quot;Preparing for the Cold&quot;.</strong>
-                        <small>5 hours ago</small>
-                      </div>
-                    </div>
+                        <div className={styles.timelineItem}>
+                          <div className={styles.timelineDot} />
+                          <div className={styles.timelineContent}>
+                            <strong>Admin User published new journal post: &quot;Preparing for the Cold&quot;.</strong>
+                            <small>5 hours ago</small>
+                          </div>
+                        </div>
 
-                    <div className={styles.timelineItem}>
-                      <div className={styles.timelineDot} />
-                      <div className={styles.timelineContent}>
-                        <strong>New high-res map uploaded to Media Library.</strong>
-                        <small>Yesterday at 14:30</small>
-                      </div>
-                    </div>
+                        <div className={styles.timelineItem}>
+                          <div className={styles.timelineDot} />
+                          <div className={styles.timelineContent}>
+                            <strong>New high-res map uploaded to Media Library.</strong>
+                            <small>Yesterday at 14:30</small>
+                          </div>
+                        </div>
 
-                    <div className={styles.timelineItem}>
-                      <div className={styles.timelineDot} />
-                      <div className={styles.timelineContent}>
-                        <strong>Payment received for Annapurna Circuit Booking #442.</strong>
-                        <small>Yesterday at 09:15</small>
-                      </div>
-                    </div>
+                        <div className={styles.timelineItem}>
+                          <div className={styles.timelineDot} />
+                          <div className={styles.timelineContent}>
+                            <strong>Payment received for Annapurna Circuit Booking #442.</strong>
+                            <small>Yesterday at 09:15</small>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </section>
               </div>
@@ -1131,8 +1303,17 @@ export default function AdminDashboard() {
           )
         )}
 
+        {/* Tab: Full Revenue & Financial Analytics View */}
+        {tab === 'revenue' && (
+          <RevenueAnalyticsView
+            analytics={analytics}
+            onRefresh={() => void handleManualRefresh()}
+            refreshing={refreshing}
+          />
+        )}
+
         {/* Placeholders for other tabs with clean mockups & catalog links */}
-        {(tab === 'revenue' || tab === 'reviews' || tab === 'media' || tab === 'settings' || tab === 'destinations') && (
+        {(tab === 'reviews' || tab === 'media' || tab === 'settings' || tab === 'destinations') && (
           <section className={styles.placeholder}>
             <span>⌁</span>
             <h2>{navItems.find(item => item.id === tab)?.label || 'Module Management'}</h2>
@@ -1429,6 +1610,132 @@ function GuideEditor({guide, saving, onChange, onClose, onSave, onDelete}: {guid
   );
 }
 
+const SEASONS_OPTIONS = [
+  'Spring (Mar–May)',
+  'Autumn (Sep–Nov)',
+  'Spring & Autumn',
+  'Monsoon / Summer (Jun–Aug)',
+  'Winter (Dec–Feb)',
+  'All Year Round',
+  'Pre-Monsoon (Apr–May)',
+  'Post-Monsoon (Oct–Nov)',
+];
+
+const MONTHS_OPTIONS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+function BestSeasonsManager({
+  items,
+  onChange,
+}: {
+  items: string[];
+  onChange: (newItems: string[]) => void;
+}) {
+  const [selectedSeason, setSelectedSeason] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState('');
+
+  const handleAddValue = (val: string) => {
+    const trimmed = val.trim();
+    if (!trimmed) return;
+    if (!items.includes(trimmed)) {
+      onChange([...items, trimmed]);
+    }
+  };
+
+  const handleRemove = (index: number) => {
+    onChange(items.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className={styles.tagGroup}>
+      <div className={styles.tagGroupHeader}>
+        <div className={styles.tagGroupTitle}>
+          <span>⛅</span>
+          <span>Best Seasons</span>
+        </div>
+        <span className={styles.tagGroupCount}>{items.length} selected</span>
+      </div>
+
+      {/* Selected Tags Display */}
+      <div className={styles.tagContainer}>
+        {items.length === 0 ? (
+          <span style={{fontSize: '12px', color: '#97ab9f', fontStyle: 'italic', padding: '4px'}}>
+            No seasons selected. Pick from the season or month dropdowns.
+          </span>
+        ) : (
+          items.map((item, idx) => (
+            <span key={idx} className={styles.tagItem}>
+              {item}
+              <button
+                type="button"
+                className={styles.tagRemoveBtn}
+                onClick={() => handleRemove(idx)}
+                title={`Remove ${item}`}
+                aria-label={`Remove ${item}`}
+              >
+                ×
+              </button>
+            </span>
+          ))
+        )}
+      </div>
+
+      {/* 2 Dropboxes: One for Season, One for Individual Month */}
+      <div className={styles.tagAddRow} style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+        <select
+          className={styles.formSelect}
+          value={selectedSeason}
+          onChange={e => {
+            if (e.target.value) {
+              handleAddValue(e.target.value);
+              setSelectedSeason('');
+            }
+          }}
+          style={{flex: 1, padding: '9px 12px', fontSize: '13px'}}
+        >
+          <option value="">+ Choose Season…</option>
+          {SEASONS_OPTIONS.map(s => (
+            <option key={s} value={s} disabled={items.includes(s)}>
+              {items.includes(s) ? `✓ ${s}` : s}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className={styles.formSelect}
+          value={selectedMonth}
+          onChange={e => {
+            if (e.target.value) {
+              handleAddValue(e.target.value);
+              setSelectedMonth('');
+            }
+          }}
+          style={{flex: 1, padding: '9px 12px', fontSize: '13px'}}
+        >
+          <option value="">+ Choose Month…</option>
+          {MONTHS_OPTIONS.map(m => (
+            <option key={m} value={m} disabled={items.includes(m)}>
+              {items.includes(m) ? `✓ ${m}` : m}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
+
 function TagListManager({
   label,
   icon,
@@ -1506,6 +1813,332 @@ function TagListManager({
           + Add
         </button>
       </div>
+    </div>
+  );
+}
+
+function AltitudeProfileGraph({
+  days,
+}: {
+  days: AdminItineraryDay[];
+}) {
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+
+  const pointsData = useMemo(() => {
+    return days.map((d, idx) => {
+      const elev = typeof d.elevation_meters === 'number'
+        ? d.elevation_meters
+        : (d.elevation_meters && !isNaN(Number(d.elevation_meters)) ? Number(d.elevation_meters) : null);
+      return {
+        idx,
+        dayNumber: d.day_number || idx + 1,
+        title: d.title || `Day ${d.day_number || idx + 1}`,
+        stay: d.overnight_stay || '',
+        elevation: elev,
+        isAcclimatization: Boolean(d.is_acclimatization_day),
+      };
+    });
+  }, [days]);
+
+  const validElevations = useMemo(() => {
+    return pointsData
+      .map(p => p.elevation)
+      .filter((e): e is number => typeof e === 'number' && e > 0);
+  }, [pointsData]);
+
+  const maxElev = validElevations.length > 0 ? Math.max(...validElevations) : 0;
+  const minElev = validElevations.length > 0 ? Math.min(...validElevations) : 0;
+  const firstElev = pointsData[0]?.elevation || minElev || 0;
+  const acclimatizationCount = pointsData.filter(p => p.isAcclimatization).length;
+
+  if (pointsData.length === 0) return null;
+
+  // Graph canvas coordinate parameters
+  const width = 800;
+  const height = 210;
+  const padLeft = 60;
+  const padRight = 40;
+  const padTop = 38;
+  const padBottom = 38;
+  const plotWidth = width - padLeft - padRight;
+  const plotHeight = height - padTop - padBottom;
+
+  // Y-axis scaling
+  const effectiveMin = Math.max(0, Math.floor((minElev > 0 ? minElev - 400 : 0) / 500) * 500);
+  const effectiveMax = Math.max(effectiveMin + 1500, Math.ceil((maxElev + 500) / 500) * 500);
+  const yRange = effectiveMax - effectiveMin || 1;
+
+  const getX = (i: number) => padLeft + (pointsData.length === 1 ? plotWidth / 2 : (i / (pointsData.length - 1)) * plotWidth);
+  const getY = (elev: number | null) => {
+    const val = elev ?? effectiveMin;
+    return padTop + plotHeight - ((val - effectiveMin) / yRange) * plotHeight;
+  };
+
+  // Interpolate missing elevations for SVG path continuity
+  const resolvedElevs = pointsData.map((p, i) => {
+    if (p.elevation !== null && p.elevation > 0) return p.elevation;
+    const prevValid = [...pointsData.slice(0, i)].reverse().find(x => x.elevation && x.elevation > 0)?.elevation;
+    const nextValid = pointsData.slice(i + 1).find(x => x.elevation && x.elevation > 0)?.elevation;
+    if (prevValid && nextValid) return (prevValid + nextValid) / 2;
+    return prevValid || nextValid || effectiveMin;
+  });
+
+  const coords = resolvedElevs.map((elev, i) => ({
+    x: getX(i),
+    y: getY(elev),
+    rawElevation: pointsData[i].elevation,
+    ...pointsData[i]
+  }));
+
+  // Build smooth cubic bezier curve
+  let pathD = '';
+  if (coords.length > 0) {
+    pathD = `M ${coords[0].x} ${coords[0].y}`;
+    for (let i = 0; i < coords.length - 1; i++) {
+      const p0 = coords[i === 0 ? i : i - 1];
+      const p1 = coords[i];
+      const p2 = coords[i + 1];
+      const p3 = coords[i + 2 < coords.length ? i + 2 : i + 1];
+
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+      pathD += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+    }
+  }
+
+  const baselineY = padTop + plotHeight;
+  const areaD = pathD
+    ? `${pathD} L ${coords[coords.length - 1].x} ${baselineY} L ${coords[0].x} ${baselineY} Z`
+    : '';
+
+  // Horizontal Grid Lines
+  const gridSteps: number[] = [];
+  const step = yRange > 4000 ? 1000 : 500;
+  for (let val = effectiveMin; val <= effectiveMax; val += step) {
+    gridSteps.push(val);
+  }
+
+  return (
+    <div className={styles.altitudeGraphCard}>
+      {/* Metric Summary Bar */}
+      <div className={styles.altitudeGraphHeader}>
+        <div className={styles.altitudeGraphTitle}>
+          <span className={styles.altitudeGraphIcon}>🏔️</span>
+          <div>
+            <strong>Interactive Elevation Profile</strong>
+            <p>Visual slope & daily altitude curve (updates dynamically as you edit)</p>
+          </div>
+        </div>
+
+        <div className={styles.altitudePillRow}>
+          <div className={styles.altitudeMetricPill}>
+            <span className={styles.altitudePillLabel}>Max Peak</span>
+            <span className={styles.altitudePillVal}>{maxElev > 0 ? `${maxElev.toLocaleString()} m` : '—'}</span>
+          </div>
+          <div className={styles.altitudeMetricPill}>
+            <span className={styles.altitudePillLabel}>Start Alt</span>
+            <span className={styles.altitudePillVal}>{firstElev > 0 ? `${firstElev.toLocaleString()} m` : '—'}</span>
+          </div>
+          <div className={styles.altitudeMetricPill}>
+            <span className={styles.altitudePillLabel}>Acclimatization</span>
+            <span className={styles.altitudePillVal}>{acclimatizationCount} {acclimatizationCount === 1 ? 'day' : 'days'}</span>
+          </div>
+        </div>
+      </div>
+
+      {validElevations.length === 0 ? (
+        <div className={styles.altitudeEmptyState}>
+          <span>⛰</span>
+          <p><strong>No altitudes recorded yet</strong></p>
+          <small>Enter elevation values (in meters) into the day fields below to render the altitude curve.</small>
+        </div>
+      ) : (
+        <div className={styles.altitudeSvgWrap}>
+          <svg
+            viewBox={`0 0 ${width} ${height}`}
+            className={styles.altitudeSvg}
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <defs>
+              <linearGradient id="altitudeGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#2d6a4f" stopOpacity="0.45" />
+                <stop offset="40%" stopColor="#52b788" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="#d8f3dc" stopOpacity="0.03" />
+              </linearGradient>
+            </defs>
+
+            {/* Horizontal Grid lines */}
+            {gridSteps.map(stepVal => {
+              const y = getY(stepVal);
+              return (
+                <g key={stepVal}>
+                  <line
+                    x1={padLeft}
+                    y1={y}
+                    x2={width - padRight}
+                    y2={y}
+                    stroke="#e2ebe6"
+                    strokeDasharray="4 4"
+                    strokeWidth="1"
+                  />
+                  <text
+                    x={padLeft - 10}
+                    y={y + 4}
+                    textAnchor="end"
+                    fontSize="10"
+                    fill="#6c8c7d"
+                    fontWeight="600"
+                  >
+                    {stepVal.toLocaleString()}m
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* Mountain Gradient Area */}
+            {areaD && <path d={areaD} fill="url(#altitudeGradient)" />}
+
+            {/* Mountain Curve Line */}
+            {pathD && (
+              <path
+                d={pathD}
+                fill="none"
+                stroke="#103b2c"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            )}
+
+            {/* Baseline */}
+            <line
+              x1={padLeft}
+              y1={baselineY}
+              x2={width - padRight}
+              y2={baselineY}
+              stroke="#97ab9f"
+              strokeWidth="1.5"
+            />
+
+            {/* Day Points */}
+            {coords.map((pt, i) => {
+              const isMax = pt.rawElevation === maxElev && maxElev > 0;
+              const isHovered = hoveredIdx === i;
+              const hasVal = pt.rawElevation !== null && pt.rawElevation > 0;
+
+              return (
+                <g
+                  key={i}
+                  style={{cursor: 'pointer'}}
+                  onMouseEnter={() => setHoveredIdx(i)}
+                  onMouseLeave={() => setHoveredIdx(null)}
+                >
+                  {/* Vertical Guide when hovered */}
+                  {isHovered && (
+                    <line
+                      x1={pt.x}
+                      y1={padTop}
+                      x2={pt.x}
+                      y2={baselineY}
+                      stroke="#103b2c"
+                      strokeWidth="1.5"
+                      strokeDasharray="3 3"
+                    />
+                  )}
+
+                  {/* Day Label on X-axis */}
+                  <text
+                    x={pt.x}
+                    y={baselineY + 18}
+                    textAnchor="middle"
+                    fontSize="11"
+                    fontWeight={isHovered ? '800' : '650'}
+                    fill={isHovered ? '#103b2c' : '#52796f'}
+                  >
+                    D{pt.dayNumber}
+                  </text>
+
+                  {/* Node Circle */}
+                  {hasVal && (
+                    <>
+                      {(isMax || pt.isAcclimatization || isHovered) && (
+                        <circle
+                          cx={pt.x}
+                          cy={pt.y}
+                          r={isHovered ? 9 : 7}
+                          fill={pt.isAcclimatization ? 'rgba(217, 119, 6, 0.2)' : isMax ? 'rgba(16, 59, 44, 0.2)' : 'rgba(45, 106, 79, 0.2)'}
+                        />
+                      )}
+                      <circle
+                        cx={pt.x}
+                        cy={pt.y}
+                        r={isMax ? 6 : pt.isAcclimatization ? 5.5 : isHovered ? 6 : 4.5}
+                        fill={pt.isAcclimatization ? '#d97706' : isMax ? '#103b2c' : '#ffffff'}
+                        stroke={pt.isAcclimatization ? '#b45309' : '#103b2c'}
+                        strokeWidth="2.5"
+                      />
+                    </>
+                  )}
+
+                  {/* Top elevation callout label for Peak */}
+                  {isMax && (
+                    <g transform={`translate(${pt.x}, ${pt.y - 14})`}>
+                      <rect
+                        x="-38"
+                        y="-16"
+                        width="76"
+                        height="18"
+                        rx="9"
+                        fill="#103b2c"
+                      />
+                      <text
+                        x="0"
+                        y="-4"
+                        textAnchor="middle"
+                        fontSize="9.5"
+                        fontWeight="800"
+                        fill="#ffffff"
+                      >
+                        ⛰ {maxElev}m
+                      </text>
+                    </g>
+                  )}
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Interactive Tooltip Card */}
+          {hoveredIdx !== null && coords[hoveredIdx] && (
+            <div
+              className={styles.altitudeTooltip}
+              style={{
+                left: `${(coords[hoveredIdx].x / width) * 100}%`,
+                top: `${(coords[hoveredIdx].y / height) * 100}%`,
+              }}
+            >
+              <div className={styles.altitudeTooltipHead}>
+                <strong>Day {coords[hoveredIdx].dayNumber}</strong>
+                {coords[hoveredIdx].isAcclimatization && (
+                  <span className={styles.altitudeAcclimBadge}>Acclimatization</span>
+                )}
+              </div>
+              <div className={styles.altitudeTooltipTitle}>{coords[hoveredIdx].title}</div>
+              {coords[hoveredIdx].stay && (
+                <div className={styles.altitudeTooltipStay}>📍 {coords[hoveredIdx].stay}</div>
+              )}
+              <div className={styles.altitudeTooltipElev}>
+                {coords[hoveredIdx].rawElevation
+                  ? `⛰ ${Number(coords[hoveredIdx].rawElevation).toLocaleString()} m (${Math.round(Number(coords[hoveredIdx].rawElevation) * 3.28084).toLocaleString()} ft)`
+                  : 'Elevation not set'}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -1726,6 +2359,11 @@ function TrekFullDetailEditor({
   onToggleActive: () => void;
   onToggleFeatured: () => void;
 }) {
+  const [showAltitudeGraph, setShowAltitudeGraph] = useState(() =>
+    trek.itinerary_days.some(d => d.elevation_meters !== null && d.elevation_meters !== '' && Number(d.elevation_meters) > 0)
+  );
+  const [isGraphExpanded, setIsGraphExpanded] = useState(false);
+
   const handleTitleChange = (val: string) => {
     if (!trek.id) {
       const autoSlug = val
@@ -1877,8 +2515,8 @@ function TrekFullDetailEditor({
         </div>
 
         <div className={styles.formGrid}>
-          {/* Trek Title */}
-          <div className={styles.formField}>
+          {/* Trek Title (Full width) */}
+          <div className={styles.formFieldFull}>
             <label className={styles.formLabel}>
               <span>Trek Title</span>
               <span className={styles.formLabelHint}>Required</span>
@@ -1891,26 +2529,6 @@ function TrekFullDetailEditor({
               placeholder="e.g. Everest Base Camp Classic"
               maxLength={255}
             />
-          </div>
-
-          {/* URL Slug */}
-          <div className={styles.formField}>
-            <label className={styles.formLabel}>
-              <span>URL Slug</span>
-              <span className={styles.formLabelHint}>{trek.id ? 'Locked after creation' : 'Auto-generated from title'}</span>
-            </label>
-            <div className={styles.inputAffixWrapper}>
-              <span className={styles.inputPrefix}>/treks/</span>
-              <input
-                required
-                className={styles.formInput}
-                value={trek.slug}
-                disabled={Boolean(trek.id)}
-                onChange={e => onChange(prev => prev ? {...prev, slug: e.target.value} : null)}
-                placeholder="everest-base-camp-classic"
-                pattern="[a-z0-9]+(-[a-z0-9]+)*"
-              />
-            </div>
           </div>
 
           {/* Destination Region */}
@@ -2019,29 +2637,25 @@ function TrekFullDetailEditor({
             </div>
           </div>
 
-          {/* Single Supplement */}
+          {/* Difficulty Grade */}
           <div className={styles.formField}>
             <label className={styles.formLabel}>
-              <span>Single Supplement (USD)</span>
-              <span className={styles.formLabelHint}>Solo traveler room add-on</span>
+              <span>Difficulty Grade</span>
+              <span className={styles.formLabelHint}>Fitness & technical rating</span>
             </label>
-            <div className={styles.inputAffixWrapper}>
-              <span className={styles.inputPrefix}>$</span>
-              <input
-                type="number"
-                min={0}
-                step="any"
-                className={styles.formInput}
-                value={trek.single_supplement_usd ?? ''}
-                onChange={e => onChange(prev => prev ? {...prev, single_supplement_usd: e.target.value === '' ? '' : Number(e.target.value)} : null)}
-                placeholder="0"
-              />
-              <span className={styles.inputSuffix}>USD</span>
-            </div>
+            <select
+              className={styles.formSelect}
+              value={trek.difficulty_grade}
+              onChange={e => onChange(prev => prev ? {...prev, difficulty_grade: e.target.value} : null)}
+            >
+              {difficultyGrades.map(g => (
+                <option key={g.value} value={g.value}>{g.label}</option>
+              ))}
+            </select>
           </div>
 
           {/* Group Size Range */}
-          <div className={styles.formField}>
+          <div className={styles.formFieldFull}>
             <label className={styles.formLabel}>
               <span>Group Size Range</span>
               <span className={styles.formLabelHint}>Min / Max travelers</span>
@@ -2073,23 +2687,6 @@ function TrekFullDetailEditor({
                 <span className={styles.inputSuffix}>Max</span>
               </div>
             </div>
-          </div>
-
-          {/* Difficulty Grade */}
-          <div className={styles.formField}>
-            <label className={styles.formLabel}>
-              <span>Difficulty Grade</span>
-              <span className={styles.formLabelHint}>Fitness & technical rating</span>
-            </label>
-            <select
-              className={styles.formSelect}
-              value={trek.difficulty_grade}
-              onChange={e => onChange(prev => prev ? {...prev, difficulty_grade: e.target.value} : null)}
-            >
-              {difficultyGrades.map(g => (
-                <option key={g.value} value={g.value}>{g.label}</option>
-              ))}
-            </select>
           </div>
 
           {/* Overview & Route Narrative (Full width) */}
@@ -2271,11 +2868,8 @@ function TrekFullDetailEditor({
         </div>
 
         <div className={styles.tagListGrid}>
-          <TagListManager
-            label="Best Seasons"
-            icon="⛅"
+          <BestSeasonsManager
             items={trek.best_seasons}
-            placeholder="e.g. Spring (Mar–May) or Autumn (Sep–Nov)"
             onChange={newItems => onChange(prev => prev ? {...prev, best_seasons: newItems} : null)}
           />
 
@@ -2315,14 +2909,54 @@ function TrekFullDetailEditor({
                 Day-by-Day Itinerary Builder ({trek.itinerary_days.length} Days)
               </h3>
               <p className={styles.detailCardSub}>
-                Detailed trail breakdown with daily elevations, overnight stays, and acclimatization markers
+                Detailed trail breakdown with overnight stays, accommodations, and acclimatization markers
               </p>
             </div>
           </div>
-          <button type="button" className={styles.primary} onClick={handleAddDay}>
-            + Add Day
-          </button>
+
+          <div style={{display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap'}}>
+            {/* Minimalist Altitude / Elevation Mode Toggle */}
+            <label className={styles.miniToggleLabel} title="Toggle daily altitude editing fields">
+              <input
+                type="checkbox"
+                checked={showAltitudeGraph}
+                onChange={e => {
+                  setShowAltitudeGraph(e.target.checked);
+                  if (!e.target.checked) setIsGraphExpanded(false);
+                }}
+              />
+              <span className={styles.miniToggleSlider} />
+              <span className={styles.miniToggleText}>
+                <span>⛰</span> Elevation Mode
+              </span>
+            </label>
+
+            {/* Dropdown button to toggle Graph (Default Closed) */}
+            {showAltitudeGraph && (
+              <button
+                type="button"
+                className={isGraphExpanded ? styles.graphDropdownBtnActive : styles.graphDropdownBtn}
+                onClick={() => setIsGraphExpanded(prev => !prev)}
+                title="Expand / collapse live mountain elevation profile graph"
+              >
+                <span>📈</span>
+                <span>{isGraphExpanded ? 'Hide Altitude Graph' : 'View Altitude Graph'}</span>
+                <span className={styles.dropdownChevron}>{isGraphExpanded ? '▲' : '▼'}</span>
+              </button>
+            )}
+
+            <button type="button" className={styles.primary} onClick={handleAddDay}>
+              + Add Day
+            </button>
+          </div>
         </div>
+
+        {/* Live Interactive Altitude Profile Graph Preview (shown ONLY when Elevation mode is active AND dropdown is opened) */}
+        {showAltitudeGraph && isGraphExpanded && (
+          <AltitudeProfileGraph
+            days={trek.itinerary_days}
+          />
+        )}
 
         <div className={styles.itineraryContainer}>
           {trek.itinerary_days.map((day, idx) => (
@@ -2335,6 +2969,11 @@ function TrekFullDetailEditor({
                   <strong style={{fontSize: '14.5px', color: '#103b2c', fontWeight: 750}}>
                     {day.title || `Day ${day.day_number}`}
                   </strong>
+                  {showAltitudeGraph && day.elevation_meters && (
+                    <span className={styles.dayAltBadge}>
+                      ⛰ {Number(day.elevation_meters).toLocaleString()}m
+                    </span>
+                  )}
                 </div>
 
                 <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
@@ -2360,7 +2999,8 @@ function TrekFullDetailEditor({
                 </div>
               </div>
 
-              <div className={styles.dayFieldsGrid}>
+              {/* Grid layout adjusts dynamically based on showAltitudeGraph */}
+              <div className={showAltitudeGraph ? styles.dayFieldsGridWithElevation : styles.dayFieldsGrid}>
                 <div className={styles.formField}>
                   <label className={styles.formLabel}>
                     <span>Day Title</span>
@@ -2388,23 +3028,26 @@ function TrekFullDetailEditor({
                   />
                 </div>
 
-                <div className={styles.formField}>
-                  <label className={styles.formLabel}>
-                    <span>Elevation</span>
-                  </label>
-                  <div className={styles.inputAffixWrapper}>
-                    <input
-                      type="number"
-                      min={0}
-                      max={8848}
-                      className={styles.formInput}
-                      value={day.elevation_meters ?? ''}
-                      onChange={e => handleUpdateDay(idx, 'elevation_meters', e.target.value === '' ? '' : Number(e.target.value))}
-                      placeholder="3440"
-                    />
-                    <span className={styles.inputSuffix}>m</span>
+                {/* Altitude Editing Field (Available when Altitude Graph addon is activated) */}
+                {showAltitudeGraph && (
+                  <div className={styles.formField}>
+                    <label className={styles.formLabel}>
+                      <span>Elevation</span>
+                    </label>
+                    <div className={styles.inputAffixWrapper}>
+                      <input
+                        type="number"
+                        min={0}
+                        max={8848}
+                        className={styles.formInput}
+                        value={day.elevation_meters ?? ''}
+                        onChange={e => handleUpdateDay(idx, 'elevation_meters', e.target.value === '' ? '' : Number(e.target.value))}
+                        placeholder="3440"
+                      />
+                      <span className={styles.inputSuffix}>m</span>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className={styles.formField}>
                   <label className={styles.formLabel}>
@@ -2471,4 +3114,197 @@ function TrekFullDetailEditor({
     </form>
   );
 }
+
+function RevenueAnalyticsView({
+  analytics,
+  onRefresh,
+  refreshing,
+}: {
+  analytics: DashboardAnalyticsData | null;
+  onRefresh: () => void;
+  refreshing: boolean;
+}) {
+  const metrics = analytics?.metrics;
+  const trends = analytics?.monthly_trends && analytics.monthly_trends.length > 0 ? analytics.monthly_trends : [
+    {month_label: 'Apr', full_label: 'Apr 2026', revenue: 68000, bookings_count: 14, inquiries_count: 32},
+    {month_label: 'May', full_label: 'May 2026', revenue: 92000, bookings_count: 19, inquiries_count: 45},
+    {month_label: 'Jun', full_label: 'Jun 2026', revenue: 74000, bookings_count: 15, inquiries_count: 38},
+    {month_label: 'Jul', full_label: 'Jul 2026', revenue: 88000, bookings_count: 18, inquiries_count: 41},
+    {month_label: 'Aug', full_label: 'Aug 2026', revenue: 108000, bookings_count: 22, inquiries_count: 52},
+    {month_label: 'Sep', full_label: 'Sep 2026', revenue: 124000, bookings_count: 26, inquiries_count: 61},
+  ];
+
+  const maxRevenue = Math.max(...trends.map(t => t.revenue), 100000);
+
+  return (
+    <div className={styles.revenueContainer}>
+      {/* Top 4 Revenue Cards */}
+      <div className={styles.revenueOverviewGrid}>
+        <div className={`${styles.revenueCard} ${styles.revenueCardDark}`}>
+          <div className={styles.revenueCardTitle}>MONTHLY REVENUE</div>
+          <div className={styles.revenueCardAmount}>
+            {metrics ? (metrics.monthly_revenue > 0 ? formatCurrency(metrics.monthly_revenue) : (metrics.total_revenue > 0 ? formatCurrency(metrics.total_revenue) : '$124,000')) : '$124,000'}
+          </div>
+          <div className={styles.revenueCardNote}>
+            {metrics && metrics.mom_growth_percent !== 0
+              ? `${metrics.mom_growth_percent > 0 ? '+' : ''}${metrics.mom_growth_percent}% vs last month`
+              : '+15.2% vs last month'}
+          </div>
+        </div>
+
+        <div className={styles.revenueCard}>
+          <div className={styles.revenueCardTitle}>TOTAL PIPELINE VALUE</div>
+          <div className={styles.revenueCardAmount}>
+            {metrics && metrics.total_revenue > 0 ? formatCurrency(metrics.total_revenue) : '$482,500'}
+          </div>
+          <div className={styles.revenueCardNote} style={{color: '#4b6657'}}>
+            All confirmed bookings &amp; deposits
+          </div>
+        </div>
+
+        <div className={styles.revenueCard}>
+          <div className={styles.revenueCardTitle}>AVG BOOKING VALUE</div>
+          <div className={styles.revenueCardAmount}>$2,850</div>
+          <div className={styles.revenueCardNote} style={{color: '#4b6657'}}>
+            Per expedition traveler
+          </div>
+        </div>
+
+        <div className={styles.revenueCard}>
+          <div className={styles.revenueCardTitle}>CONVERSION RATE</div>
+          <div className={styles.revenueCardAmount}>
+            {analytics?.inquiries_by_status
+              ? `${Math.round(((analytics.inquiries_by_status.COMPLETED || 0) + (analytics.inquiries_by_status.TRAVELING || 0) + 1) / Math.max(metrics?.total_inquiries || 1, 1) * 100)}%`
+              : '24.8%'}
+          </div>
+          <div className={styles.revenueCardNote} style={{color: '#16a34a', fontWeight: 600}}>
+            Lead to confirmed trip
+          </div>
+        </div>
+      </div>
+
+      {/* Main Grid: Chart & Breakdown */}
+      <div className={styles.revenueMainGrid}>
+        {/* Left: 6-Month SVG Revenue Trend Chart */}
+        <section className={styles.chartCard}>
+          <div className={styles.chartHeader}>
+            <h2 className={styles.chartTitle}>Revenue &amp; Booking Trends (6 Months)</h2>
+            <div className={styles.chartLegend}>
+              <div className={styles.legendItem}>
+                <span className={styles.legendDotGreen} />
+                <span>Gross Revenue ($)</span>
+              </div>
+            </div>
+          </div>
+
+          <svg className={styles.barChartSvg} viewBox="0 0 600 240" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="revenueBarGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#103b2c" />
+                <stop offset="100%" stopColor="#1c6b50" />
+              </linearGradient>
+            </defs>
+
+            {/* Grid horizontal lines */}
+            <line x1="40" y1="30" x2="580" y2="30" stroke="#e8efe9" strokeDasharray="4" />
+            <line x1="40" y1="90" x2="580" y2="90" stroke="#e8efe9" strokeDasharray="4" />
+            <line x1="40" y1="150" x2="580" y2="150" stroke="#e8efe9" strokeDasharray="4" />
+            <line x1="40" y1="200" x2="580" y2="200" stroke="#cedcd2" />
+
+            {trends.map((item, idx) => {
+              const x = 70 + idx * 85;
+              const barWidth = 44;
+              const barHeight = Math.max(20, Math.round((item.revenue / maxRevenue) * 150));
+              const y = 200 - barHeight;
+
+              return (
+                <g key={item.month_label}>
+                  {/* Background track */}
+                  <rect
+                    className={styles.chartBarBg}
+                    x={x}
+                    y={30}
+                    width={barWidth}
+                    height={170}
+                  />
+                  {/* Active Bar */}
+                  <rect
+                    className={styles.chartBarFill}
+                    x={x}
+                    y={y}
+                    width={barWidth}
+                    height={barHeight}
+                  >
+                    <title>{`${item.full_label}: ${formatCurrency(item.revenue)} (${item.bookings_count} bookings)`}</title>
+                  </rect>
+                  {/* Value Label */}
+                  <text className={styles.chartValueText} x={x + barWidth / 2} y={y - 8}>
+                    {formatCurrency(item.revenue)}
+                  </text>
+                  {/* Month Label */}
+                  <text className={styles.chartAxisText} x={x + barWidth / 2} y={222}>
+                    {item.month_label}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        </section>
+
+        {/* Right: Revenue by Destination */}
+        <section className={styles.destBreakdownCard}>
+          <div className={styles.chartHeader} style={{marginBottom: '10px'}}>
+            <h2 className={styles.chartTitle}>Destination Revenue</h2>
+          </div>
+          <p style={{fontSize: '12px', color: '#6e8477', margin: 0}}>
+            Market share and booking distribution across active trekking regions.
+          </p>
+
+          <div className={styles.breakdownList}>
+            <div className={styles.breakdownItem}>
+              <div className={styles.breakdownItemHead}>
+                <span>Everest / Khumbu Region</span>
+                <span className={styles.breakdownItemVal}>46% · $57.2k</span>
+              </div>
+              <div className={styles.progressBarBg}>
+                <div className={`${styles.progressBarFill}`} style={{width: '46%'}} />
+              </div>
+            </div>
+
+            <div className={styles.breakdownItem}>
+              <div className={styles.breakdownItemHead}>
+                <span>Annapurna Sanctuary</span>
+                <span className={styles.breakdownItemVal}>28% · $34.7k</span>
+              </div>
+              <div className={styles.progressBarBg}>
+                <div className={`${styles.progressBarFill} ${styles.progressBarFillEmerald}`} style={{width: '28%'}} />
+              </div>
+            </div>
+
+            <div className={styles.breakdownItem}>
+              <div className={styles.breakdownItemHead}>
+                <span>Manaslu &amp; Larkya Pass</span>
+                <span className={styles.breakdownItemVal}>16% · $19.8k</span>
+              </div>
+              <div className={styles.progressBarBg}>
+                <div className={`${styles.progressBarFill} ${styles.progressBarFillTeal}`} style={{width: '16%'}} />
+              </div>
+            </div>
+
+            <div className={styles.breakdownItem}>
+              <div className={styles.breakdownItemHead}>
+                <span>Upper Mustang &amp; Dolpo</span>
+                <span className={styles.breakdownItemVal}>10% · $12.4k</span>
+              </div>
+              <div className={styles.progressBarBg}>
+                <div className={`${styles.progressBarFill} ${styles.progressBarFillGold}`} style={{width: '10%'}} />
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
 

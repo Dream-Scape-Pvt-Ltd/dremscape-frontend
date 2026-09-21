@@ -2221,7 +2221,7 @@
 
 .dayFieldsGrid {
   display: grid;
-  grid-template-columns: 2fr 1.3fr 1fr 1.3fr;
+  grid-template-columns: 2fr 1.3fr 1.3fr;
   gap: 14px;
   margin-bottom: 14px;
 }
@@ -2230,6 +2230,342 @@
   .dayFieldsGrid {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+@media (max-width: 640px) {
+  .dayFieldsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Day Fields Grid with Elevation (4 columns) */
+.dayFieldsGridWithElevation {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 1fr 1.2fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 960px) {
+  .dayFieldsGridWithElevation {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .dayFieldsGridWithElevation {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dayAltBadge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11.5px;
+  font-weight: 750;
+  color: #103b2c;
+  background: #e8f5ee;
+  border: 1px solid #c5dfd2;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-left: 8px;
+}
+
+/* Minimalist Toggle in Header */
+.miniToggleLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  background: #f0f7f3;
+  border: 1.5px solid #cce3d7;
+  padding: 5px 12px 5px 6px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #103b2c;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.miniToggleLabel:hover {
+  background: #e5f2eb;
+  border-color: #b8dac6;
+}
+
+.miniToggleSlider {
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 18px;
+  background-color: #cbd5e1;
+  border-radius: 18px;
+  transition: all 0.2s ease;
+}
+
+.miniToggleSlider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.miniToggleLabel input {
+  display: none;
+}
+
+.miniToggleLabel input:checked + .miniToggleSlider {
+  background-color: #103b2c;
+}
+
+.miniToggleLabel input:checked + .miniToggleSlider:before {
+  transform: translateX(14px);
+}
+
+.miniToggleText {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Graph Dropdown Button */
+.graphDropdownBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #ffffff;
+  border: 1.5px solid #c2ded0;
+  color: #103b2c;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.graphDropdownBtn:hover {
+  background: #f0f7f3;
+  border-color: #103b2c;
+}
+
+.graphDropdownBtnActive {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #103b2c;
+  border: 1.5px solid #103b2c;
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(16, 59, 44, 0.15);
+}
+
+.dropdownChevron {
+  font-size: 9px;
+  opacity: 0.85;
+  margin-left: 2px;
+}
+
+/* Elevation Graph Component Card */
+.altitudeGraphCard {
+  background: #ffffff;
+  border: 1.5px solid #cfe0d7;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 14px rgba(16, 59, 44, 0.05);
+  position: relative;
+  animation: altitudeFadeIn 0.2s ease;
+}
+
+@keyframes altitudeFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.altitudeGraphHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.altitudeGraphTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.altitudeGraphIcon {
+  font-size: 20px;
+}
+
+.altitudeGraphTitle strong {
+  font-size: 14px;
+  font-weight: 750;
+  color: #103b2c;
+  display: block;
+}
+
+.altitudeGraphTitle p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #5d7a6e;
+}
+
+.altitudePillRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.altitudeMetricPill {
+  display: flex;
+  flex-direction: column;
+  background: #f4f8f6;
+  border: 1px solid #d8e7e0;
+  border-radius: 8px;
+  padding: 4px 12px;
+}
+
+.altitudePillLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 750;
+  color: #6c8a7c;
+  letter-spacing: 0.03em;
+}
+
+.altitudePillVal {
+  font-size: 13px;
+  font-weight: 800;
+  color: #103b2c;
+}
+
+.altitudeEmptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 36px 20px;
+  background: #fbfdfc;
+  border: 1.5px dashed #cfded6;
+  border-radius: 10px;
+  color: #5c7b6d;
+}
+
+.altitudeEmptyState span {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.altitudeEmptyState p {
+  margin: 0 0 4px;
+  font-size: 13.5px;
+  color: #103b2c;
+}
+
+.altitudeEmptyState small {
+  font-size: 12px;
+  color: #6b8578;
+}
+
+.altitudeSvgWrap {
+  position: relative;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.altitudeSvg {
+  width: 100%;
+  height: 210px;
+  display: block;
+}
+
+/* Tooltip */
+.altitudeTooltip {
+  position: absolute;
+  transform: translate(-50%, -120%);
+  background: #0d281e;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  z-index: 10;
+  min-width: 130px;
+  white-space: nowrap;
+}
+
+.altitudeTooltip:after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #0d281e transparent transparent transparent;
+}
+
+.altitudeTooltipHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.altitudeAcclimBadge {
+  background: #d97706;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 750;
+  padding: 1px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.altitudeTooltipTitle {
+  font-weight: 600;
+  color: #d1fae5;
+  margin-bottom: 2px;
+}
+
+.altitudeTooltipStay {
+  font-size: 11px;
+  color: #a7f3d0;
+  margin-bottom: 2px;
+}
+
+.altitudeTooltipElev {
+  font-weight: 750;
+  color: #ffffff;
+  font-size: 12px;
 }
 
 .dayDescriptionInput {
@@ -2402,6 +2738,360 @@
   flex-shrink: 0;
 }
 
+/* Clickable and Dynamic Stat Cards */
+.statCardClickable {
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  user-select: none;
+}
 
+.statCardClickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(19, 62, 47, 0.08);
+  border-color: #bad3c3;
+}
 
+.statCardDark.statCardClickable:hover {
+  border-color: #276850;
+  box-shadow: 0 8px 24px rgba(10, 36, 27, 0.35);
+}
 
+.statBadgeGreen {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  padding: 3px 8px;
+  border-radius: 99px;
+  text-transform: uppercase;
+}
+
+.statBadgeGray {
+  background: #f1f5f3;
+  color: #557062;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  padding: 3px 8px;
+  border-radius: 99px;
+  text-transform: uppercase;
+}
+
+/* Top Live Sync Bar */
+.liveSyncBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8faf8;
+  border: 1px solid #dfe7e2;
+  border-radius: 12px;
+  padding: 8px 16px;
+  margin-bottom: 20px;
+}
+
+.liveSyncStatus {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.livePulseDot {
+  width: 8px;
+  height: 8px;
+  background: #16a34a;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+  animation: pulseLive 2s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+@keyframes pulseLive {
+  0% {
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(22, 163, 74, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+  }
+}
+
+.liveSyncText {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b6657;
+}
+
+.refreshBtn {
+  background: #ffffff;
+  border: 1px solid #cedcd3;
+  color: #133e2f;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.refreshBtn:hover:not(:disabled) {
+  background: #edf5f0;
+  border-color: #9cbca9;
+  color: #0b2c20;
+}
+
+.refreshBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.refreshBtnSpinning svg {
+  animation: spinRefresh 0.8s linear infinite;
+}
+
+@keyframes spinRefresh {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Activity section enhancements */
+.sectionCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.activityCountBadge {
+  font-size: 10.5px;
+  font-weight: 700;
+  background: #eef3f0;
+  color: #3b5749;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.timelineSub {
+  font-size: 12px;
+  color: #667c70;
+  margin: 2px 0 4px;
+  line-height: 1.35;
+}
+
+/* Full Revenue & Analytics View */
+.revenueContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.revenueOverviewGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.revenueCard {
+  background: #ffffff;
+  border: 1px solid #e1e7e2;
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: 0 2px 10px rgba(19, 62, 47, 0.03);
+}
+
+.revenueCardDark {
+  background: #0f3326;
+  border-color: #164634;
+  color: #ffffff;
+}
+
+.revenueCardTitle {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #6e8477;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
+}
+
+.revenueCardDark .revenueCardTitle {
+  color: #9ac2af;
+}
+
+.revenueCardAmount {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: #133e2f;
+  margin-bottom: 4px;
+}
+
+.revenueCardDark .revenueCardAmount {
+  color: #ffffff;
+}
+
+.revenueCardNote {
+  font-size: 11.5px;
+  color: #5c7467;
+}
+
+.revenueCardDark .revenueCardNote {
+  color: #4ade80;
+  font-weight: 600;
+}
+
+.revenueMainGrid {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 22px;
+}
+
+.chartCard {
+  background: #ffffff;
+  border: 1px solid #e1e7e2;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(19, 62, 47, 0.03);
+}
+
+.chartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.chartTitle {
+  font-size: 17px;
+  font-weight: 750;
+  color: #133e2f;
+  margin: 0;
+}
+
+.chartLegend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #597365;
+}
+
+.legendDotGreen {
+  width: 10px;
+  height: 10px;
+  background: #103b2c;
+  border-radius: 3px;
+}
+
+.legendDotGold {
+  width: 10px;
+  height: 10px;
+  background: #d97706;
+  border-radius: 3px;
+}
+
+.barChartSvg {
+  width: 100%;
+  height: 240px;
+  overflow: visible;
+}
+
+.chartBarBg {
+  fill: #f1f5f2;
+  rx: 6px;
+}
+
+.chartBarFill {
+  fill: url(#revenueBarGradient);
+  rx: 6px;
+  transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1), y 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.chartBarFill:hover {
+  fill: #0b2b1f;
+}
+
+.chartAxisText {
+  font-size: 11px;
+  fill: #738b7e;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.chartValueText {
+  font-size: 10.5px;
+  fill: #133e2f;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.destBreakdownCard {
+  background: #ffffff;
+  border: 1px solid #e1e7e2;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(19, 62, 47, 0.03);
+}
+
+.breakdownList {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.breakdownItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.breakdownItemHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #133e2f;
+}
+
+.breakdownItemVal {
+  color: #4b6657;
+  font-weight: 600;
+}
+
+.progressBarBg {
+  height: 8px;
+  background: #eef3f0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: #103b2c;
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+.progressBarFillGold {
+  background: #d97706;
+}
+
+.progressBarFillTeal {
+  background: #0d9488;
+}
+
+.progressBarFillEmerald {
+  background: #16a34a;
+}
