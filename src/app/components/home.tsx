@@ -348,6 +348,7 @@ export default function Home() {
         </section>
 
         <section className="testimonials section">
+          <img className="testimonial-landscape" src="/images/mountain-landscape-illustration.svg" alt="" aria-hidden="true" />
           <div className="container reveal">
             <Eyebrow>The people behind the journeys</Eyebrow>
             <h2>Every Journey Leaves a Story.</h2>
