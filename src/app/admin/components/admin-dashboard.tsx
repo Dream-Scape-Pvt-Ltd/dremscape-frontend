@@ -3,15 +3,47 @@
 import React, {FormEvent, useEffect, useMemo, useState} from 'react';
 import Link from 'next/link';
 import {useAuthContext} from '@/context/AuthContext';
-import type {Inquiry, InquiryNote, InquiryStatus} from '@/types/inquiry';
+import type {
+  Inquiry,
+  InquiryNote,
+  InquiryStatus,
+  Activity,
+  ActivityChannel,
+  Task,
+  TaskStatus,
+  Tag,
+  LostReason,
+  TimelineEntry,
+  PipelineSummary,
+  FunnelData,
+  CustomerProfile,
+} from '@/types/inquiry';
 import type {TravelGuideAdminItem, TravelGuideDetail, GuidePayload} from '@/types/content';
 import AdminLogin from './admin-login';
+import AssignmentRulesView from './assignment-rules-view';
+import CapacityView from './capacity-view';
+import DeparturesEditor from './departures-editor';
+import type {Agent} from './capacity-types';
 import styles from '@/app/admin/admin.module.css';
 
-type Tab = 'dashboard' | 'treks' | 'revenue' | 'journal' | 'inquiries' | 'reviews' | 'settings' | 'destinations';
+type Tab = 'dashboard' | 'treks' | 'capacity' | 'revenue' | 'journal' | 'inquiries' | 'pipeline' | 'reviews' | 'settings' | 'destinations';
 type Page<T> = {count: number; next: string | null; previous: string | null; results: T[]};
 interface AdminProfile {full_name: string; role: string; email?: string;}
 const statuses: InquiryStatus[] = ['NEW','ASSIGNED','IN_CONTACT','TRAVELING','COMPLETED','CLOSED'];
+const lostReasonOptions: {value: LostReason; label: string}[] = [
+  {value: 'PRICE', label: 'Price Too High'},
+  {value: 'DATES', label: "Dates Didn't Work"},
+  {value: 'COMPETITOR', label: 'Booked With Competitor'},
+  {value: 'NO_RESPONSE', label: 'Went Unresponsive'},
+  {value: 'NOT_SUITABLE', label: 'Trip Not Suitable'},
+  {value: 'OTHER', label: 'Other'},
+];
+const activityChannelOptions: {value: ActivityChannel; label: string}[] = [
+  {value: 'CALL', label: 'Phone Call'},
+  {value: 'EMAIL', label: 'Email'},
+  {value: 'WHATSAPP', label: 'WhatsApp'},
+  {value: 'NOTE', label: 'Internal Note'},
+];
 const emptyGuide: GuidePayload = {title: '', slug: '', country: 'NEPAL', body_markdown: '', category: 'ADVENTURE', hero_image_url: '', gallery_images: [], is_published: false};
 
 export interface AnalyticsMetrics {
@@ -227,6 +259,30 @@ export default function AdminDashboard() {
   const [saving, setSaving] = useState(false);
   const [editor, setEditor] = useState<TravelGuideDetail | null>(null);
 
+  // CRM: inquiry drawer sub-tabs (timeline, tasks, tags)
+  const [drawerTab, setDrawerTab] = useState<'details' | 'timeline' | 'tasks' | 'tags'>('details');
+  const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [inquiryTags, setInquiryTags] = useState<Tag[]>([]);
+  const [allTags, setAllTags] = useState<Tag[]>([]);
+
+  // CRM: pipeline board + funnel analytics
+  const [pipelineSummary, setPipelineSummary] = useState<PipelineSummary | null>(null);
+  const [funnel, setFunnel] = useState<FunnelData | null>(null);
+  const [pipelineInquiries, setPipelineInquiries] = useState<Inquiry[]>([]);
+  const [loadingPipeline, setLoadingPipeline] = useState(false);
+
+  // CRM: tour-based filtering, assignment and bulk actions
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [tripFilter, setTripFilter] = useState('ALL');
+  const [agentFilter, setAgentFilter] = useState('ALL');
+  const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
+  const [capacityAlerts, setCapacityAlerts] = useState(0);
+
+  // CRM: customer 360
+  const [customerProfile, setCustomerProfile] = useState<CustomerProfile | null>(null);
+  const [loadingCustomer, setLoadingCustomer] = useState(false);
+
   // Trek Management states
   const [treks, setTreks] = useState<AdminTrek[]>([]);
   const [destinations, setDestinations] = useState<DestinationOption[]>([]);
@@ -276,11 +332,37 @@ export default function AdminDashboard() {
     if (!adminUser) return;
     setLoading(true);
     try {
-      setInquiries(await api<Page<Inquiry>>(`/api/admin/inquiries?status=${encodeURIComponent(status)}&search=${encodeURIComponent(query)}`));
+      const params = new URLSearchParams({status, search: query});
+      if (tripFilter !== 'ALL') params.set('trip', tripFilter);
+      if (agentFilter !== 'ALL') params.set('assigned_agent', agentFilter);
+      setInquiries(await api<Page<Inquiry>>(`/api/admin/inquiries?${params}`));
+      setSelectedLeads([]);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to load inquiries.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAgents = async () => {
+    if (!adminUser) return;
+    try {
+      setAgents(await api<Agent[]>('/api/admin/agents'));
+    } catch {
+      // A missing agent list only disables the assignee pickers; it must not
+      // take down the rest of the workspace.
+      setAgents([]);
+    }
+  };
+
+  /** Badge count for the Capacity tab: batches that are full or oversubscribed. */
+  const loadCapacityAlerts = async () => {
+    if (!adminUser) return;
+    try {
+      const page = await api<Page<{id: string}>>('/api/admin/departures?capacity_state=OVERSUBSCRIBED');
+      setCapacityAlerts(page.count);
+    } catch {
+      setCapacityAlerts(0);
     }
   };
 
@@ -317,6 +399,25 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadPipeline = async () => {
+    if (!adminUser) return;
+    setLoadingPipeline(true);
+    try {
+      const [summary, funnelData, ...columns] = await Promise.all([
+        api<PipelineSummary>('/api/admin/crm/pipeline-summary'),
+        api<FunnelData>('/api/admin/crm/funnel'),
+        ...statuses.map(value => api<Page<Inquiry>>(`/api/admin/inquiries?status=${encodeURIComponent(value)}`)),
+      ]);
+      setPipelineSummary(summary);
+      setFunnel(funnelData);
+      setPipelineInquiries(columns.flatMap(page => page.results));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to load the pipeline.');
+    } finally {
+      setLoadingPipeline(false);
+    }
+  };
+
   const loadAnalytics = async (isManual = false) => {
     if (!adminUser) return;
     if (isManual) setRefreshing(true);
@@ -349,6 +450,8 @@ export default function AdminDashboard() {
       void loadInquiries();
       void loadGuides();
       void loadTreks();
+      void loadAgents();
+      void loadCapacityAlerts();
     }
   }, [adminUser]);
 
@@ -356,13 +459,15 @@ export default function AdminDashboard() {
     if (!adminUser) return;
     if (tab === 'dashboard' || tab === 'revenue') void loadAnalytics();
     if (tab === 'inquiries') void loadInquiries();
+    if (tab === 'capacity') void loadCapacityAlerts();
     if (tab === 'journal') void loadGuides();
     if (tab === 'treks') void loadTreks();
+    if (tab === 'pipeline') void loadPipeline();
     if (tab !== 'treks') {
       setSelectedTrekSlug(null);
       setSelectedTrekDetail(null);
     }
-  }, [tab, status, adminUser]);
+  }, [tab, status, tripFilter, agentFilter, adminUser]);
 
   const metrics = useMemo(() => ({
     total: inquiries?.count || 0,
@@ -701,36 +806,200 @@ export default function AdminDashboard() {
   async function openInquiry(reference: string) {
     setMessage('');
     setNotes([]);
+    setTimeline([]);
+    setTasks([]);
+    setInquiryTags([]);
+    setDrawerTab('details');
     try {
-      const [detail, noteList] = await Promise.all([
+      const [detail, noteList, timelineList, taskList] = await Promise.all([
         api<Inquiry>(`/api/admin/inquiries/${reference}`),
-        api<InquiryNote[] | Page<InquiryNote>>(`/api/admin/inquiries/${reference}/notes`)
+        api<InquiryNote[] | Page<InquiryNote>>(`/api/admin/inquiries/${reference}/notes`),
+        api<TimelineEntry[]>(`/api/admin/inquiries/${reference}/timeline`),
+        api<Page<Task>>(`/api/admin/inquiries/${reference}/tasks`),
       ]);
       setSelectedInquiry(detail);
       setNotes(Array.isArray(noteList) ? noteList : noteList.results);
+      setTimeline(timelineList);
+      setTasks(taskList.results);
+      setInquiryTags(detail.tags ?? []);
+      if (allTags.length === 0) void loadAllTags();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to open this inquiry.');
     }
   }
 
-  async function updateStatus(next: InquiryStatus) {
+  async function updateStatus(next: InquiryStatus, lostReason?: LostReason | '') {
     if (!selectedInquiry) return;
     setSaving(true);
     setMessage('');
     try {
+      const body: Record<string, unknown> = {status: next};
+      if (next === 'CLOSED') body.lost_reason = lostReason || '';
       const saved = await api<Inquiry>(`/api/admin/inquiries/${selectedInquiry.inquiry_number}`, {
         method: 'PATCH',
-        body: JSON.stringify({status: next})
+        body: JSON.stringify(body)
       });
       setSelectedInquiry(saved);
       setInquiries(current => current && {
         ...current,
         results: current.results.map(item => item.inquiry_number === saved.inquiry_number ? {...item, status: saved.status} : item)
       });
+      setPipelineInquiries(current => current.map(item => item.inquiry_number === saved.inquiry_number ? {...item, status: saved.status} : item));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to update the inquiry.');
     } finally {
       setSaving(false);
+    }
+  }
+
+  /** Reassign the open inquiry to an agent, from the drawer's picker. */
+  async function assignAgent(agentId: string) {
+    if (!selectedInquiry) return;
+    setSaving(true);
+    setMessage('');
+    try {
+      const saved = await api<Inquiry>(`/api/admin/inquiries/${selectedInquiry.inquiry_number}`, {
+        method: 'PATCH',
+        body: JSON.stringify({status: selectedInquiry.status, assigned_agent_id: agentId || null})
+      });
+      setSelectedInquiry(saved);
+      setInquiries(current => current && {
+        ...current,
+        results: current.results.map(item =>
+          item.inquiry_number === saved.inquiry_number
+            ? {...item, assigned_agent_name: saved.assigned_agent_name, assigned_agent_id: saved.assigned_agent_id}
+            : item
+        )
+      });
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to reassign this inquiry.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  /** Reassign every currently selected lead to one agent. */
+  async function bulkAssign(agentId: string) {
+    if (!selectedLeads.length) return;
+    setSaving(true);
+    setMessage('');
+    try {
+      const result = await api<{matched: number; reassigned: number}>('/api/admin/inquiries/bulk-assign', {
+        method: 'POST',
+        body: JSON.stringify({inquiry_numbers: selectedLeads, agent_id: agentId})
+      });
+      setMessage(`${result.reassigned} of ${result.matched} lead(s) reassigned.`);
+      setSelectedLeads([]);
+      await loadInquiries();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to reassign these leads.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function loadAllTags() {
+    try {
+      const page = await api<Page<Tag>>('/api/admin/inquiries/tags');
+      setAllTags(page.results);
+    } catch {
+      // Non-critical — tag picker just stays empty.
+    }
+  }
+
+  async function logActivity(reference: string, channel: ActivityChannel, body: string) {
+    setSaving(true);
+    setMessage('');
+    try {
+      const saved = await api<Activity>(`/api/admin/inquiries/${reference}/activities`, {
+        method: 'POST',
+        body: JSON.stringify({channel, body}),
+      });
+      setTimeline(items => [{entry_type: 'activity', created_at: saved.created_at, data: saved}, ...items]);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to log this activity.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function addTask(reference: string, title: string, dueAt: string) {
+    setSaving(true);
+    setMessage('');
+    try {
+      const saved = await api<Task>(`/api/admin/inquiries/${reference}/tasks`, {
+        method: 'POST',
+        body: JSON.stringify({title, due_at: dueAt}),
+      });
+      setTasks(items => [...items, saved]);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to add the task.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function toggleTaskDone(task: Task) {
+    const nextStatus: TaskStatus = task.status === 'DONE' ? 'OPEN' : 'DONE';
+    try {
+      const saved = await api<Task>(`/api/admin/inquiries/tasks/${task.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({status: nextStatus}),
+      });
+      setTasks(items => items.map(item => item.id === task.id ? saved : item));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to update the task.');
+    }
+  }
+
+  async function attachTag(reference: string, tagId: string) {
+    setSaving(true);
+    setMessage('');
+    try {
+      const saved = await api<Tag[]>(`/api/admin/inquiries/${reference}/tags`, {
+        method: 'POST',
+        body: JSON.stringify({tag_id: tagId}),
+      });
+      setInquiryTags(saved);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to attach the tag.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function detachTag(reference: string, tagId: string) {
+    try {
+      const saved = await api<Tag[]>(`/api/admin/inquiries/${reference}/tags/${tagId}`, {method: 'DELETE'});
+      setInquiryTags(saved);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to remove the tag.');
+    }
+  }
+
+  async function createTag(name: string) {
+    try {
+      const saved = await api<Tag>('/api/admin/inquiries/tags', {
+        method: 'POST',
+        body: JSON.stringify({name}),
+      });
+      setAllTags(items => [...items, saved]);
+      return saved;
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to create the tag.');
+      return null;
+    }
+  }
+
+  async function openCustomer(email: string) {
+    setMessage('');
+    setLoadingCustomer(true);
+    try {
+      setCustomerProfile(await api<CustomerProfile>(`/api/admin/crm/customers/${encodeURIComponent(email)}`));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to load this customer.');
+    } finally {
+      setLoadingCustomer(false);
     }
   }
 
@@ -844,6 +1113,17 @@ export default function AdminDashboard() {
       )
     },
     {
+      id: 'capacity',
+      label: 'Departure Capacity',
+      badge: capacityAlerts > 0 ? capacityAlerts : undefined,
+      icon: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="4" width="18" height="17" rx="2"/>
+          <path d="M16 2v4M8 2v4M3 10h18"/>
+        </svg>
+      )
+    },
+    {
       id: 'revenue',
       label: 'Revenue',
       icon: (
@@ -874,11 +1154,32 @@ export default function AdminDashboard() {
       )
     },
     {
+      id: 'pipeline',
+      label: 'CRM',
+      badge: pipelineSummary?.sla_breached_count ? pipelineSummary.sla_breached_count : undefined,
+      icon: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 3v18h18"/>
+          <path d="M18 17V9M13 17V5M8 17v-4"/>
+        </svg>
+      )
+    },
+    {
       id: 'reviews',
       label: 'Reviews',
       icon: (
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      )
+    },
+    {
+      id: 'settings',
+      label: 'Lead Routing',
+      icon: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h.09A1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
       )
     },
@@ -1254,10 +1555,34 @@ export default function AdminDashboard() {
             loading={loading}
             query={query}
             status={status}
+            treks={treks}
+            agents={agents}
+            tripFilter={tripFilter}
+            agentFilter={agentFilter}
+            selected={selectedLeads}
             onQuery={setQuery}
             onStatus={setStatus}
+            onTrip={setTripFilter}
+            onAgent={setAgentFilter}
+            onSelect={setSelectedLeads}
+            onBulkAssign={agentId => void bulkAssign(agentId)}
             onSearch={() => void loadInquiries()}
             onOpen={openInquiry}
+          />
+        )}
+
+        {/* Tab: CRM Pipeline (Kanban + conversion funnel) */}
+        {tab === 'pipeline' && (
+          <PipelineView
+            summary={pipelineSummary}
+            funnel={funnel}
+            inquiries={pipelineInquiries}
+            loading={loadingPipeline}
+            onOpen={openInquiry}
+            onStatusChange={(inquiry, next, lostReason) => {
+              setSelectedInquiry(inquiry);
+              void updateStatus(next, lostReason);
+            }}
           />
         )}
 
@@ -1276,10 +1601,12 @@ export default function AdminDashboard() {
           selectedTrekSlug && selectedTrekDetail ? (
             <TrekFullDetailEditor
               trek={selectedTrekDetail}
+              slug={selectedTrekSlug}
               destinations={destinations}
               categories={categories}
               saving={trekSaving}
               loading={loadingTrekDetail}
+              onMessage={setMessage}
               onChange={setSelectedTrekDetail}
               onBack={() => {
                 setSelectedTrekSlug(null);
@@ -1313,6 +1640,16 @@ export default function AdminDashboard() {
           )
         )}
 
+        {/* Tab: Departure Capacity Board */}
+        {tab === 'capacity' && (
+          <CapacityView
+            api={api}
+            agents={agents}
+            onMessage={setMessage}
+            formatDate={date}
+          />
+        )}
+
         {/* Tab: Full Revenue & Financial Analytics View */}
         {tab === 'revenue' && (
           <RevenueAnalyticsView
@@ -1322,8 +1659,18 @@ export default function AdminDashboard() {
           />
         )}
 
+        {/* Tab: Settings — CRM lead routing rules */}
+        {tab === 'settings' && (
+          <AssignmentRulesView
+            api={api}
+            agents={agents}
+            treks={treks}
+            onMessage={setMessage}
+          />
+        )}
+
         {/* Placeholders for other tabs with clean mockups & catalog links */}
-        {(tab === 'reviews' || tab === 'settings' || tab === 'destinations') && (
+        {(tab === 'reviews' || tab === 'destinations') && (
           <section className={styles.placeholder}>
             <span>⌁</span>
             <h2>{navItems.find(item => item.id === tab)?.label || 'Module Management'}</h2>
@@ -1350,10 +1697,41 @@ export default function AdminDashboard() {
           notes={notes}
           noteText={noteText}
           saving={saving}
+          agents={agents}
+          onAssign={agentId => void assignAgent(agentId)}
           onClose={() => setSelectedInquiry(null)}
           onStatus={updateStatus}
           onNoteText={setNoteText}
           onSubmit={submitNote}
+          drawerTab={drawerTab}
+          onDrawerTab={setDrawerTab}
+          timeline={timeline}
+          tasks={tasks}
+          tags={inquiryTags}
+          allTags={allTags}
+          onLogActivity={(channel, body) => void logActivity(selectedInquiry.inquiry_number, channel, body)}
+          onAddTask={(title, dueAt) => void addTask(selectedInquiry.inquiry_number, title, dueAt)}
+          onToggleTask={task => void toggleTaskDone(task)}
+          onAttachTag={tagId => void attachTag(selectedInquiry.inquiry_number, tagId)}
+          onDetachTag={tagId => void detachTag(selectedInquiry.inquiry_number, tagId)}
+          onCreateTag={async name => {
+            const created = await createTag(name);
+            if (created) void attachTag(selectedInquiry.inquiry_number, created.id);
+          }}
+          onViewCustomer={() => void openCustomer(selectedInquiry.email)}
+        />
+      )}
+
+      {/* Customer 360 */}
+      {(customerProfile || loadingCustomer) && (
+        <CustomerProfileModal
+          customer={customerProfile}
+          loading={loadingCustomer}
+          onClose={() => setCustomerProfile(null)}
+          onOpenInquiry={reference => {
+            setCustomerProfile(null);
+            void openInquiry(reference);
+          }}
         />
       )}
 
@@ -1404,7 +1782,29 @@ export default function AdminDashboard() {
   );
 }
 
-function InquiriesView({inquiries, loading, query, status, onQuery, onStatus, onSearch, onOpen}: {inquiries: Inquiry[]; loading: boolean; query: string; status: string; onQuery: (value: string) => void; onStatus: (value: string) => void; onSearch: () => void; onOpen: (reference: string) => void}) {
+function InquiriesView({
+  inquiries, loading, query, status, treks, agents, tripFilter, agentFilter,
+  selected, onQuery, onStatus, onTrip, onAgent, onSelect, onBulkAssign, onSearch, onOpen
+}: {
+  inquiries: Inquiry[];
+  loading: boolean;
+  query: string;
+  status: string;
+  treks: AdminTrek[];
+  agents: Agent[];
+  tripFilter: string;
+  agentFilter: string;
+  selected: string[];
+  onQuery: (value: string) => void;
+  onStatus: (value: string) => void;
+  onTrip: (value: string) => void;
+  onAgent: (value: string) => void;
+  onSelect: (numbers: string[]) => void;
+  onBulkAssign: (agentId: string) => void;
+  onSearch: () => void;
+  onOpen: (reference: string) => void;
+}) {
+  const allSelected = inquiries.length > 0 && selected.length === inquiries.length;
   return (
     <section className={styles.panel}>
       <div className={styles.toolbar}>
@@ -1422,8 +1822,44 @@ function InquiriesView({inquiries, loading, query, status, onQuery, onStatus, on
             <option key={value}>{value}</option>
           ))}
         </select>
+        <select value={tripFilter} onChange={event => onTrip(event.target.value)} aria-label="Filter by tour">
+          <option value="ALL">All tours</option>
+          {treks.map(trek => (
+            <option key={trek.slug} value={trek.slug}>{trek.title}</option>
+          ))}
+        </select>
+        <select value={agentFilter} onChange={event => onAgent(event.target.value)} aria-label="Filter by agent">
+          <option value="ALL">All agents</option>
+          <option value="me">Assigned to me</option>
+          <option value="unassigned">Unassigned</option>
+          {agents.map(agent => (
+            <option key={agent.id} value={agent.id}>{agent.full_name || agent.email}</option>
+          ))}
+        </select>
         <button className={styles.primary} onClick={onSearch}>Search</button>
       </div>
+      {selected.length > 0 && (
+        <div className={styles.toolbar}>
+          <span style={{fontSize: '12px', fontWeight: 700, color: '#133e2f'}}>
+            {selected.length} lead{selected.length === 1 ? '' : 's'} selected
+          </span>
+          <select
+            defaultValue=""
+            aria-label="Assign selected leads to an agent"
+            onChange={event => {
+              if (!event.target.value) return;
+              onBulkAssign(event.target.value);
+              event.target.value = '';
+            }}
+          >
+            <option value="">Assign selected to...</option>
+            {agents.map(agent => (
+              <option key={agent.id} value={agent.id}>{agent.full_name || agent.email}</option>
+            ))}
+          </select>
+          <button className={styles.actionBtnToggle} onClick={() => onSelect([])}>Clear selection</button>
+        </div>
+      )}
       {loading ? (
         <p className={styles.empty}>Loading inquiries…</p>
       ) : inquiries.length ? (
@@ -1431,8 +1867,17 @@ function InquiriesView({inquiries, loading, query, status, onQuery, onStatus, on
           <table className={styles.modernTable}>
             <thead>
               <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    aria-label="Select all leads in this view"
+                    onChange={event => onSelect(event.target.checked ? inquiries.map(i => i.inquiry_number) : [])}
+                  />
+                </th>
                 <th>Traveler</th>
                 <th>Trip interest</th>
+                <th>Agent</th>
                 <th>Status</th>
                 <th>Received</th>
                 <th></th>
@@ -1442,10 +1887,33 @@ function InquiriesView({inquiries, loading, query, status, onQuery, onStatus, on
               {inquiries.map(item => (
                 <tr key={item.inquiry_number}>
                   <td>
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(item.inquiry_number)}
+                      aria-label={`Select the inquiry from ${item.full_name}`}
+                      onChange={event => onSelect(
+                        event.target.checked
+                          ? [...selected, item.inquiry_number]
+                          : selected.filter(number => number !== item.inquiry_number)
+                      )}
+                    />
+                  </td>
+                  <td>
                     <strong className={styles.travelerName}>{item.full_name}</strong>
                     <small style={{fontSize: '11px', color: '#6d8276'}}>{item.email}</small>
                   </td>
-                  <td>{item.trip || item.journey || item.inquiry_type || 'General inquiry'}</td>
+                  <td>
+                    {/* trip_title is what the serializer actually sends. The old
+                        item.trip / item.journey reads were stripped by the field
+                        allowlist, so this column always fell through to the type. */}
+                    <span>{item.trip_title || 'General inquiry'}</span>
+                    {item.departure_label && (
+                      <small style={{display: 'block', fontSize: '11px', color: '#6d8276'}}>{item.departure_label}</small>
+                    )}
+                  </td>
+                  <td>
+                    {item.assigned_agent_name || <span style={{color: '#a8b8ae'}}>Unassigned</span>}
+                  </td>
                   <td>
                     <em data-status={item.status}>{label(item.status)}</em>
                   </td>
@@ -1524,7 +1992,54 @@ function JournalView({guides, loading, onCreate, onEdit}: {guides: TravelGuideAd
   );
 }
 
-function InquiryDrawer({inquiry, notes, noteText, saving, onClose, onStatus, onNoteText, onSubmit}: {inquiry: Inquiry; notes: InquiryNote[]; noteText: string; saving: boolean; onClose: () => void; onStatus: (value: InquiryStatus) => void; onNoteText: (value: string) => void; onSubmit: (event: FormEvent) => void}) {
+function InquiryDrawer({
+  inquiry, notes, noteText, saving, agents, onAssign, onClose, onStatus, onNoteText, onSubmit,
+  drawerTab, onDrawerTab, timeline, tasks, tags, allTags,
+  onLogActivity, onAddTask, onToggleTask, onAttachTag, onDetachTag, onCreateTag, onViewCustomer,
+}: {
+  inquiry: Inquiry; notes: InquiryNote[]; noteText: string; saving: boolean;
+  agents: Agent[]; onAssign: (agentId: string) => void;
+  onClose: () => void; onStatus: (value: InquiryStatus, lostReason?: LostReason | '') => void;
+  onNoteText: (value: string) => void; onSubmit: (event: FormEvent) => void;
+  drawerTab: 'details' | 'timeline' | 'tasks' | 'tags'; onDrawerTab: (tab: 'details' | 'timeline' | 'tasks' | 'tags') => void;
+  timeline: TimelineEntry[]; tasks: Task[]; tags: Tag[]; allTags: Tag[];
+  onLogActivity: (channel: ActivityChannel, body: string) => void;
+  onAddTask: (title: string, dueAt: string) => void;
+  onToggleTask: (task: Task) => void;
+  onAttachTag: (tagId: string) => void;
+  onDetachTag: (tagId: string) => void;
+  onCreateTag: (name: string) => void;
+  onViewCustomer: () => void;
+}) {
+  const [pendingStatus, setPendingStatus] = useState<InquiryStatus | null>(null);
+  const [lostReason, setLostReason] = useState<LostReason | ''>('');
+  const [activityChannel, setActivityChannel] = useState<ActivityChannel>('CALL');
+  const [activityBody, setActivityBody] = useState('');
+  const [taskTitle, setTaskTitle] = useState('');
+  const [taskDueAt, setTaskDueAt] = useState('');
+  const [tagPick, setTagPick] = useState('');
+  const [newTagName, setNewTagName] = useState('');
+
+  const needsLostReason = pendingStatus === 'CLOSED' && !inquiry.converted_booking_reference;
+
+  function handleStatusChange(next: InquiryStatus) {
+    if (next === 'CLOSED' && !inquiry.converted_booking_reference) {
+      setPendingStatus(next);
+      setLostReason('');
+      return;
+    }
+    setPendingStatus(null);
+    onStatus(next);
+  }
+
+  function confirmLostReason() {
+    if (!pendingStatus || !lostReason) return;
+    onStatus(pendingStatus, lostReason);
+    setPendingStatus(null);
+  }
+
+  const availableTags = allTags.filter(tag => !tags.some(t => t.id === tag.id));
+
   return (
     <aside className={styles.drawer} aria-label="Inquiry details">
       <button className={styles.close} onClick={onClose}>×</button>
@@ -1532,52 +2047,398 @@ function InquiryDrawer({inquiry, notes, noteText, saving, onClose, onStatus, onN
       <h2>{inquiry.full_name}</h2>
       <a href={`mailto:${inquiry.email}`}>{inquiry.email}</a>
       {inquiry.phone && <a href={`tel:${inquiry.phone}`}>{inquiry.phone}</a>}
-      <dl>
-        <div>
-          <dt>Status</dt>
-          <dd>
-            <select value={inquiry.status} disabled={saving} onChange={event => onStatus(event.target.value as InquiryStatus)}>
-              {statuses.map(value => (
-                <option key={value}>{value}</option>
-              ))}
-            </select>
-          </dd>
-        </div>
-        <div>
-          <dt>Trip interest</dt>
-          <dd>{inquiry.trip || inquiry.journey || inquiry.inquiry_type || 'General inquiry'}</dd>
-        </div>
-        <div>
-          <dt>Preferred dates</dt>
-          <dd>{inquiry.preferred_dates || 'Not specified'}</dd>
-        </div>
-      </dl>
-      <section className={styles.message}>
-        <h3>Traveler message</h3>
-        <p>{inquiry.message || 'No message supplied.'}</p>
-      </section>
-      <section className={styles.notes}>
-        <h3>Consultation notes</h3>
-        {notes.map(note => (
-          <article key={note.id}>
-            <strong>{note.author || 'Staff'}</strong>
-            <small>{date(note.created_at)}</small>
-            <p>{note.note_text}</p>
-          </article>
-        ))}
-        <form onSubmit={onSubmit}>
-          <textarea
-            value={noteText}
-            onChange={event => onNoteText(event.target.value)}
-            placeholder="Add an internal note"
-            maxLength={5000}
-          />
-          <button className={styles.primary} disabled={saving || !noteText.trim()}>
-            {saving ? 'Saving…' : 'Add note'}
+      <button type="button" className={styles.drawerHistoryBtn} onClick={onViewCustomer}>View customer history →</button>
+
+      <nav className={styles.drawerTabs} aria-label="Inquiry sections">
+        {(['details', 'timeline', 'tasks', 'tags'] as const).map(value => (
+          <button
+            key={value}
+            type="button"
+            className={`${styles.drawerTab} ${drawerTab === value ? styles.drawerTabActive : ''}`}
+            onClick={() => onDrawerTab(value)}
+          >
+            {value === 'details' ? 'Details' : value === 'timeline' ? 'Timeline' : value === 'tasks' ? `Tasks (${tasks.filter(t => t.status === 'OPEN').length})` : `Tags (${tags.length})`}
           </button>
-        </form>
-      </section>
+        ))}
+      </nav>
+
+      {drawerTab === 'details' && (
+        <>
+          <dl>
+            <div>
+              <dt>Status</dt>
+              <dd>
+                <select value={inquiry.status} disabled={saving} onChange={event => handleStatusChange(event.target.value as InquiryStatus)}>
+                  {statuses.map(value => (
+                    <option key={value}>{value}</option>
+                  ))}
+                </select>
+                {needsLostReason && (
+                  <div className={styles.lostReasonPrompt}>
+                    <small>Why is this lead closing without a booking?</small>
+                    <select value={lostReason} onChange={event => setLostReason(event.target.value as LostReason)}>
+                      <option value="">Select a reason…</option>
+                      {lostReasonOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                    </select>
+                    <button type="button" className={styles.primary} disabled={!lostReason || saving} style={{marginTop: '6px'}} onClick={confirmLostReason}>
+                      Confirm close
+                    </button>
+                  </div>
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt>Assigned agent</dt>
+              <dd>
+                <select
+                  value={inquiry.assigned_agent_id || ''}
+                  disabled={saving}
+                  onChange={event => onAssign(event.target.value)}
+                >
+                  <option value="">Unassigned</option>
+                  {agents.map(agent => (
+                    <option key={agent.id} value={agent.id}>{agent.full_name || agent.email}</option>
+                  ))}
+                </select>
+              </dd>
+            </div>
+            <div>
+              <dt>Trip interest</dt>
+              {/* trip_title is the field the serializer actually sends; trip and
+                  journey are stripped by the staff field allowlist. */}
+              <dd>{inquiry.trip_title || 'General inquiry'}</dd>
+            </div>
+            <div>
+              <dt>Departure</dt>
+              <dd>{inquiry.departure_label || 'No fixed batch'}</dd>
+            </div>
+            <div>
+              <dt>Preferred dates</dt>
+              <dd>{inquiry.preferred_dates || 'Not specified'}</dd>
+            </div>
+          </dl>
+          {inquiry.converted_booking_reference && (
+            <p style={{fontSize: '11px', color: '#24583f', fontWeight: 700}}>
+              ✓ Converted to booking {inquiry.converted_booking_reference}
+            </p>
+          )}
+          <section className={styles.message}>
+            <h3>Traveler message</h3>
+            <p>{inquiry.message || 'No message supplied.'}</p>
+          </section>
+          <section className={styles.notes}>
+            <h3>Consultation notes</h3>
+            {notes.map(note => (
+              <article key={note.id}>
+                <strong>{note.author || 'Staff'}</strong>
+                <small>{date(note.created_at)}</small>
+                <p>{note.note_text}</p>
+              </article>
+            ))}
+            <form onSubmit={onSubmit}>
+              <textarea
+                value={noteText}
+                onChange={event => onNoteText(event.target.value)}
+                placeholder="Add an internal note"
+                maxLength={5000}
+              />
+              <button className={styles.primary} disabled={saving || !noteText.trim()}>
+                {saving ? 'Saving…' : 'Add note'}
+              </button>
+            </form>
+          </section>
+        </>
+      )}
+
+      {drawerTab === 'timeline' && (
+        <section>
+          <h3>Activity timeline</h3>
+          <div className={styles.timelineList}>
+            {timeline.length === 0 && <p className={styles.empty}>No activity logged yet.</p>}
+            {timeline.map((entry, index) => {
+              const isActivity = entry.entry_type === 'activity';
+              const activity = isActivity ? entry.data as Activity : null;
+              const note = !isActivity ? entry.data as InquiryNote : null;
+              return (
+                <article key={`${entry.entry_type}-${entry.data.id}-${index}`} className={styles.timelineEntry} data-channel={activity?.channel || 'NOTE'}>
+                  <div className={styles.timelineHead}>
+                    <span className={styles.timelineChannel}>{isActivity ? label(activity!.channel) : 'Note'}</span>
+                    <span className={styles.timelineAuthor}>{(isActivity ? activity!.author?.full_name : note?.author) || 'Staff'}</span>
+                    <span className={styles.timelineTime}>{date(entry.created_at)}</span>
+                  </div>
+                  <p className={styles.timelineBody}>{isActivity ? activity!.body : note!.note_text}</p>
+                </article>
+              );
+            })}
+          </div>
+          <form
+            className={styles.activityForm}
+            onSubmit={event => {
+              event.preventDefault();
+              if (!activityBody.trim() && activityChannel !== 'NOTE') return;
+              onLogActivity(activityChannel, activityBody);
+              setActivityBody('');
+            }}
+          >
+            <select value={activityChannel} onChange={event => setActivityChannel(event.target.value as ActivityChannel)}>
+              {activityChannelOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+            </select>
+            <textarea
+              value={activityBody}
+              onChange={event => setActivityBody(event.target.value)}
+              placeholder="What happened on this call/email/WhatsApp touch?"
+              maxLength={5000}
+            />
+            <button className={styles.primary} disabled={saving}>{saving ? 'Saving…' : 'Log activity'}</button>
+          </form>
+        </section>
+      )}
+
+      {drawerTab === 'tasks' && (
+        <section>
+          <h3>Follow-up tasks</h3>
+          <div className={styles.taskList}>
+            {tasks.length === 0 && <p className={styles.empty}>No follow-ups scheduled.</p>}
+            {tasks.map(task => (
+              <div key={task.id} className={styles.taskRow} data-status={task.status}>
+                <div className={styles.taskRowTitle}>
+                  {task.title}
+                  <div className={styles.taskRowDue}>Due {date(task.due_at)}</div>
+                </div>
+                {task.status !== 'CANCELLED' && (
+                  <button type="button" className={styles.taskDoneBtn} onClick={() => onToggleTask(task)}>
+                    {task.status === 'DONE' ? 'Reopen' : 'Mark done'}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <form
+            className={styles.taskForm}
+            onSubmit={event => {
+              event.preventDefault();
+              if (!taskTitle.trim() || !taskDueAt) return;
+              onAddTask(taskTitle, new Date(taskDueAt).toISOString());
+              setTaskTitle('');
+              setTaskDueAt('');
+            }}
+          >
+            <input type="text" value={taskTitle} onChange={event => setTaskTitle(event.target.value)} placeholder="Follow-up title" maxLength={255} />
+            <input type="datetime-local" value={taskDueAt} onChange={event => setTaskDueAt(event.target.value)} />
+            <button className={styles.primary} disabled={saving || !taskTitle.trim() || !taskDueAt}>+ Add</button>
+          </form>
+        </section>
+      )}
+
+      {drawerTab === 'tags' && (
+        <section>
+          <h3>Tags</h3>
+          <div className={styles.chipRow}>
+            {tags.length === 0 && <p className={styles.empty}>No tags attached.</p>}
+            {tags.map(tag => (
+              <span key={tag.id} className={styles.chip} style={{background: tag.color ? `${tag.color}33` : undefined}}>
+                {tag.name}
+                <button type="button" className={styles.chipRemove} onClick={() => onDetachTag(tag.id)} aria-label={`Remove tag ${tag.name}`}>×</button>
+              </span>
+            ))}
+          </div>
+          <form
+            className={styles.addChipForm}
+            onSubmit={event => {
+              event.preventDefault();
+              if (tagPick) { onAttachTag(tagPick); setTagPick(''); return; }
+              if (newTagName.trim()) { onCreateTag(newTagName.trim()); setNewTagName(''); }
+            }}
+          >
+            {availableTags.length > 0 && (
+              <select value={tagPick} onChange={event => setTagPick(event.target.value)}>
+                <option value="">Pick existing tag…</option>
+                {availableTags.map(tag => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
+              </select>
+            )}
+            <input type="text" value={newTagName} onChange={event => setNewTagName(event.target.value)} placeholder="Or create a new tag" maxLength={50} />
+            <button className={styles.primary} disabled={!tagPick && !newTagName.trim()}>Add tag</button>
+          </form>
+        </section>
+      )}
     </aside>
+  );
+}
+
+function PipelineView({summary, funnel, inquiries, loading, onOpen, onStatusChange}: {
+  summary: PipelineSummary | null;
+  funnel: FunnelData | null;
+  inquiries: Inquiry[];
+  loading: boolean;
+  onOpen: (reference: string) => void;
+  onStatusChange: (inquiry: Inquiry, next: InquiryStatus, lostReason?: LostReason | '') => void;
+}) {
+  const columns = statuses.map(value => ({
+    value,
+    items: inquiries.filter(item => item.status === value),
+  }));
+
+  return (
+    <section className={styles.panel}>
+      <div className={styles.panelHead}>
+        <div>
+          <p style={{fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1.4px', color: '#74897d', fontWeight: 800, margin: '0 0 4px'}}>Sales & Leads</p>
+          <h2>CRM</h2>
+        </div>
+      </div>
+
+      <div className={styles.pipelineStats}>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Total leads</span>
+          <strong className={styles.statValue}>{funnel?.total_leads ?? '—'}</strong>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Conversion rate</span>
+          <strong className={styles.statValue}>{funnel ? `${funnel.conversion_rate_percent}%` : '—'}</strong>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Avg days to close</span>
+          <strong className={styles.statValue}>{funnel?.avg_days_to_close ?? '—'}</strong>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>SLA breaches</span>
+          <strong className={styles.statValue}>{summary?.sla_breached_count ?? '—'}</strong>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Unassigned</span>
+          <strong className={styles.statValue}>{summary?.unassigned_open_leads ?? '—'}</strong>
+        </div>
+      </div>
+
+      {loading ? (
+        <p className={styles.empty}>Loading pipeline…</p>
+      ) : (
+        <div className={styles.kanbanBoard}>
+          {columns.map(column => (
+            <div key={column.value} className={styles.kanbanColumn}>
+              <div className={styles.kanbanColumnHead}>
+                <h4>{label(column.value)}</h4>
+                <span className={styles.kanbanColumnCount}>{column.items.length}</span>
+              </div>
+              <div className={styles.kanbanCards}>
+                {column.items.map(item => (
+                  <KanbanCard key={item.inquiry_number} inquiry={item} onOpen={onOpen} onStatusChange={onStatusChange} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function KanbanCard({inquiry, onOpen, onStatusChange}: {
+  inquiry: Inquiry;
+  onOpen: (reference: string) => void;
+  onStatusChange: (inquiry: Inquiry, next: InquiryStatus, lostReason?: LostReason | '') => void;
+}) {
+  const [pendingStatus, setPendingStatus] = useState<InquiryStatus | null>(null);
+  const [lostReason, setLostReason] = useState<LostReason | ''>('');
+
+  function handleChange(next: InquiryStatus) {
+    if (next === 'CLOSED' && !inquiry.converted_booking_reference) {
+      setPendingStatus(next);
+      setLostReason('');
+      return;
+    }
+    onStatusChange(inquiry, next);
+  }
+
+  return (
+    <div className={styles.kanbanCard}>
+      <div onClick={() => onOpen(inquiry.inquiry_number)} role="button" tabIndex={0}>
+        <strong>{inquiry.full_name}</strong>
+        <small>{inquiry.trip || inquiry.journey || inquiry.inquiry_type || 'General inquiry'}</small>
+      </div>
+      <div className={styles.kanbanCardMeta}>
+        <span>{inquiry.sla_breached && <span className={styles.slaDot} title="SLA breached" />}{date(inquiry.created_at)}</span>
+        <select value={inquiry.status} onClick={event => event.stopPropagation()} onChange={event => handleChange(event.target.value as InquiryStatus)}>
+          {statuses.map(value => <option key={value} value={value}>{value}</option>)}
+        </select>
+      </div>
+      {pendingStatus === 'CLOSED' && (
+        <div className={styles.lostReasonPrompt} onClick={event => event.stopPropagation()}>
+          <small>Why is this lead closing?</small>
+          <select value={lostReason} onChange={event => setLostReason(event.target.value as LostReason)}>
+            <option value="">Select a reason…</option>
+            {lostReasonOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+          </select>
+          <button
+            type="button"
+            className={styles.primary}
+            disabled={!lostReason}
+            style={{marginTop: '6px'}}
+            onClick={() => { onStatusChange(inquiry, 'CLOSED', lostReason); setPendingStatus(null); }}
+          >
+            Confirm close
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CustomerProfileModal({customer, loading, onClose, onOpenInquiry}: {
+  customer: CustomerProfile | null;
+  loading: boolean;
+  onClose: () => void;
+  onOpenInquiry: (reference: string) => void;
+}) {
+  return (
+    <div className={styles.modalBackdrop} role="dialog" aria-modal="true" aria-label="Customer history">
+      <div className={styles.editor} style={{maxWidth: '640px'}}>
+        <button className={styles.close} onClick={onClose}>×</button>
+        {loading || !customer ? (
+          <p className={styles.empty}>Loading customer history…</p>
+        ) : (
+          <>
+            <p style={{fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1.4px', color: '#74897d', fontWeight: 800, margin: '0 0 4px'}}>Customer</p>
+            <h2>{customer.full_name || customer.email}</h2>
+            <a href={`mailto:${customer.email}`}>{customer.email}</a>
+            {customer.phone && <a href={`tel:${customer.phone}`} style={{marginLeft: '12px'}}>{customer.phone}</a>}
+
+            <div className={styles.customerStats}>
+              <div><strong>{customer.lifetime_inquiries}</strong><span>Inquiries</span></div>
+              <div><strong>{customer.lifetime_bookings}</strong><span>Bookings</span></div>
+              <div><strong>{formatCurrency(Number(customer.lifetime_value_usd) || 0)}</strong><span>Lifetime value</span></div>
+            </div>
+
+            <section className={styles.notes}>
+              <h3>Inquiries</h3>
+              {customer.inquiries.length === 0 && <p className={styles.empty}>No inquiries yet.</p>}
+              {customer.inquiries.map(item => (
+                <article key={item.id}>
+                  <strong>{item.inquiry_number}</strong>
+                  <small>{date(item.created_at)} · {label(item.status)}</small>
+                  <p>
+                    {item.trip_title || label(item.inquiry_type)}{' '}
+                    <button type="button" className={styles.taskDoneBtn} onClick={() => onOpenInquiry(item.inquiry_number)}>Open →</button>
+                  </p>
+                </article>
+              ))}
+            </section>
+
+            <section className={styles.notes}>
+              <h3>Bookings</h3>
+              {customer.bookings.length === 0 && <p className={styles.empty}>No bookings yet.</p>}
+              {customer.bookings.map(item => (
+                <article key={item.id}>
+                  <strong>{item.booking_reference}</strong>
+                  <small>{date(item.created_at)} · {label(item.status)}</small>
+                  <p>{formatCurrency(Number(item.total_amount_usd) || 0)} · Trip starts {date(item.trip_start_date)}</p>
+                </article>
+              ))}
+            </section>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -2416,10 +3277,12 @@ function TrekManagementView({
 
 function TrekFullDetailEditor({
   trek,
+  slug,
   destinations,
   categories,
   saving,
   loading,
+  onMessage,
   onChange,
   onBack,
   onSave,
@@ -2427,10 +3290,12 @@ function TrekFullDetailEditor({
   onToggleFeatured,
 }: {
   trek: AdminTrekDetail;
+  slug: string;
   destinations: DestinationOption[];
   categories: CategoryOption[];
   saving: boolean;
   loading: boolean;
+  onMessage: (text: string) => void;
   onChange: React.Dispatch<React.SetStateAction<AdminTrekDetail | null>>;
   onBack: () => void;
   onSave: (event: FormEvent) => void;
@@ -3254,6 +4119,9 @@ function TrekFullDetailEditor({
           </button>
         </div>
       </section>
+
+      {/* Section 05 — Departures & Seats */}
+      <DeparturesEditor slug={slug} api={api} onMessage={onMessage} />
 
       {/* Footer Actions */}
       <div className={styles.detailTopNav}>

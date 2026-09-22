@@ -10,11 +10,20 @@ export type TripDifficulty =
   | 'STRENUOUS'
   | 'EXTREME';
 
+/** Mirrors the backend DepartureStatus enum exactly. */
 export type DepartureStatus =
   | 'GUARANTEED'
-  | 'FILLING_FAST'
   | 'LIMITED'
-  | 'SOLDOUT'
+  | 'SOLD_OUT'
+  | 'WAITLIST'
+  | 'CANCELLED';
+
+/** Derived, client-facing availability indicator. */
+export type AvailabilityState =
+  | 'AVAILABLE'
+  | 'FEW_SEATS_LEFT'
+  | 'SOLD_OUT'
+  | 'WAITLIST'
   | 'CANCELLED';
 
 export interface ItineraryDay {
@@ -38,10 +47,14 @@ export interface Departure {
   start_date: string;
   end_date: string;
   price_usd: string | number;
+  /** Derived on the server from max_seats - reserved_seats - booked_seats. */
   available_seats: number;
+  max_seats?: number;
   total_seats?: number;
+  availability_state?: AvailabilityState;
   status: DepartureStatus | string;
   is_guaranteed?: boolean;
+  waitlist_enabled?: boolean;
 }
 
 export interface TripInclusions {

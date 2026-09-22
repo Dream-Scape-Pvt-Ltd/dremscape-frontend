@@ -1,7 +1,8 @@
 import type {Trip} from './catalog';
 import {backend, backendConfigured, BackendError} from './backend';
 
-export type Departure={id:string; start_date:string; end_date:string; price_usd:string; available_seats:number; status:string};
+export type AvailabilityState='AVAILABLE'|'FEW_SEATS_LEFT'|'SOLD_OUT'|'WAITLIST'|'CANCELLED';
+export type Departure={id:string; start_date:string; end_date:string; price_usd:string; max_seats:number; available_seats:number; availability_state:AvailabilityState; status:string; is_guaranteed:boolean; waitlist_enabled:boolean};
 export type ItineraryDay={day_number:number; title:string; description:string; overnight_stay:string; elevation_meters:number|null; is_acclimatization_day:boolean};
 export type Journey=Trip & {overview:string; min_group_size:number; max_group_size:number; best_seasons:string[]; inclusions:string[]; exclusions:string[]; packing_list:string[]; gallery_images:string[]; itinerary_days:ItineraryDay[]; departures:Departure[]};
 type RawTrip=Trip & {destination?:{name:string;slug:string};category?:{name:string;slug:string}};
@@ -43,6 +44,26 @@ export async function getJourney(slug:string) {
   const departures=await allPages<Departure>(`trips/${encodeURIComponent(slug)}/departures/`);
   return {journey:{...raw,...normalizeTrip(raw),departures} as Journey,demo:false};
 }
+export function upcoming(departure:Departure) {
+  return departure.start_date>=new Date().toISOString().slice(0,10) && departure.status!=='CANCELLED';
+}
 export function bookable(departure:Departure) {
-  return departure.available_seats>0 && ['LIMITED','GUARANTEED'].includes(departure.status) && departure.start_date>=new Date().toISOString().slice(0,10);
+  return departure.available_seats>0 && ['LIMITED','GUARANTEED'].includes(departure.status) && upcoming(departure);
+}
+/**
+ * A full departure that still wants to hear from travellers. Not bookable, but
+ * deliberately still shown — hiding it loses the demand.
+ */
+export function waitlistable(departure:Departure) {
+  return !bookable(departure) && upcoming(departure) && departure.waitlist_enabled && departure.available_seats<=0;
+}
+/** Copy for the availability pill on tour pages and the booking screen. */
+export function availabilityLabel(departure:Departure) {
+  switch(departure.availability_state) {
+    case 'FEW_SEATS_LEFT': return `Only ${departure.available_seats} ${departure.available_seats===1?'spot':'spots'} remaining`;
+    case 'WAITLIST': return 'Batch full — join waitlist';
+    case 'SOLD_OUT': return 'Batch full';
+    case 'CANCELLED': return 'Cancelled';
+    default: return `${departure.available_seats} seats available`;
+  }
 }
