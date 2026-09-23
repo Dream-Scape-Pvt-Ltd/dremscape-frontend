@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import type { Journey } from '@/lib/journeys';
+import { availabilityLabel, bookable, upcoming, waitlistable } from '@/lib/journeys';
 import { asset } from '@/lib/assets';
 import { difficulty, dateLabel, money } from '@/lib/format';
 import JourneyShell from '@/components/journey-shell';
@@ -9,9 +10,10 @@ import InquiryDialog from '@/components/inquiry-dialog';
 
 export default function JourneyDetail({ journey: t }: { journey: Journey; demo?: boolean }) {
   const [inquiry, setInquiry] = useState(false);
-  const departures = t.departures.filter(
-    d => d.available_seats > 0 && ['LIMITED', 'GUARANTEED'].includes(d.status) && d.start_date >= new Date().toISOString().slice(0, 10)
-  );
+  // Every upcoming departure is listed, full ones included — a hidden batch
+  // cannot invite anyone onto its waitlist.
+  const departures = t.departures.filter(upcoming);
+  const hasOpenDeparture = departures.some(d => bookable(d) || waitlistable(d));
 
   return (
     <JourneyShell>
@@ -133,24 +135,42 @@ export default function JourneyDetail({ journey: t }: { journey: Journey; demo?:
               <h2>Your next chapter.</h2>
               {departures.length ? (
                 <div className="departure-list">
-                  {departures.map(d => (
-                    <div key={d.id}>
-                      <div>
-                        <strong>{dateLabel(d.start_date)}</strong>
-                        <p>to {dateLabel(d.end_date)}</p>
-                        <small>{d.available_seats} seats available</small>
+                  {departures.map(d => {
+                    const open = bookable(d);
+                    const waitlist = waitlistable(d);
+                    return (
+                      <div key={d.id} data-state={d.availability_state}>
+                        <div>
+                          <strong>{dateLabel(d.start_date)}</strong>
+                          <p>to {dateLabel(d.end_date)}</p>
+                          <small className="seat-pill" data-seats={d.availability_state}>
+                            {availabilityLabel(d)}
+                          </small>
+                        </div>
+                        <div>
+                          <strong>{money(d.price_usd)}</strong>
+                          <small>per person</small>
+                        </div>
+                        {open ? (
+                          <Link className="button green" href={`/booking?trek=${t.slug}&departure=${d.id}`}>Choose date ↗</Link>
+                        ) : waitlist ? (
+                          <Link className="button outline-dark" href={`/booking?trek=${t.slug}&departure=${d.id}`}>Join waitlist ↗</Link>
+                        ) : (
+                          <span className="button disabled" aria-disabled="true">Unavailable</span>
+                        )}
                       </div>
-                      <div>
-                        <strong>{money(d.price_usd)}</strong>
-                        <small>per person</small>
-                      </div>
-                      <Link className="button green" href={`/booking?trek=${t.slug}&departure=${d.id}`}>Choose date ↗</Link>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="quiet-panel">
-                  <p>No bookable departures are listed right now. Ask about upcoming dates or a private journey.</p>
+                  <p>No departures are listed right now. Ask about upcoming dates or a private journey.</p>
+                  <button className="button green" onClick={() => setInquiry(true)}>Ask about dates</button>
+                </div>
+              )}
+              {departures.length > 0 && !hasOpenDeparture && (
+                <div className="quiet-panel">
+                  <p>Every listed departure is closed. Ask the team about additional dates or a private journey.</p>
                   <button className="button green" onClick={() => setInquiry(true)}>Ask about dates</button>
                 </div>
               )}

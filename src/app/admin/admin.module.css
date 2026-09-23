@@ -3226,4 +3226,65 @@
 .publishSwitch input:checked + span:after { transform: translateX(21px); }
 .publishSwitch strong { min-width: 68px; color: #355747; font-size: 12px; }
 .blogEditor footer { position: sticky; bottom: 0; z-index: 2; margin: 22px 0 0; padding: 17px 28px; border-top: 1px solid #dbe4dd; background: #ffffffed; backdrop-filter: blur(8px); }
+
+/* CRM: Inquiry drawer sub-tabs */
+.drawerTabs { display: flex; gap: 6px; margin: 16px 0 4px; border-bottom: 1px solid #e7ece8; }
+.drawerTab { padding: 8px 12px; border: 0; background: transparent; color: #6d8276; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; border-bottom: 2px solid transparent; }
+.drawerTab:hover { color: #24583f; }
+.drawerTabActive { color: #133e2f; border-bottom-color: #133e2f; }
+.drawerHistoryBtn { margin-top: 8px; padding: 6px 10px; border: 1px solid #cddcd2; border-radius: 7px; background: #fff; color: #24583f; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+/* CRM: Timeline */
+.timelineList { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+.timelineEntry { padding: 10px 12px; border-radius: 8px; background: #f7f9f7; border-left: 3px solid #a9c4b3; }
+.timelineEntry[data-channel="STATUS_CHANGE"], .timelineEntry[data-channel="SYSTEM"] { background: #f2f5f9; border-left-color: #9db0c9; }
+.timelineHead { display: flex; align-items: baseline; gap: 8px; font-size: 10px; }
+.timelineChannel { font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #24583f; }
+.timelineAuthor { color: #6d8276; }
+.timelineTime { margin-left: auto; color: #91a099; }
+.timelineBody { margin: 6px 0 0; font-size: 12px; color: #3f5347; white-space: pre-wrap; }
+.activityForm { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.activityForm select { width: fit-content; }
+
+/* CRM: Tasks */
+.taskList { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
+.taskRow { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: 8px; background: #f7f9f7; }
+.taskRow[data-status="DONE"] { opacity: 0.55; text-decoration: line-through; }
+.taskRowTitle { flex: 1; font-size: 12px; }
+.taskRowDue { font-size: 10px; color: #6d8276; }
+.taskDoneBtn { padding: 5px 10px; border: 1px solid #cddcd2; border-radius: 6px; background: #fff; color: #24583f; font-size: 10.5px; font-weight: 700; cursor: pointer; }
+.taskForm { display: flex; gap: 8px; margin-top: 12px; }
+.taskForm input[type="text"] { flex: 1; }
+
+/* CRM: Tags */
+.chipRow { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-radius: 999px; font-size: 10.5px; font-weight: 700; color: #133e2f; background: #dcfce7; }
+.chipRemove { border: 0; background: transparent; color: inherit; font-size: 13px; line-height: 1; cursor: pointer; opacity: 0.7; }
+.chipRemove:hover { opacity: 1; }
+.addChipForm { display: flex; gap: 8px; margin-top: 10px; }
+
+/* CRM: Lost reason inline prompt */
+.lostReasonPrompt { margin-top: 8px; padding: 9px; border-radius: 8px; background: #fdf3ee; border: 1px solid #f0d9cb; }
+.lostReasonPrompt select { width: 100%; margin-top: 6px; }
+
+/* CRM: Pipeline (Kanban + funnel) */
+.pipelineStats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 22px; }
+.kanbanBoard { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 10px; }
+.kanbanColumn { flex: 0 0 260px; display: flex; flex-direction: column; background: #f5f7f5; border-radius: 12px; padding: 12px; max-height: 72vh; }
+.kanbanColumnHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 0 2px; }
+.kanbanColumnHead h4 { margin: 0; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; color: #395446; }
+.kanbanColumnCount { font-size: 10.5px; font-weight: 800; color: #6d8276; background: #fff; border-radius: 999px; padding: 2px 8px; }
+.kanbanCards { display: flex; flex-direction: column; gap: 9px; overflow-y: auto; }
+.kanbanCard { background: #fff; border-radius: 10px; padding: 10px 11px; box-shadow: 0 1px 4px #15372812; cursor: pointer; }
+.kanbanCard strong { display: block; font-size: 12px; color: #133e2f; }
+.kanbanCard small { display: block; font-size: 10.5px; color: #6d8276; margin-top: 2px; }
+.kanbanCardMeta { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; gap: 6px; }
+.kanbanCard select { font-size: 10px; padding: 3px 5px; }
+.slaDot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #d64545; margin-right: 5px; }
+
+/* CRM: Customer 360 modal */
+.customerStats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 16px 0 22px; }
+.customerStats div { background: #f5f7f5; border-radius: 10px; padding: 12px; }
+.customerStats strong { display: block; font-size: 18px; color: #133e2f; }
+.customerStats span { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #74897d; }
 @media(max-width:760px){.blogEditorHeader{align-items:flex-start;flex-direction:column;padding:28px 24px 22px}.blogEditorSection{margin:16px 14px 0;padding:20px}.blogMediaColumns,.blogEditor .formGrid{grid-template-columns:1fr}.blogPublishSection{align-items:flex-start;flex-direction:column}.blogEditor footer{padding:15px 16px}.blogGalleryGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
