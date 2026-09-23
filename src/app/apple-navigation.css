@@ -1,0 +1,62 @@
+/* A compact translucent navigation bar; shared tokens keep light/dark contrast paired. */
+body .header.site-navigation.apple-nav[data-page]{
+  --apple-ink:#f5f7f2;--apple-muted:#dce8df;--apple-glass:rgba(16,59,44,.94);--apple-solid:rgba(16,59,44,.98);--apple-edge:rgba(235,244,237,.12);--apple-hover:rgba(255,255,255,.09);--apple-button:rgba(255,255,255,.085);--apple-accent:#e1b77a;--apple-logo:brightness(0) invert(1);
+  height:64px;top:16px;border-radius:16px;border:1px solid var(--apple-edge);color:var(--apple-ink);background:var(--apple-glass)!important;box-shadow:0 8px 28px #0718110c!important;backdrop-filter:blur(26px) saturate(120%)!important;-webkit-backdrop-filter:blur(26px) saturate(120%)!important;transition:background .3s,box-shadow .3s;
+}
+body:has(.hero,.trek-hero,.dest-page) .header.site-navigation.apple-nav[data-page],body .header.site-navigation.apple-nav[data-page="journal"]{
+  --apple-ink:#f5f7f2;--apple-muted:#dce8df;--apple-glass:rgba(16,59,44,.90);--apple-solid:rgba(16,59,44,.98);--apple-edge:rgba(235,244,237,.12);--apple-hover:rgba(255,255,255,.09);--apple-button:rgba(255,255,255,.085);--apple-accent:#e1b77a;--apple-logo:brightness(0) invert(1);
+}
+body .header.site-navigation.apple-nav[data-page].scrolled{background:var(--apple-solid)!important;box-shadow:0 8px 24px #07181112!important}
+body .header.site-navigation.apple-nav[data-page] .header-inner{height:100%;padding-inline:20px;gap:24px}
+body .header.site-navigation.apple-nav[data-page] .brand{width:160px;height:50px;filter:var(--apple-logo)}
+body .header.site-navigation.apple-nav[data-page] .nav{gap:6px;font-size:12px}
+body .header.site-navigation.apple-nav[data-page] .nav a{padding:14px 12px;border-radius:8px;color:var(--apple-muted);font-weight:500;letter-spacing:-.01em;background:transparent;box-shadow:none;transition:color .2s,background .2s;white-space:nowrap}
+body .header.site-navigation.apple-nav[data-page] .nav a:hover,body .header.site-navigation.apple-nav[data-page] .nav a:focus-visible{color:var(--apple-ink);background:var(--apple-hover)}
+body .header.site-navigation.apple-nav[data-page] .nav a[aria-current]{color:var(--apple-ink);background:transparent;box-shadow:none}
+body .header.site-navigation.apple-nav[data-page] .nav a:after{content:'';display:block;position:absolute;left:12px;right:12px;bottom:7px;height:2px;border-radius:2px;background:var(--apple-accent);transform:scaleX(0);transform-origin:center;transition:transform .25s cubic-bezier(.2,.7,.2,1)}
+body .header.site-navigation.apple-nav[data-page] .nav a[aria-current]:after,body .header.site-navigation.apple-nav[data-page] .nav a:hover:after,body .header.site-navigation.apple-nav[data-page] .nav a:focus-visible:after{transform:scaleX(1)}
+body .header.site-navigation.apple-nav[data-page] .header-actions{gap:12px}
+body .header.site-navigation.apple-nav[data-page] .search-link{width:38px;height:38px;border-radius:9px}
+body .header.site-navigation.apple-nav[data-page] .search-link:hover{background:var(--apple-hover)}
+body .header.site-navigation.apple-nav[data-page] .search-link img{width:17px;height:17px;filter:var(--apple-logo);opacity:.9}
+body .header.site-navigation.apple-nav[data-page] .header-cta{border-radius:10px!important;min-height:36px;padding:9px 14px;gap:15px;background:var(--apple-button);border:1px solid var(--apple-edge);color:var(--apple-ink);box-shadow:inset 0 1px 0 #ffffff08;font-size:11px;font-weight:550;white-space:nowrap}
+body .header.site-navigation.apple-nav[data-page] .header-cta:hover{background:var(--apple-hover);transform:translateY(-1px);box-shadow:0 4px 10px #00000008}
+body .header.site-navigation.apple-nav[data-page] .menu-toggle{min-height:40px;padding:8px 10px;border:0;border-radius:8px;background:transparent;color:var(--apple-ink);gap:12px}
+body .header.site-navigation.apple-nav[data-page] .menu-label{font-size:11px;font-weight:500}
+.apple-nav .menu-lines{position:relative;display:block;width:18px;height:14px}.apple-nav .menu-lines i{position:absolute;left:0;width:18px;height:1.5px;background:currentColor;border-radius:2px;transition:transform .25s,top .25s}.apple-nav .menu-lines i:first-child{top:3px}.apple-nav .menu-lines i:last-child{top:10px}.apple-nav .menu-toggle[aria-expanded=true] .menu-lines i:first-child{top:6px;transform:rotate(45deg)}.apple-nav .menu-toggle[aria-expanded=true] .menu-lines i:last-child{top:6px;transform:rotate(-45deg)}
+@media(min-width:901px) and (max-width:1100px){body .header.site-navigation.apple-nav[data-page] .header-inner{gap:12px;padding-inline:16px}body .header.site-navigation.apple-nav[data-page] .brand{width:148px}body .header.site-navigation.apple-nav[data-page] .nav{gap:0}body .header.site-navigation.apple-nav[data-page] .nav a{padding-inline:8px;font-size:11px}body .header.site-navigation.apple-nav[data-page] .header-actions{gap:4px}}
+@media(max-width:900px){body .header.site-navigation.apple-nav[data-page]{top:12px;left:16px;right:16px}body .header.site-navigation.apple-nav[data-page] .nav{top:calc(100% + 8px);padding:12px;background:var(--apple-solid);border:1px solid var(--apple-edge);border-radius:16px;box-shadow:0 14px 30px #07181124;backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px)}body .header.site-navigation.apple-nav[data-page] .nav a{padding:15px 16px;font-size:14px}body .header.site-navigation.apple-nav[data-page] .nav a:after{left:16px;right:auto;width:24px;bottom:8px}body .header.site-navigation.apple-nav[data-page] .header-cta{display:none}}
+@media(max-width:600px){body .header.site-navigation.apple-nav[data-page]{height:60px;left:12px;right:12px;border-radius:14px}body .header.site-navigation.apple-nav[data-page] .header-inner{padding-inline:14px;gap:8px}body .header.site-navigation.apple-nav[data-page] .brand{width:144px;height:46px}body .header.site-navigation.apple-nav[data-page] .header-actions{gap:3px}body .header.site-navigation.apple-nav[data-page] .search-link{width:34px}.apple-nav .menu-toggle{padding-inline:8px}}
+@media(prefers-reduced-motion:reduce){.apple-nav .menu-lines i{transition:none}body .header.site-navigation.apple-nav[data-page] .nav a:after{transition:none}}
+/* Search unfolds from the navigation, with paired colors for each page surface. */
+body .header.site-navigation.apple-nav[data-page] .search-link{border:0;background:transparent;color:var(--apple-ink);cursor:pointer;transition:background .2s,transform .2s}
+body .header.site-navigation.apple-nav[data-page] .search-link[aria-expanded=true]{background:var(--apple-button)}
+.apple-nav .search-link svg{transition:transform .3s}.apple-nav.search-open .search-link svg{transform:rotate(90deg)}
+.apple-nav .nav-search-panel{position:absolute;top:calc(100% + 8px);left:0;right:0;display:grid;grid-template-rows:0fr;visibility:hidden;opacity:0;transform:translateY(-8px) scale(.99);transform-origin:top center;background:var(--apple-solid);color:var(--apple-ink);border-radius:20px;box-shadow:0 24px 60px #07181126;backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);transition:grid-template-rows .38s cubic-bezier(.22,1,.36,1),opacity .22s,transform .38s cubic-bezier(.22,1,.36,1),visibility .38s}
+.apple-nav.search-open .nav-search-panel{grid-template-rows:1fr;visibility:visible;opacity:1;transform:none}
+.apple-nav .nav-search-clip{overflow:hidden;min-height:0}
+.apple-nav .nav-search-content{max-width:820px;margin:auto;padding:32px 40px 28px;max-height:calc(100dvh - 110px);overflow-y:auto}
+.apple-nav .nav-search-content label{display:block;color:var(--apple-muted);font-size:12px;margin-bottom:18px;letter-spacing:.02em}
+.apple-nav .nav-search-field{display:flex;align-items:center;gap:16px;padding-bottom:18px;border-bottom:1px solid var(--apple-edge)}
+.apple-nav .nav-search-field>svg{flex-shrink:0;color:var(--apple-muted)}
+.apple-nav .nav-search-field input{min-width:0;width:100%;border:0;background:transparent;color:var(--apple-ink);font:inherit;font-size:clamp(18px,2.2vw,28px);font-weight:550;letter-spacing:-.04em;outline:none;border-radius:4px}
+.apple-nav .nav-search-field input::placeholder{color:var(--apple-muted);opacity:.8}
+.apple-nav .nav-search-field:focus-within{border-color:var(--apple-accent)}
+.apple-nav .nav-search-field button{flex-shrink:0;border:1px solid var(--apple-edge);border-radius:10px;background:var(--apple-button);color:var(--apple-ink);padding:12px 16px;font:inherit;font-size:12px;cursor:pointer;transition:background .2s,transform .2s}
+.apple-nav .nav-search-field button:hover{background:var(--apple-hover);transform:translateX(2px)}
+.apple-nav .nav-search-suggestions{margin-top:22px}.apple-nav .nav-search-suggestions p{color:var(--apple-muted);font-size:10px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px}
+.apple-nav .nav-search-suggestions>div{display:flex;flex-wrap:wrap;gap:8px}
+.apple-nav .nav-search-suggestions a{display:flex;gap:24px;padding:12px 16px;background:var(--apple-button);border-radius:10px;font-size:12px;color:var(--apple-ink);transition:background .2s,transform .2s}
+.apple-nav.search-open .nav-search-suggestions a{animation:nav-search-arrive .35s both cubic-bezier(.22,1,.36,1)}
+.apple-nav .nav-search-suggestions a:hover{background:var(--apple-hover);transform:translateY(-2px)}
+.apple-nav .nav-search-suggestions a span{color:var(--apple-accent)}
+.apple-nav .nav-search-hint{font-size:13px;line-height:1.7;color:var(--apple-muted);overflow-wrap:anywhere}
+.apple-nav .nav-search-all{display:inline-flex;gap:24px;font-size:12px;margin-top:24px;color:var(--apple-ink)}
+.apple-nav :is(.search-link,.nav-search-content a,.nav-search-field button):focus-visible{outline:2px solid var(--apple-accent);outline-offset:4px}
+@keyframes nav-search-arrive{from{opacity:0;translate:0 7px}to{opacity:1;translate:0 0}}
+@media(max-width:900px){body .header.site-navigation.apple-nav[data-page] .nav.open{animation:nav-search-arrive .3s both}body .header.site-navigation.apple-nav[data-page] .nav.open a{animation:nav-search-arrive .3s both}.apple-nav .nav.open a:nth-child(2){animation-delay:35ms!important}.apple-nav .nav.open a:nth-child(3){animation-delay:70ms!important}.apple-nav .nav.open a:nth-child(4){animation-delay:105ms!important}.apple-nav .nav.open a:nth-child(5){animation-delay:140ms!important}.apple-nav .nav.open a:nth-child(6){animation-delay:175ms!important}}
+@media(max-width:600px){.apple-nav .nav-search-content{padding:24px 20px}.apple-nav .nav-search-field{gap:10px}.apple-nav .nav-search-field>svg{display:none}.apple-nav .nav-search-field input{font-size:17px}.apple-nav .nav-search-field button{padding:12px}.apple-nav .nav-search-field button span{display:none}.apple-nav .nav-search-suggestions>div{display:grid;grid-template-columns:1fr 1fr}.apple-nav .nav-search-suggestions a{justify-content:space-between;gap:8px;padding:12px}.apple-nav .nav-search-hint{grid-column:1/-1}}
+@media(prefers-reduced-motion:reduce){body .header.site-navigation.apple-nav[data-page],.apple-nav .nav-search-panel,.apple-nav .search-link svg,.apple-nav .nav-search-field button,.apple-nav .nav-search-suggestions a{transition:none!important}.apple-nav.search-open .nav-search-suggestions a,body .header.site-navigation.apple-nav[data-page] .nav.open,body .header.site-navigation.apple-nav[data-page] .nav.open a{animation:none!important}}
+body .header.site-navigation.apple-nav[data-page] .nav-search-field input{background:transparent!important;color:var(--apple-ink)!important;border:0!important;box-shadow:none!important;padding:8px 0}
+body .header.site-navigation.apple-nav[data-page] .search-link{display:grid!important;flex-shrink:0}
+

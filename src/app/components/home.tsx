@@ -7,6 +7,7 @@ import JourneySelect from '@/components/journey-select';
 import TrekFilm from './trek-film';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
+import TrailSticker from '@/components/trail-sticker';
 import JourneyCard from '@/components/journey-card';
 import InquiryForm from '@/components/inquiry-form';
 import { journalPosts } from '@/lib/editorial-content';
@@ -21,15 +22,15 @@ function Photo({ name, alt, className = '' }: { name: string; alt: string; class
   return <img src={asset(name)} alt={alt} className={className} loading="lazy" />;
 }
 
-const destinations = [
+const defaultDestinations = [
   { name: 'Everest & Khumbu', slug: 'everest', image: '222-78-imgNepalEverestBaseCampAndAmaDablamPeak', tag: 'FLAGSHIP SANCTUARY', description: 'Everest Base Camp · Gokyo Ri · Cho La · Ama Dablam' },
   { name: 'Annapurna & Mustang', slug: 'annapurna', image: '222-78-imgAnnapurnaRangeAndHighGlacialLakesNepal', tag: 'GLACIAL LAKES & ANCIENT CAVES', description: 'Thorong La Pass · Tilicho Lake · Upper Mustang · Poon Hill' },
   { name: 'Manaslu & Langtang', slug: 'manaslu', image: '222-78-imgManasluAndLangtangSacredValleyPeaksNepal', tag: 'WILD CIRCUIT & SACRED VALLEYS', description: 'Larkya La · Tsum Valley · Kyanjin Gompa · Gosaikunda' },
 ];
 
-const articles = journalPosts.map(p => ({ ...p, tag: p.category, date: p.reading + ' read' }));
+const defaultArticles = journalPosts.map(p => ({ ...p, tag: p.category, date: p.reading + ' read' }));
 
-export default function Home() {
+export default function Home({heroImage,heroAlt,destinations=defaultDestinations,articles=defaultArticles}:{heroImage?:string;heroAlt?:string;destinations?:{name:string;slug:string;image:string;tag:string;description:string}[];articles?:{slug:string;title:string;image:string;tag:string;date:string;excerpt:string}[]}) {
   const [filmOpen, setFilmOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
   const [category, setCategory] = useState('treks');
@@ -134,13 +135,13 @@ export default function Home() {
         <section className="hero" id="home">
           <img
             className="hero-image"
-            src="/images/trek-memories/a-pause-on-the-ridge.jpg"
+            src={heroImage||"/images/trek-memories/a-pause-on-the-ridge.jpg"}
             width="2048"
             height="1536"
-            alt="Trekkers resting on a ridge beneath clear Himalayan snow peaks"
+            alt={heroAlt||"Trekkers resting on a ridge beneath clear Himalayan snow peaks"}
             fetchPriority="high"
           />
-          <div className="hero-shade" />
+          <div className="hero-shade" /><TrailSticker/>
           <div className="container hero-content">
             <Eyebrow>Nepal, one extraordinary step at a time</Eyebrow>
             <h1>Beyond the<br /><em>Horizon.</em></h1>

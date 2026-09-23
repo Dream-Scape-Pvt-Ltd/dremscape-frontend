@@ -1,8 +1,9 @@
 'use client';
 import Link from 'next/link';
+import DestinationScope from '@/components/destination-scope';
 import { useEffect, useState } from 'react';
 import { asset } from '@/lib/assets';
-import { regions } from '@/lib/destinations';
+import type {Region} from '@/lib/destination-content';
 import type { Trip } from '@/lib/catalog';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
@@ -14,7 +15,7 @@ function Arrow() {
   return <img className="icon" src={asset('heroContext-imgSvg')} alt="" width="18" height="18" />;
 }
 
-export default function Destinations() {
+export default function Destinations({regions=[]}:{regions?:Region[]}) {
   const [region, setRegion] = useState(''),
     [mood, setMood] = useState(''),
     [search, setSearch] = useState('');
@@ -112,7 +113,7 @@ export default function Destinations() {
         </section>
 
         <div className="container dest-content">
-          <section className="region-finder" id="region-finder" aria-label="Find a destination">
+          <DestinationScope/><section className="region-finder" id="region-finder" aria-label="Find a destination">
             <div className="finder-title">
               <span className="planner-kicker">FIND YOUR KIND OF NEPAL</span>
               <h2>Follow your curiosity.</h2>
@@ -155,7 +156,7 @@ export default function Destinations() {
             <div className="sanctuary-heading">
               <div>
                 <p className="eyebrow">ONE COUNTRY. ENDLESS PERSPECTIVES.</p>
-                <h2>Four regions.<br /><em>A world of possibility.</em></h2>
+                <h2>Your next chapter.<br /><em>A world of possibility.</em></h2>
               </div>
               <p>From the familiar silhouette of Ama Dablam to the quiet trails of Dolpo, every region has its own rhythm. Find yours.</p>
             </div>

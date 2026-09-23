@@ -72,7 +72,7 @@ export default function PaymentPage({ reference = '', confirmation = false }: { 
             {error && (
               <div className="quiet-panel" role="alert">
                 <p>{error}</p>
-                {login && <Link href="/login" className="button gold">Sign in</Link>}
+                {login && <Link href="/contact" className="button gold">Request booking access</Link>}
               </div>
             )}
             {receipt && (

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { MemoryReveal } from './trek-memories';
 import type { Guide } from '@/lib/guides';
+import {memoryPhotos} from '@/lib/trek-memories';
 
 export default function JournalIndex({ guides }: { guides: Guide[] }) {
   const [category, setCategory] = useState(''),
@@ -54,7 +55,7 @@ export default function JournalIndex({ guides }: { guides: Guide[] }) {
                 <section>
                   <p className="eyebrow">{g.category.replaceAll('_', ' ')}</p>
                   <h2>{g.title}</h2>
-                  <p>{g.excerpt}</p>
+                  <p>{g.excerpt}</p><div className="journal-card-previews">{(g.galleryImages?.length?g.galleryImages:g.photoIds?.map(id=>memoryPhotos.find(p=>p.id===id)?.src).filter((src):src is string=>!!src)||[]).slice(0,3).map((src,index)=><img key={`${src}-${index}`} src={src} alt="" loading="lazy"/>)}</div>
                   <span className="journal-card-foot">
                     <span>{g.reading ? `${g.reading} read` : 'Read the story'}</span>
                     <span>↗</span>

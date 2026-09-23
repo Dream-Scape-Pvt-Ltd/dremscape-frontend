@@ -1,38 +1,5 @@
-const landmark = 'Avalon House, Lekhnath Marg, Thamel, Kathmandu, Nepal';
-const query = encodeURIComponent(landmark);
-
-export default function ContactMap() {
-  return (
-    <section className="contact-location-section container" aria-labelledby="location-title">
-      <div className="contact-map-card">
-        <div className="contact-map-copy">
-          <span className="location-symbol" aria-hidden="true">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z" />
-              <circle cx="12" cy="12" r="2.5" />
-            </svg>
-          </span>
-          <p className="eyebrow">BEFORE THE MOUNTAINS, A HELLO</p>
-          <h2 id="location-title">Find us<br /><em>in Thamel.</em></h2>
-          <p>Below Hotel Avalon<br />Thamel, Kathmandu, Nepal</p>
-          <p className="location-note">The map marks the Hotel Avalon landmark. Get in touch for help finding the entrance.</p>
-          <a className="button green" href={`https://www.google.com/maps/search/?api=1&query=${query}`} target="_blank" rel="noopener noreferrer">
-            Open in Google Maps <span aria-hidden="true">↗</span>
-          </a>
-        </div>
-        <div className="contact-map-frame">
-          <iframe
-            title="Hotel Avalon landmark in Thamel, Kathmandu"
-            src={`https://maps.google.com/maps?q=${query}&z=16&output=embed`}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            allowFullScreen
-          />
-          <div className="map-caption">
-            <span className="map-dot" />THAMEL, KATHMANDU <span>YOUR JOURNEY STARTS HERE</span>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+import {getSiteSettings} from '@/lib/site-settings';
+export default async function ContactMap(){
+ const settings=await getSiteSettings();const query=encodeURIComponent(settings.map_query);const zoom=Math.min(20,Math.max(1,Number(settings.map_zoom)||16));
+ return <section className="contact-location-section container" aria-labelledby="location-title"><div className="contact-map-card"><div className="contact-map-copy"><span className="location-symbol" aria-hidden="true">↗</span><p className="eyebrow">BEFORE THE MOUNTAINS, A HELLO</p><h2 id="location-title">Meet us<br/><em>in {settings.area}.</em></h2><address>{settings.address}</address><p className="location-note">{settings.directions_note}</p><a className="button green" href={`https://www.google.com/maps/search/?api=1&query=${query}`} target="_blank" rel="noopener noreferrer">Get directions <span aria-hidden="true">↗</span></a></div><div className="contact-map-frame"><iframe title={`Map: ${settings.address}`} src={`https://maps.google.com/maps?q=${query}&z=${zoom}&output=embed`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen/><a className="map-external-link" href={`https://www.google.com/maps/search/?api=1&query=${query}`} target="_blank" rel="noopener noreferrer">Open larger map ↗</a></div></div></section>;
 }

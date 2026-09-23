@@ -1,9 +1,10 @@
+import {cookies} from 'next/headers';
 import {NextResponse} from 'next/server';
 import {backend,apiError,BackendError,readInput,requiredText,emailInput,noStore} from '@/lib/backend';
 export async function POST(request:Request,{params}:{params:Promise<{action:string}>}) {
   try {
     const input=await readInput(request),{action}=await params;
-    if(action==='logout') {const response=NextResponse.json({success:true},{headers:noStore});response.cookies.set('dreamscape_session','',{httpOnly:true,sameSite:'lax',path:'/',maxAge:0,secure:request.headers.get('x-forwarded-proto')==='https'||new URL(request.url).protocol==='https:'});return response;}
+    if(action==='logout') {const jar=await cookies(),refresh=jar.get('dreamscape_refresh')?.value,access=jar.get('dreamscape_session')?.value;if(refresh&&access){try{await backend('auth/logout/',{method:'POST',headers:{Authorization:`Bearer ${access}`},body:JSON.stringify({refresh})});}catch{}} const response=NextResponse.json({success:true},{headers:noStore});response.cookies.set('dreamscape_session','',{httpOnly:true,sameSite:'lax',path:'/',maxAge:0,secure:request.headers.get('x-forwarded-proto')==='https'||new URL(request.url).protocol==='https:'});response.cookies.delete('dreamscape_refresh');return response;}
     if(action==='confirm') {
       const uid=requiredText(input,'uid'),token=requiredText(input,'token');
       requiredText(input,'new_password',1024);
@@ -22,10 +23,11 @@ export async function POST(request:Request,{params}:{params:Promise<{action:stri
         payload.password_confirm=input.password_confirm;
       }
     }
-    const data=await backend<{access?:string;user?:unknown}>(`auth/${action==='reset'?'password/reset':action}/`,{method:'POST',body:JSON.stringify(payload)});
+    const data=await backend<{access?:string;refresh?:string;user?:unknown}>(`auth/${action==='reset'?'password/reset':action}/`,{method:'POST',body:JSON.stringify(payload)});
     if(action==='reset')return NextResponse.json({success:true,message:'If an account matches this email, the team’s password-reset service will send instructions.'},{headers:noStore});
     if(!data.access||!data.user)throw new BackendError('Sign-in could not be confirmed. Please try again.');
-    const response=NextResponse.json({success:true},{headers:noStore});
+    const response=NextResponse.json({success:true,user:data.user},{headers:noStore});
+    if(data.refresh)response.cookies.set("dreamscape_refresh",data.refresh,{httpOnly:true,sameSite:"lax",path:"/",secure:new URL(request.url).protocol==="https:"||request.headers.get("x-forwarded-proto")==="https"});
     response.cookies.set('dreamscape_session',data.access,{httpOnly:true,sameSite:'lax',secure:request.headers.get('x-forwarded-proto')==='https'||new URL(request.url).protocol==='https:',path:'/'});
     return response;
   }catch(error){return apiError(error);}

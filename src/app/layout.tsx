@@ -9,12 +9,14 @@ import './memories.css';
 import './refinements.css';
 import './refined-ui.css';
 import './ui-polish.css';
+import './content-experience.css';
 
 export const metadata: Metadata = {
   title: 'Dreamscape Treks — Beyond the Horizon',
   description: 'Explore the sacred Himalayas of Nepal. Discover trekking journeys through Everest, Annapurna, Mustang and Manaslu with Dreamscape Treks.',
 };
 
+import PageMotion from '@/components/page-motion';
 import {AuthProvider} from '@/context/AuthContext';
 
 export default function RootLayout({
@@ -25,9 +27,8 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>{children}<PageMotion/></AuthProvider>
       </body>
     </html>
   );
 }
-

@@ -1,37 +1,9 @@
 import Link from 'next/link';
-import { MemoryImage } from './trek-memories';
-import { memoryPhoto } from '@/lib/trek-memories';
-
-export default function JournalHero() {
-  return (
-    <section className="memory-hero container">
-      <div className="memory-hero-copy">
-        <p className="eyebrow"><span />THE DREAMSCAPE JOURNAL</p>
-        <h1>Some trails<br />stay <em>with you.</em></h1>
-        <p>The climb is only part of the story. These are the people, places and little moments we brought back from past treks.</p>
-        <div className="button-row">
-          <a href="#journal-stories" className="button green">Explore the stories <span aria-hidden="true">↘</span></a>
-          <a href="#trek-memories" className="text-link">Open the photo archive ↗</a>
-        </div>
-        <div className="memory-hero-note">
-          <span className="memory-note-line" />
-          <span>FROM OUR PAST TREKS<br /><strong>Real photographs. Lasting memories.</strong></span>
-        </div>
-      </div>
-      <div className="memory-hero-visual">
-        <Link className="memory-hero-main" href="/blog/finding-your-own-pace">
-          <MemoryImage photo={memoryPhoto('together-in-the-mountains')} priority />
-          <span className="memory-hero-caption">
-            <span><small>MEMORIES FROM THE TRAIL</small><strong>Better, together.</strong></span>
-            <span className="memory-round-arrow" aria-hidden="true">↗</span>
-          </span>
-        </Link>
-        <figure className="memory-hero-inset">
-          <MemoryImage photo={memoryPhoto('prayer-flags-and-friends')} sizes="240px" />
-          <figcaption>A moment worth keeping.</figcaption>
-        </figure>
-        <span className="memory-vertical-label">NEPAL · BEYOND THE HORIZON</span>
-      </div>
-    </section>
-  );
+import Image from 'next/image';
+import type {Guide} from '@/lib/guides';
+import type {SiteSettings} from '@/lib/site-settings';
+import {memoryPhotos} from '@/lib/trek-memories';
+export default function JournalHero({settings,featured}:{settings:SiteSettings;featured?:Guide}){
+ const cover=featured?.image||memoryPhotos[0].src;
+ return <section className="journal-editorial-hero container"><div className="journal-editorial-heading"><div><p className="eyebrow">THE DREAMSCAPE JOURNAL</p><h1>{settings.journal_title}</h1></div><div><p>{settings.journal_description}</p><a className="text-link" href="#journal-stories">Find your next read <span aria-hidden="true">↘</span></a></div></div><Link className="journal-cover-story" href={featured?`/blog/${featured.slug}`:'#trek-memories'}><Image src={cover} alt="" fill priority sizes="(max-width:1280px) 100vw, 1184px" unoptimized={!featured?.photoIds}/><div className="journal-cover-copy"><span className="journal-cover-label">{featured?'THE FEATURED STORY':'FROM OUR TREK ARCHIVE'}</span><h2>{featured?.title||'The mountains are only the beginning.'}</h2><p>{featured?.excerpt||'Step into our collection of photographs from past treks.'}</p><span className="journal-cover-action">{featured?'Read the story':'Explore the photographs'} <span aria-hidden="true">↗</span></span></div></Link><div className="journal-photo-ribbon" aria-label="A glimpse of the trek archive">{['forest-footsteps','village-street','last-light','prayer-flags-and-friends'].map(id=>{const photo=memoryPhotos.find(p=>p.id===id)!;return <a href="#trek-memories" key={id}><Image src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} sizes="(max-width:600px) 45vw, 25vw"/><span>{photo.title}<span aria-hidden="true">↗</span></span></a>;})}</div></section>;
 }

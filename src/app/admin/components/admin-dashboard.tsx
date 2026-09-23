@@ -2,10 +2,13 @@
 
 import React, {FormEvent, useEffect, useMemo, useState} from 'react';
 import Link from 'next/link';
+import ReviewEditor from './review-editor';
 import {useAuthContext} from '@/context/AuthContext';
 import type {Inquiry, InquiryNote, InquiryStatus} from '@/types/inquiry';
 import type {TravelGuideAdminItem, TravelGuideDetail, GuidePayload} from '@/types/content';
 import AdminLogin from './admin-login';
+import SiteSettingsEditor from './site-settings-editor';
+import DestinationEditor from './destination-editor';
 import styles from '@/app/admin/admin.module.css';
 
 type Tab = 'dashboard' | 'treks' | 'revenue' | 'journal' | 'inquiries' | 'reviews' | 'settings' | 'destinations';
@@ -1000,14 +1003,14 @@ export default function AdminDashboard() {
                   </svg>
                 </div>
                 <div className={styles.statValue}>
-                  {analytics ? analytics.metrics.total_treks : (treks.length > 0 ? treks.length : 24)}
+                  {analytics ? analytics.metrics.total_treks : treks.length}
                 </div>
                 <p className={styles.statSub}>
                   {analytics
                     ? (analytics.metrics.treks_this_month > 0
                         ? `+${analytics.metrics.treks_this_month} this month`
                         : `${analytics.metrics.active_treks} active in catalog`)
-                    : '+2 this month'}
+                    : 'Awaiting analytics'}
                 </p>
               </div>
 
@@ -1031,7 +1034,7 @@ export default function AdminDashboard() {
                   )}
                 </div>
                 <div className={styles.statValue}>
-                  {analytics ? analytics.metrics.new_inquiries : (metrics.new > 0 ? metrics.new : 3)}
+                  {analytics ? analytics.metrics.new_inquiries : metrics.new}
                 </div>
                 <p className={styles.statSub}>
                   {analytics && analytics.metrics.inquiries_last_48h > 0
@@ -1061,7 +1064,7 @@ export default function AdminDashboard() {
                   </svg>
                 </div>
                 <div className={styles.statValue}>
-                  {analytics ? formatNumber(analytics.metrics.active_expeditions) : '08'}
+                  {analytics ? formatNumber(analytics.metrics.active_expeditions) : '—'}
                 </div>
                 <p className={styles.statSub}>currently en route</p>
               </div>
@@ -1082,16 +1085,12 @@ export default function AdminDashboard() {
                   </svg>
                 </div>
                 <div className={styles.statValue}>
-                  {analytics
-                    ? (analytics.metrics.monthly_revenue > 0
-                        ? formatCurrency(analytics.metrics.monthly_revenue)
-                        : (analytics.metrics.total_revenue > 0 ? formatCurrency(analytics.metrics.total_revenue) : '$124k'))
-                    : '$124k'}
+                  {analytics ? formatCurrency(analytics.metrics.monthly_revenue) : '—'}
                 </div>
                 <p className={styles.statSub}>
-                  {analytics && analytics.metrics.mom_growth_percent !== 0
+                  {analytics
                     ? `${analytics.metrics.mom_growth_percent > 0 ? '+' : ''}${analytics.metrics.mom_growth_percent}% MoM`
-                    : '+15% MoM'}
+                    : 'Awaiting analytics'}
                 </p>
               </div>
             </div>
@@ -1323,24 +1322,9 @@ export default function AdminDashboard() {
         )}
 
         {/* Placeholders for other tabs with clean mockups & catalog links */}
-        {(tab === 'reviews' || tab === 'settings' || tab === 'destinations') && (
-          <section className={styles.placeholder}>
-            <span>⌁</span>
-            <h2>{navItems.find(item => item.id === tab)?.label || 'Module Management'}</h2>
-            <p>
-              Administrative control for this section is connected to the master expedition engine.
-              The customer catalog and booking pipelines are actively synchronized.
-            </p>
-            <div style={{display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '20px'}}>
-              <button className={styles.primary} onClick={() => void editGuide()}>
-                + Create record
-              </button>
-              <Link href="/treks" style={{padding: '10px 16px', borderRadius: '8px', border: '1px solid #cddcd2', textDecoration: 'none', color: '#133e2f', fontWeight: 600, fontSize: '13px'}}>
-                View public catalog →
-              </Link>
-            </div>
-          </section>
-        )}
+        {tab === 'settings' && <SiteSettingsEditor/>}
+        {tab === 'destinations' && <DestinationEditor/>}
+        {tab === 'reviews' && <ReviewEditor/>}
       </section>
 
       {/* Inquiry Drawer */}
@@ -1627,6 +1611,7 @@ function GuideEditor({guide, saving, onChange, onClose, onSave, onDelete, onDele
           <div className={styles.blogSectionHeading}><span>01</span><div><h3>Story details</h3><p>The post address is created automatically from the title.</p></div></div>
           <div className={styles.formGrid}>
             <label>Post title<input required value={guide.title} onChange={field('title')} maxLength={180} placeholder="A memorable day above the clouds" /></label>
+            <label>Story introduction<textarea value={guide.summary || ''} onChange={field('summary')} maxLength={500} placeholder="A short invitation to read this story" /></label>
             <label>Category
               <select value={guide.category || 'ADVENTURE'} onChange={field('category')}>
                 <option value="ADVENTURE">Adventure</option>

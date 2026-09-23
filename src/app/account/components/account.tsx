@@ -41,7 +41,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' | 'reset' }) {
           <Link href="/treks" className="text-link">Explore the collection ↗</Link>
         </div>
         <form className="inquiry-form contact-form-panel" onSubmit={submit}>
-          <h2>{mode === 'register' ? 'Create an account' : mode === 'reset' ? 'Reset password' : 'Sign in'}</h2>
+          <h2>{mode === 'register' ? 'Explore journeys' : mode === 'reset' ? 'Reset password' : 'Sign in'}</h2>
           {success ? (
             <p className="form-success" role="status">{success}</p>
           ) : (
@@ -71,7 +71,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' | 'reset' }) {
             {mode === 'reset' && <Link href="/reset-password">I have a reset code</Link>}
             {mode === 'login' ? (
               <>
-                <Link href="/register">Create an account</Link>
+                <Link href="/treks">Create an account</Link>
                 <Link href="/forgot-password">Forgot password?</Link>
               </>
             ) : (
@@ -130,7 +130,7 @@ export default function Account() {
           <div>
             <p className="eyebrow">BEYOND THE HORIZON</p>
             <h1>Your journeys.</h1>
-            <p>{state && !needsLogin ? `Welcome back${state.name ? ', ' + state.name : ''}. Your next chapter starts here.` : 'Your booking references and the details that matter, in one place.'}</p>
+            <p>{state && !needsLogin ? `Welcome back${state.name ? ', ' + state.name : ''}. Your next chapter starts here.` : 'Bookings saved in this browser appear here. No account is needed to book.'}</p>
           </div>
           {state && !needsLogin && <button className="button outline-dark" onClick={() => void logout()}>Sign out</button>}
         </div>

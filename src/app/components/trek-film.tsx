@@ -15,7 +15,19 @@ export default function TrekFilm({ onClose, onExplore }: { onClose: () => void; 
   const [scene, setScene] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [youtube, setYoutube] = useState<{videoId:string;title:string}|null>(null);
   const filmUrl = process.env.NEXT_PUBLIC_TREK_FILM_URL;
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/api/youtube/latest', {signal:controller.signal}).then(r=>r.json()).then(data=>{
+      if(data.status==='ready' && /^[\w-]{11}$/.test(data.videoId)) {
+        setYoutube({videoId:data.videoId,title:data.title||'Dreamscape Treks'});
+        setPlaying(false);
+      }
+    }).catch(()=>{});
+    return ()=>controller.abort();
+  }, []);
 
   useEffect(() => {
     const focus = document.activeElement as HTMLElement;
@@ -51,7 +63,7 @@ export default function TrekFilm({ onClose, onExplore }: { onClose: () => void; 
     >
       <div className="film-shell">
         <button className="film-close" onClick={onClose} aria-label="Close film">×</button>
-        {filmUrl && !videoError ? (
+        {youtube ? <div className="youtube-film"><iframe title={youtube.title} src={`https://www.youtube-nocookie.com/embed/${youtube.videoId}?rel=0`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen/></div> : filmUrl && !videoError ? (
           <video
             className="trek-video"
             controls
@@ -108,6 +120,7 @@ export default function TrekFilm({ onClose, onExplore }: { onClose: () => void; 
         )}
         <div className="film-footer">
           <div>
+            <a className="film-channel" href="https://www.youtube.com/@Dreamscapetreks" target="_blank" rel="noopener noreferrer">Dreamscape channel ↗</a>
             <strong>Your journey begins with a little curiosity.</strong>
             <p>
               {filmUrl && !videoError

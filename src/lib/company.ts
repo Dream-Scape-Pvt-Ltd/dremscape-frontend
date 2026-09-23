@@ -1,5 +1,5 @@
 // Public contact details. WhatsApp is enabled only after the company supplies a number.
-const whatsapp=process.env.NEXT_PUBLIC_COMPANY_WHATSAPP || '';
+const whatsapp=process.env.NEXT_PUBLIC_COMPANY_WHATSAPP || '+977 9761424745';
 const digits=whatsapp.replace(/\D/g,'');
 export const company={
   name:'Dreamscape Treks',
