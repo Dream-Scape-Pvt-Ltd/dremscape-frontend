@@ -4,7 +4,8 @@ import {backend, apiError, noStore, readInput, requiredText, BackendError} from 
 import {projectInquiry} from '@/lib/admin';
 
 type Context = {params: Promise<{reference: string}>};
-const statuses = new Set(['NEW','ASSIGNED','IN_CONTACT','TRAVELING','COMPLETED','CLOSED']);
+const statuses = new Set(['NEW','ASSIGNED','IN_CONTACT','BOOKED','TRAVELING','COMPLETED','CLOSED']);
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const lostReasons = new Set(['PRICE','DATES','COMPETITOR','NO_RESPONSE','NOT_SUITABLE','OTHER']);
 function referenceIsValid(reference: string) { if (!/^[\w-]{1,100}$/.test(reference)) throw new BackendError('Invalid inquiry reference.', 400); }
 
@@ -29,6 +30,17 @@ export async function PATCH(request: Request, {params}: Context) {
         throw new BackendError('Please select a valid lost reason.', 400);
       }
       body.lost_reason = lostReason;
+    }
+    // Booking a lead onto a departure: which batch, and how many people.
+    if ('departure_id' in input) {
+      const departureId = input.departure_id;
+      if (typeof departureId !== 'string' || !uuidPattern.test(departureId)) throw new BackendError('Please select a valid departure.', 400);
+      body.departure_id = departureId;
+    }
+    if ('travelers_count' in input) {
+      const travelers = Number(input.travelers_count);
+      if (!Number.isInteger(travelers) || travelers < 1 || travelers > 500) throw new BackendError('Please enter a valid number of travellers.', 400);
+      body.travelers_count = travelers;
     }
 
     const {headers} = await staffAccess(); const data = await backend(`inquiries/${reference}/`, {method: 'PATCH', headers, body: JSON.stringify(body)});

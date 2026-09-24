@@ -23,3 +23,38 @@
 .waitlist-panel h2{font-size:24px}
 .waitlist-panel>p{font-size:13px;margin-top:12px}
 .waitlist-position{display:inline-block;margin-top:18px;padding:14px 22px;border-radius:10px;border:1px solid #ccd3e6;background:#fff;font-size:20px;font-weight:700;letter-spacing:1px}
+.related-treks{border-top:1px solid #d8dfd6;padding-top:55px;padding-bottom:85px}.trek-layout:has(+.related-treks){padding-bottom:55px}
+.page-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;color:#5f6b61}.page-loading-bar{display:block;width:140px;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#a78246,transparent) #e3e6dc;background-size:60% 100%;background-repeat:no-repeat;animation:page-loading 1.1s ease-in-out infinite}@keyframes page-loading{from{background-position:-100% 0}to{background-position:200% 0}}@media(prefers-reduced-motion:reduce){.page-loading-bar{animation:none;background-position:center}}
+/* Trek page polish: hero, facts, itinerary timeline, inclusions, departures */
+.trek-hero .container{padding-top:190px;padding-bottom:90px}.trek-hero:after{background:linear-gradient(90deg,#0a231de6 0%,#0a231d8c 45%,#0a231d26 100%),linear-gradient(0deg,#0a231dcc,transparent 55%)}
+.trek-hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}.trek-hero-meta span{padding:8px 14px;border:1px solid #ffffff38;border-radius:99px;background:#ffffff14;backdrop-filter:blur(6px);font-size:11px;letter-spacing:.3px;color:#f1ece0}
+.trek-facts{position:relative;z-index:2;margin-top:-38px;padding:26px 30px;background:#fffdf8;border:1px solid #e3e3d6;border-bottom:1px solid #e3e3d6;border-radius:16px;box-shadow:0 18px 40px #15372b12}
+.trek-facts div{display:grid;grid-template-columns:auto 1fr;column-gap:14px;align-items:center}.trek-facts dt{grid-column:2;margin-bottom:4px}.trek-facts dd{grid-column:2}
+.fact-icon{grid-row:1/3;width:40px;height:40px;padding:9px;border-radius:12px;background:#f0ede2;color:#a78246}
+.itinerary-timeline{position:relative}.itinerary-timeline:before{content:'';position:absolute;left:21px;top:28px;bottom:28px;width:1px;background:linear-gradient(#d9ccb0,#d8dfd6)}
+.itinerary-timeline details{position:relative;border-bottom:0;margin-bottom:10px;border-radius:12px;transition:background .2s}.itinerary-timeline details:hover,.itinerary-timeline details[open]{background:#f3f2ea}
+.itinerary-timeline summary{padding:14px 16px 14px 0}.itinerary-timeline .day-number{position:relative;z-index:1;flex-shrink:0;display:grid;place-items:center;width:43px;height:43px;border-radius:50%;background:#fffdf8;border:1px solid #d9ccb0;font-size:16px}
+.itinerary-timeline details[open] .day-number{background:#103b2c;border-color:#103b2c;color:#ead6af}.itinerary-timeline summary small{display:inline-block;margin:6px 0 0;padding:2px 9px;border-radius:99px;background:#efe6d3;color:#86683a}
+.itinerary-timeline details>div{padding:0 20px 20px 61px}.itinerary-plus{transition:transform .2s}
+.inclusion-grid>div{border:1px solid #e1e4d8;background:#fbfaf5}.inclusion-grid h3{display:flex;align-items:center;gap:10px}.inclusion-grid h3:before{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;font-size:13px}
+.inclusion-yes h3:before{content:'✓';background:#e1eee4;color:#2d6a45}.inclusion-no h3:before{content:'✕';background:#f6e6e0;color:#a2503a}
+.inclusion-grid li{list-style:none;position:relative;margin-left:0;padding-left:24px}.inclusion-grid li:before{position:absolute;left:0;top:0;font-weight:700}.inclusion-yes li:before{content:'✓';color:#3d7a54}.inclusion-no li:before{content:'–';color:#a2503a}
+.departure-list>div{grid-template-columns:auto 1fr auto auto;gap:22px;padding:18px 20px;margin-bottom:12px;border:1px solid #e1e4d8;border-radius:14px;background:#fffdf8;transition:border-color .2s,box-shadow .2s}.departure-list>div:hover{border-color:#c9b58c;box-shadow:0 10px 24px #15372b0d}
+.departure-date{display:grid;place-items:center;width:58px;height:62px;border-radius:12px;background:#103b2c;color:#ead6af;font-size:9px;letter-spacing:1.4px;line-height:1.1}.departure-date b{font-family:Georgia,serif;font-size:24px;font-weight:400;letter-spacing:0;color:#fff}
+.departure-list>div[data-state=SOLD_OUT] .departure-date,.departure-list>div[data-state=WAITLIST] .departure-date{background:#8d958b}
+.trek-reserve{border-top:3px solid #a78246}
+@media(max-width:900px){.trek-hero .container{padding-top:130px;padding-bottom:70px}.trek-facts{margin-top:-28px;padding:20px}.fact-icon{width:34px;height:34px;padding:7px}.trek-facts div,.trek-facts div:nth-child(3){padding-left:0;border:0}.trek-reserve{grid-template-columns:1fr}.trek-reserve .button{white-space:nowrap}.departure-list>div{grid-template-columns:auto 1fr auto;gap:14px;padding:16px}.departure-list>div>:last-child{grid-column:1/-1;width:100%;text-align:center}}
+@media(max-width:480px){.trek-facts{grid-template-columns:1fr 1fr;gap:18px}.itinerary-timeline details>div{padding-left:20px}.departure-date{width:50px;height:54px}.departure-date b{font-size:20px}}
+@media(prefers-reduced-motion:reduce){.itinerary-timeline details,.departure-list>div,.itinerary-plus{transition:none}}
+.trek-hero .eyebrow{color:#ead6af;text-shadow:0 1px 8px #0a231d99}
+/* Trek page: altitude profile chart */
+.altitude-profile{border-top:1px solid #d8dfd6;padding-top:55px;padding-bottom:65px;scroll-margin-top:120px}.altitude-profile>p:not(.eyebrow){margin-top:18px;color:#5f6b61;font-size:14px}
+.altitude-chart{margin-top:28px;padding:22px 22px 14px;background:#fffdf8;border:1px solid #e1e4d8;border-radius:16px}
+.altitude-frame{position:relative;width:100%}.altitude-frame svg{display:block;overflow:visible;outline:none}.altitude-frame svg:focus-visible{outline:3px solid #ba9559;outline-offset:6px;border-radius:8px}
+.altitude-grid{stroke:#e6e8df;stroke-width:1}.altitude-axis{fill:#7a8273;font-size:11px;font-variant-numeric:tabular-nums}
+.altitude-line{fill:none;stroke:#1d5a44;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}.altitude-area{fill:#1d5a44;opacity:.1}
+.altitude-dot{fill:#1d5a44;stroke:#fffdf8;stroke-width:2}.altitude-peak-label{fill:#133e2f;font-size:12px;font-weight:700}
+.altitude-crosshair{stroke:#9aa596;stroke-width:1}.altitude-hit{fill:transparent;cursor:crosshair;touch-action:pan-y}
+.altitude-tooltip{position:absolute;transform:translateX(-50%);min-width:150px;max-width:220px;padding:10px 12px;border-radius:10px;background:#102b23;color:#e8efe9;box-shadow:0 10px 24px #0a231d33;pointer-events:none;display:grid;gap:2px}.altitude-tooltip strong{font-size:16px;color:#fff}.altitude-tooltip span{font-size:11px;color:#ead6af}.altitude-tooltip small{font-size:11px;color:#c3d0c7;line-height:1.4}
+.altitude-table{margin-top:10px;font-size:12px}.altitude-table summary{cursor:pointer;padding:8px 0;color:#5f6b61;font-weight:600}.altitude-table table{width:100%;border-collapse:collapse;margin-top:6px}.altitude-table th,.altitude-table td{text-align:left;padding:8px 6px;border-bottom:1px solid #e6e8df}.altitude-table th{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#7a8273}.altitude-table td:last-child,.altitude-table th:last-child{text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:480px){.altitude-chart{padding:14px 10px 8px}}

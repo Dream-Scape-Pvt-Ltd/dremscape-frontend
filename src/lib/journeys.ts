@@ -35,14 +35,31 @@ export async function listJourneys() {
 export async function getJourney(slug:string) {
   if(!/^[\w-]+$/.test(slug)) throw new BackendError('Journey not found.',404);
   if(!backendConfigured()) throw new BackendError('Journey not found.',404);
-  const raw=await backend<Journey & RawTrip>(`trips/${encodeURIComponent(slug)}/`);
+  // The detail serializer caps nested departures at ten, so read the complete
+  // dated list too. Both only need the slug, so fetch them together.
+  const [raw,departures]=await Promise.all([
+    backend<Journey & RawTrip>(`trips/${encodeURIComponent(slug)}/`),
+    allPages<Departure>(`trips/${encodeURIComponent(slug)}/departures/`),
+  ]);
 
   if(!Array.isArray(raw.itinerary_days)||!Array.isArray(raw.departures)) throw new BackendError('The itinerary response is incomplete.');
   for(const key of ['inclusions','exclusions','best_seasons','packing_list'] as const)if(!Array.isArray(raw[key])||!raw[key].every(v=>typeof v==='string'))throw new BackendError('The itinerary response is incomplete.');
   if(typeof raw.overview!=='string')throw new BackendError('The itinerary response is incomplete.');
-  // The detail serializer caps nested departures at ten. Read the complete dated list.
-  const departures=await allPages<Departure>(`trips/${encodeURIComponent(slug)}/departures/`);
   return {journey:{...raw,...normalizeTrip(raw),departures} as Journey,demo:false};
+}
+/**
+ * A few other treks to suggest from a trek's page, same region first. Reads
+ * single small pages rather than the whole catalogue.
+ */
+export async function listRelatedJourneys(current:Trip,limit=3):Promise<Trip[]> {
+  if(!backendConfigured()) return [];
+  const page=(query:string)=>backend<{results:RawTrip[]}>(`trips/?${query}`).then(data=>Array.isArray(data.results)?data.results.map(normalizeTrip):[]);
+  const [sameRegion,others]=await Promise.all([
+    page(`destination=${encodeURIComponent(current.destination_slug)}&page_size=${limit+1}`),
+    page(`page_size=${limit*2+1}`),
+  ]);
+  const seen=new Set([current.slug]);
+  return [...sameRegion,...others].filter(trip=>!seen.has(trip.slug)&&Boolean(seen.add(trip.slug))).slice(0,limit);
 }
 export function upcoming(departure:Departure) {
   return departure.start_date>=new Date().toISOString().slice(0,10) && departure.status!=='CANCELLED';

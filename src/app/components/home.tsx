@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { asset } from '@/lib/assets';
@@ -255,7 +256,7 @@ export default function Home({heroImage,heroAlt,destinations=defaultDestinations
             <Eyebrow>Sacred sanctuaries</Eyebrow>
             <h2>Where Will You Go Beyond The Horizon?</h2>
             <p>From the soaring 8,000-metre giants of the Khumbu to pristine glacial sanctuaries and ancient high valleys, explore the authentic heart of Nepal where legends are carved into stone.</p>
-            <a className="button green compact" href="/destinations">View All Sanctuaries <Icon name="222-78-imgSvg" /></a>
+            <Link className="button green compact" href="/destinations">View All Sanctuaries <Icon name="222-78-imgSvg" /></Link>
           </div>
           <div className="destination-grid">
             {destinations.map((d, i) => (
@@ -276,7 +277,7 @@ export default function Home({heroImage,heroAlt,destinations=defaultDestinations
               <h2>More Than a Trek,<br />It’s a Life Experience<br /><em>Beyond the Horizon.</em></h2>
               <p>We honor high-altitude reverence: unhurried acclimatization curves, respectful village homestays, and elite Sherpa guides whose families have traversed these ridgelines for generations. No rushed itineraries, no compromises on altitude safety.</p>
               <div className="story-values"><span>Local knowledge</span><span>Thoughtful journeys</span><span>Shared adventure</span></div>
-              <a className="button gold" href="/about">Discover Our Story <Icon /></a>
+              <Link className="button gold" href="/about">Discover Our Story <Icon /></Link>
             </div>
             <div className="story-photos">
               <figure>
@@ -297,7 +298,7 @@ export default function Home({heroImage,heroAlt,destinations=defaultDestinations
               <Eyebrow>Handpicked expeditions</Eyebrow>
               <h2>{searched ? 'Find Your Himalayan Journey' : 'Featured Himalayan Journeys'}</h2>
             </div>
-            <a className="text-link" href="/treks">View All Journeys <Icon /></a>
+            <Link className="text-link" href="/treks">View All Journeys <Icon /></Link>
           </div>
           <p className="catalog-note">Journey catalog from Dreamscape Treks.{searched && ` Planning for ${party} · ${season}. Season availability is confirmed by the team.`}</p>
           {loading ? (
@@ -354,7 +355,7 @@ export default function Home({heroImage,heroAlt,destinations=defaultDestinations
             <Eyebrow>The people behind the journeys</Eyebrow>
             <h2>Every Journey Leaves a Story.</h2>
             <p className="review-home-copy">The views bring us here. The experiences we share are what stay with us. Explore published traveller stories, or add a memory of your own.</p>
-            <a href="/reviews" className="button green">Read Traveller Stories ↗</a>
+            <Link href="/reviews" className="button green">Read Traveller Stories ↗</Link>
           </div>
         </section>
 
@@ -364,7 +365,7 @@ export default function Home({heroImage,heroAlt,destinations=defaultDestinations
               <Eyebrow>From our past treks</Eyebrow>
               <h2>Some trails stay with you.</h2>
             </div>
-            <a className="text-link" href="/blog">Explore the journal ↗</a>
+            <Link className="text-link" href="/blog">Explore the journal ↗</Link>
           </div>
           <div className="article-grid">
             {articles.map(article => (
@@ -375,7 +376,7 @@ export default function Home({heroImage,heroAlt,destinations=defaultDestinations
                   <h3>{article.title}</h3>
                   <p className="home-story-excerpt">{article.excerpt}</p>
                   <p className="article-date">{article.date}</p>
-                  <a className="text-link" href={`/blog/${article.slug}`}>Read Story <Icon name="222-465-imgSvg" /></a>
+                  <Link className="text-link" href={`/blog/${article.slug}`}>Read Story <Icon name="222-465-imgSvg" /></Link>
                 </div>
               </article>
             ))}
@@ -389,7 +390,7 @@ export default function Home({heroImage,heroAlt,destinations=defaultDestinations
               <Eyebrow>Himalayan dispatch</Eyebrow>
               <h2>Stories for the<br />Journey Ahead.</h2>
               <p>Make room for a different perspective. Explore field notes, thoughtful journeys and the moments that stay with us.</p>
-              <a className="button gold" href="/blog">Explore the Journal <Icon /></a>
+              <Link className="button gold" href="/blog">Explore the Journal <Icon /></Link>
             </div>
           </div>
         </section>

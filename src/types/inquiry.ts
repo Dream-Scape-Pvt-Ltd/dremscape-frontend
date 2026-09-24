@@ -13,6 +13,7 @@ export type InquiryStatus =
   | 'NEW'
   | 'ASSIGNED'
   | 'IN_CONTACT'
+  | 'BOOKED'
   | 'TRAVELING'
   | 'COMPLETED'
   | 'CLOSED';
@@ -76,6 +77,10 @@ export interface Inquiry extends InquiryPayload {
   first_response_at?: string | null;
   converted_booking_reference?: string | null;
   converted_at?: string | null;
+  /** People on the booked departure, fixed when the lead moves to BOOKED. */
+  travelers_count?: number | null;
+  /** Departure price x travellers, set once the trip completes. */
+  revenue_usd?: string | null;
 }
 
 export interface InquiryNote {
@@ -143,6 +148,23 @@ export interface FunnelData {
   funnel_stages: Array<{status: InquiryStatus; label: string; count: number}>;
   lost_reasons: Record<string, number>;
   avg_days_to_close: number | null;
+}
+
+/** One active trek's slice of the CRM, from /crm/treks/. */
+export interface TrekPipelineRow {
+  id: string;
+  slug: string;
+  title: string;
+  destination_name: string | null;
+  by_status: Record<InquiryStatus, number>;
+  total_leads: number;
+  travelers_completed: number;
+  revenue_usd: string;
+}
+
+export interface TrekPipeline {
+  results: TrekPipelineRow[];
+  total_revenue_usd: string;
 }
 
 export interface CustomerProfile {

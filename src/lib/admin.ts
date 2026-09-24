@@ -6,6 +6,7 @@ const inquiryFields = new Set([
   'message','group_size','preferred_dates','created_at','updated_at','assigned_agent','estimated_budget',
   'inquiry_type','tailor_made_detail',
   'lost_reason','tags','sla_breached','first_response_at','converted_booking_reference','converted_at',
+  'travelers_count','seats_held','revenue_usd',
 ]);
 const departureFields = new Set([
   'id','trip','trip_title','trip_slug','start_date','end_date','price_usd','max_seats','booked_seats',

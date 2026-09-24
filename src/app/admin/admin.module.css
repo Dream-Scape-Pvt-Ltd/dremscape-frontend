@@ -3282,6 +3282,21 @@
 .kanbanCard select { font-size: 10px; padding: 3px 5px; }
 .slaDot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #d64545; margin-right: 5px; }
 
+/* CRM: active-trek landing page */
+.secondary { border: 1px solid #cfdcd4; border-radius: 9px; background: #fff; color: #103b2c; padding: 9px 14px; font-weight: 700; cursor: pointer; }
+.crmBackBtn { background: none; border: 0; padding: 0; margin: 0 0 4px; font-size: 11px; font-weight: 800; color: #74897d; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+.crmTrekGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.crmTrekCard { display: flex; flex-direction: column; gap: 6px; text-align: left; background: #fff; border: 1px solid #e3ebe6; border-radius: 12px; padding: 14px; cursor: pointer; font: inherit; }
+.crmTrekCard:hover { border-color: #103b2c; }
+.crmTrekCard strong { font-size: 14px; color: #133e2f; }
+.crmTrekCard small { font-size: 11px; color: #6d8276; }
+.crmTrekCounts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 6px; }
+.crmTrekCounts span { display: flex; flex-direction: column; align-items: center; background: #f5f7f5; border-radius: 8px; padding: 6px 2px; font-size: 10px; color: #6d8276; }
+.crmTrekCounts b { font-size: 15px; color: #133e2f; }
+.crmTrekRevenue { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid #eef3f0; padding-top: 8px; margin-top: 4px; font-size: 11px; color: #6d8276; }
+.crmTrekRevenue strong { font-size: 15px; }
+.kanbanCard small + small { margin-top: 2px; }
+
 /* CRM: Customer 360 modal */
 .customerStats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 16px 0 22px; }
 .customerStats div { background: #f5f7f5; border-radius: 10px; padding: 12px; }
