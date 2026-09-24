@@ -9,15 +9,21 @@ import './memories.css';
 import './refinements.css';
 import './refined-ui.css';
 import './ui-polish.css';
-import './content-experience.css';
+import './destination-navigation.css';
+import './navigation-refinement.css';
+import './experience.css';
+import './apple-navigation.css';
+import './travel-polish.css';
+import 'photoswipe/style.css';
+import './photo-experience.css';
+import './final-polish.css';
+import './brand-correction.css';
+import PageMotion from '@/components/page-motion';
 
 export const metadata: Metadata = {
   title: 'Dreamscape Treks — Beyond the Horizon',
   description: 'Explore the sacred Himalayas of Nepal. Discover trekking journeys through Everest, Annapurna, Mustang and Manaslu with Dreamscape Treks.',
 };
-
-import PageMotion from '@/components/page-motion';
-import {AuthProvider} from '@/context/AuthContext';
 
 export default function RootLayout({
   children,
@@ -26,9 +32,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <body>
-        <AuthProvider>{children}<PageMotion/></AuthProvider>
-      </body>
+      <body>{children}<PageMotion/></body>
     </html>
   );
 }
+
+import './home-refresh.css';

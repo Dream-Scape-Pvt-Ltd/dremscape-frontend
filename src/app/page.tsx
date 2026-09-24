@@ -1,8 +1,5 @@
+import Home from '@/components/home';
 import {getSiteSettings} from '@/lib/site-settings';
-import Home from './components/home';
 import {listDestinationContent} from '@/lib/destination-content';
 import {listGuides} from '@/lib/guides';
-export default async function Page(){
- const [settings,regions,guides]=await Promise.all([getSiteSettings(),listDestinationContent().catch(()=>[]),listGuides().catch(()=>[])]);
- return <Home heroImage={settings.home_image_url} heroAlt={settings.home_image_alt} destinations={regions.map(r=>({name:r.name,slug:r.slug,image:r.image,tag:r.tag,description:r.highlights}))} articles={guides.slice(0,3).map(g=>({slug:g.slug,title:g.title,image:g.image||'/images/trek-memories/sunlit-summits.jpg',tag:g.category,date:g.reading?`${g.reading} read`:'From the Journal',excerpt:g.excerpt}))}/>;
-}
+export default async function Page(){const [settings,regions,guides]=await Promise.all([getSiteSettings(),listDestinationContent(),listGuides()]);return <Home finderDestinations={settings.home_filter_destinations} finderDifficulties={settings.home_filter_difficulties} finderBudgets={settings.home_filter_budgets} destinationCountries={Object.fromEntries(regions.map(r=>[r.slug,r.country||"NEPAL"]))} heroCaption={settings.home_caption} heroLocation={settings.home_location} heroImage={settings.home_image_url} heroAlt={settings.home_image_alt} destinations={regions.slice(0,3).map(r=>({name:r.name,slug:r.slug,image:r.image,tag:r.tag,description:r.highlights}))} articles={guides.slice(0,3).map(g=>({slug:g.slug,title:g.title,image:g.image,tag:g.category,date:g.reading?`${g.reading} read`:'From the Journal',excerpt:g.excerpt}))}/>;}

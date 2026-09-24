@@ -6,20 +6,3 @@
 @media(prefers-reduced-motion:reduce){.catalogue-grid .trip-card{animation:none}}
 
 .inquiry-form,.inquiry-form label,.inquiry-form input,.inquiry-form textarea{min-width:0}.inquiry-form input,.inquiry-form textarea{max-width:100%}
-
-.trek-gallery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:28px}.trek-gallery-grid img{display:block;width:100%;height:260px;object-fit:cover;border-radius:12px;background:#e4e9df}.trek-gallery-grid img:first-child:nth-last-child(odd){grid-column:1/-1;height:360px}
-@media(max-width:640px){.trek-gallery-grid{grid-template-columns:1fr}.trek-gallery-grid img,.trek-gallery-grid img:first-child:nth-last-child(odd){height:240px;grid-column:auto}}
-
-/* Departure availability — seat pills and closed-batch rows. Status colour is
-   driven by data-seats so it stays in step with the server's availability_state. */
-.departure-list .seat-pill{display:inline-block;margin-top:8px;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.3px;border:1px solid transparent}
-.departure-list .seat-pill[data-seats="AVAILABLE"]{background:#eaf1e6;border-color:#cbdcc2;color:#33613f}
-.departure-list .seat-pill[data-seats="FEW_SEATS_LEFT"]{background:#fdf1df;border-color:#ecd2a2;color:#8a6117}
-.departure-list .seat-pill[data-seats="WAITLIST"]{background:#eef0f7;border-color:#ccd3e6;color:#3f4b7a}
-.departure-list .seat-pill[data-seats="SOLD_OUT"],.departure-list .seat-pill[data-seats="CANCELLED"]{background:#f1f0ee;border-color:#d8d5cf;color:#6d675e}
-.departure-list>div[data-state="SOLD_OUT"],.departure-list>div[data-state="CANCELLED"]{opacity:.68}
-.departure-list .button.disabled{background:#eceae5;color:#77716a;pointer-events:none;box-shadow:none}
-.waitlist-panel{margin-top:25px;padding:26px;border:1px solid #ccd3e6;background:#f6f7fb;border-radius:14px}
-.waitlist-panel h2{font-size:24px}
-.waitlist-panel>p{font-size:13px;margin-top:12px}
-.waitlist-position{display:inline-block;margin-top:18px;padding:14px 22px;border-radius:10px;border:1px solid #ccd3e6;background:#fff;font-size:20px;font-weight:700;letter-spacing:1px}

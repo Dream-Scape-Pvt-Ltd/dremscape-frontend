@@ -2,10 +2,10 @@
 import {useRef,type PointerEvent} from 'react';
 import {motion,useReducedMotion,useSpring} from 'motion/react';
 import {memoryPhoto,type MemoryPhoto} from '@/lib/trek-memories';
-import {MemoryImage} from '@/app/blog/components/trek-memories';
+import {MemoryImage} from '@/components/trek-memories';
 import {usePhotoLightbox} from './photo-lightbox';
 
-const photos=['together-in-the-mountains','prayer-flags-and-friends','last-light'].map(memoryPhoto);
+const photos=['a-pause-on-the-ridge','together-in-the-mountains','last-light'].map(memoryPhoto).map((photo,index)=>index===0?{...photo,src:'/images/trek-memories/home-slide-3.jpg'}:photo);
 function PhotoCard({photo,index}:{photo:MemoryPhoto;index:number}){
   const reduced=useReducedMotion();
   const rotateX=useSpring(0,{stiffness:160,damping:22});
