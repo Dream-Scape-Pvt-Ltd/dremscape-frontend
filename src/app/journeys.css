@@ -1,60 +1,1757 @@
-.journey-page{background:#faf9f5;min-height:75vh}.journey-page h1{font-size:clamp(38px,5.5vw,76px);line-height:1.06;letter-spacing:-.055em}.journey-page h1 em,.journey-page h2 em{font-family:Georgia,serif;font-weight:400;color:#a78246;letter-spacing:-.045em}.journey-page h2{font-size:clamp(27px,3vw,42px);line-height:1.15;letter-spacing:-.035em}.journey-page p{line-height:1.8}.catalog-hero,.trek-hero{position:relative;isolation:isolate;background:#102b23;color:#fff;overflow:hidden}.catalog-hero>img,.trek-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}.catalog-hero:after,.trek-hero:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#0a231dd9,#0a231d50),linear-gradient(0deg,#0a231d90,transparent);z-index:-1}.catalog-hero .container{padding-top:178px;padding-bottom:98px}.catalog-hero h1{max-width:930px}.catalog-hero h1 em{color:#ead6af}.catalog-hero p:not(.eyebrow){margin:24px 0;color:#e0e7dd;font-size:16px}.hero-coordinate{font-size:9px;letter-spacing:2.8px;display:block;margin-top:48px;opacity:.65}.catalog-filter{position:relative;margin-top:-30px;padding:30px;background:#fffffff5;border:1px solid #ece7dc;border-radius:18px;box-shadow:0 15px 45px #16352c09;z-index:5}.catalog-search{display:block;padding-bottom:20px;border-bottom:1px solid #e5e7dc}.catalog-search input{display:block;width:100%;background:none;border:0;padding:10px 0;font-size:20px;outline-offset:5px;color:var(--forest)}.catalog-selects{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:25px;padding-top:20px}.catalog-results .section-heading p:not(.eyebrow){font-size:13px;margin-top:12px}.catalog-sort{width:210px;flex-shrink:0}.sample-notice{border-left:2px solid #b49560;background:#f2ede3;padding:14px 18px;color:#675c48;font-size:12px;margin-bottom:28px}.clear-filters{margin-bottom:24px}.catalogue-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.catalogue-grid .trip-image{height:235px}.journey-location{font-size:9px!important;letter-spacing:1.5px;text-transform:uppercase;color:#777d69;margin:0 0 8px}.trip-no-image small{display:block;text-align:center;font-size:10px;letter-spacing:2px;margin-top:10px;text-transform:uppercase;font-weight:400}.journey-invitation{padding:65px 20px 85px;text-align:center;border-top:1px solid #dfe3d7}.journey-invitation p{max-width:480px;margin:20px auto 28px}.trek-hero .container{padding-top:155px;padding-bottom:75px}.trek-hero h1{max-width:900px;font-size:clamp(38px,5vw,68px)}.trek-hero p:not(.eyebrow){margin-top:25px;color:#dae4db}.trek-hero-plain{background:radial-gradient(ellipse at 80% 90%,#3d5b40,transparent 65%),#0c3026}.breadcrumbs{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;margin-bottom:45px;color:#d0d8ce}.breadcrumbs a:hover{color:#edd0a0}.trek-facts{display:grid;grid-template-columns:repeat(4,1fr);padding:30px 0;border-bottom:1px solid #d8dfd6;gap:20px}.trek-facts div{padding-left:25px;border-left:1px solid #d8dfd6}.trek-facts div:first-child{border:0;padding-left:0}.trek-facts dt{font-size:9px;letter-spacing:1.4px;color:#7a8273;margin-bottom:8px}.trek-facts dd{font-size:19px;font-weight:650}.trek-layout{display:grid;grid-template-columns:minmax(0,1fr) 315px;gap:65px;padding-top:45px;padding-bottom:85px;align-items:start}.trek-story section{scroll-margin-top:120px;margin-bottom:55px}.trek-story section>p:not(.eyebrow){margin-top:25px;color:#5f6b61;font-size:14px}.preserve-lines{white-space:pre-line}.trek-section-nav{display:flex;flex-wrap:wrap;gap:30px;border-bottom:1px solid #d8dfd6;padding:12px 0 20px;margin-bottom:45px;font-size:12px;font-weight:650}.trek-section-nav a:hover{color:#a17b3e}.trek-reserve,.booking-summary{position:sticky;top:118px;border:1px solid #d8dfd6;border-radius:15px;padding:28px;background:#fffdf8;box-shadow:0 12px 30px #15372b07}.trek-reserve .eyebrow{font-size:9px}.reserve-price{font-size:42px;font-weight:700;letter-spacing:-2px;line-height:1.4!important}.reserve-price small{display:block;font-size:11px;letter-spacing:0;font-weight:400;color:#7b8578}.trek-reserve hr,.booking-summary hr{border:0;border-top:1px solid #dce1d6;margin:25px 0}.trek-reserve .button{width:100%;margin-top:15px;font-size:12px}.trek-reserve>small{display:block;text-align:center;font-size:10px;margin-top:20px;color:#7b8578}.outline-dark{border:1px solid #becabf;background:transparent;color:#1b3b2c}.outline-dark:hover{background:#e8ece5}.quiet-panel{padding:24px;background:#f0f2ea;border-radius:10px;margin-top:25px;font-size:13px}.quiet-panel .button,.quiet-panel .text-link{margin-top:18px}.itinerary-list{margin-top:25px}.itinerary-list details{border-bottom:1px solid #d8dfd6}.itinerary-list summary{display:flex;align-items:center;gap:18px;padding:20px 0;cursor:pointer;list-style:none;font-size:14px;font-weight:600}.itinerary-list summary::-webkit-details-marker{display:none}.itinerary-list summary small{display:block;font-size:10px;color:#967c4f;font-weight:400;margin-top:5px}.day-number{font-family:Georgia,serif;font-size:23px;color:#a08658}.itinerary-plus{margin-left:auto;font-size:20px;font-weight:400}.itinerary-list details[open] .itinerary-plus{transform:rotate(45deg)}.itinerary-list details>div{padding:0 0 24px 45px;color:#667263;font-size:13px}.day-meta{margin-top:15px;font-size:11px;color:#8c7957}.inclusion-grid{display:grid;grid-template-columns:1fr 1fr;gap:25px;margin-top:25px}.inclusion-grid>div{background:#f0f2ea;padding:24px;border-radius:12px}.inclusion-grid h3{font-size:15px;margin-bottom:16px}.inclusion-grid li,.packing-list li{margin:12px 0 12px 15px;font-size:13px;line-height:1.7;list-style:disc;color:#65705e}.inclusion-grid p{font-size:13px}.packing-list{margin-top:25px;font-size:14px}.packing-list summary{padding:15px 0;cursor:pointer}.departure-list{margin-top:25px}.departure-list>div{display:grid;grid-template-columns:1fr auto auto;gap:20px;padding:25px 0;border-bottom:1px solid #d8dfd6;align-items:center;font-size:13px}.departure-list p{font-size:11px}.departure-list small{display:block;color:#7c8778;font-size:10px;margin-top:6px}.departure-list .button{font-size:11px;padding:12px 16px;min-height:40px}.utility-page{padding-top:150px;padding-bottom:90px;min-height:65vh}.utility-page>.text-link{display:inline-block;margin-bottom:25px}.utility-page>p{max-width:700px;margin:22px 0}.utility-page.status{margin-top:0;background:#f4f4eb;border-radius:0;padding-inline:25px}.journey-page:has(.utility-page),.journey-page:has(.contact-intro){border-top:88px solid #123528}.utility-page{padding-top:70px}.contact-intro{display:grid;grid-template-columns:1fr 1fr;gap:70px;padding-top:70px;padding-bottom:90px;align-items:start}.contact-intro h1,.auth-layout h1{font-size:clamp(36px,4vw,56px)}.contact-intro>div>p:not(.eyebrow),.auth-layout>div>p:not(.eyebrow){margin:24px 0;max-width:450px;font-size:14px}.contact-photo{position:relative;height:280px;border-radius:14px;overflow:hidden;margin-top:35px}.contact-photo>img{width:100%;height:100%;object-fit:cover}.contact-photo:after{content:'';position:absolute;inset:0;background:linear-gradient(transparent,#102b23af)}.contact-photo>span{position:absolute;bottom:25px;left:25px;color:white;z-index:1;font-family:Georgia,serif;font-size:29px}.contact-photo small{font-family:inherit;font-size:12px}.contact-form-panel{background:#fffdf9;border:1px solid #e1e3d8;border-radius:18px;padding:32px;box-shadow:0 15px 40px #19332205}.contact-form-panel h2{font-size:28px;margin-bottom:12px}.inquiry-form fieldset{border:0;padding:0;min-width:0;display:grid;gap:20px}.form-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.inquiry-form label small{font-size:10px;font-weight:400;color:#788575}.inquiry-form textarea{resize:vertical}.form-footnote{font-size:10px;color:#7b8578;line-height:1.6}.auth-layout{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}.auth-links{display:flex;justify-content:space-between;flex-wrap:wrap;gap:15px;font-size:12px}.auth-links a{border-bottom:1px solid #d8dfd6}.account-bookings{display:grid;grid-template-columns:1fr 1fr;gap:25px}.account-bookings article{border:1px solid #d8dfd6;border-radius:15px;padding:30px;background:#fffdf9}.account-bookings article h2{font-size:24px}.account-bookings article>p{font-size:12px;margin:12px 0 25px}.account-bookings dl{margin-bottom:20px}.account-bookings dl>div,.booking-summary dl>div,.receipt dl>div{display:flex;justify-content:space-between;gap:20px;padding:12px 0;border-bottom:1px solid #e3e5da;font-size:12px}.account-bookings dd,.booking-summary dd,.receipt dd{font-weight:700;text-align:right}.booking-kicker{margin-top:20px!important}.booking-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:60px;align-items:start;margin-top:45px}.booking-form{background:#fffdf9;border:1px solid #dce0d4;padding:32px;border-radius:15px}.booking-step{display:flex;align-items:center;gap:16px;padding-top:10px}.booking-step:not(:first-child){border-top:1px solid #dce0d4;margin-top:20px;padding-top:30px}.booking-step span{font-family:Georgia,serif;font-size:22px;color:#ab8b52}.booking-step h2{font-size:24px}.booking-form p{font-size:12px}.booking-form p a{text-decoration:underline}.booking-form .traveller-fields{padding:22px;border:1px solid #dce0d4;border-radius:10px}.traveller-fields legend,.payment-options legend{font-size:12px;font-weight:700;padding:0 8px}.booking-form .payment-options{display:flex;flex-direction:column;gap:12px;padding-top:15px}.payment-options label,.consent{display:flex!important;align-items:start;gap:10px;font-size:12px!important;line-height:1.7}.inquiry-form .payment-options input,.inquiry-form .consent input{width:16px;min-width:16px;height:16px;margin-top:3px;accent-color:#214a32}.booking-summary h2{font-size:26px}.booking-summary>p{font-size:13px;margin-top:20px}.booking-summary small{display:block;font-size:10px;line-height:1.7;margin-top:20px;color:#7b8578}.booking-summary .text-link{display:inline-block;margin-top:25px}.receipt{max-width:780px}.receipt h1{font-size:50px}.receipt .receipt-reference{display:inline-block;font-size:22px;font-weight:600;letter-spacing:2px;border:1px solid #c8d2c5;background:#f0f3e9;padding:16px 24px;border-radius:10px}.receipt h2{font-size:25px}.receipt dl{margin:30px 0}.receipt>small{display:block;margin-top:20px;font-size:11px;color:#7b8578}.button:disabled{opacity:.55;cursor:not-allowed}.journey-page a:focus-visible,.journey-page summary:focus-visible{outline:3px solid #ba9559;outline-offset:5px}.journey-page .form-error{overflow-wrap:anywhere}
-@media(min-width:901px){.catalogue-grid .trip-card{animation:journey-enter .5s ease both}.catalogue-grid .trip-card:nth-child(2){animation-delay:.06s}.catalogue-grid .trip-card:nth-child(3){animation-delay:.12s}}@keyframes journey-enter{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:1050px){.trek-layout{gap:30px;grid-template-columns:minmax(0,1fr) 280px}.booking-layout{gap:30px;grid-template-columns:minmax(0,1fr) 290px}.catalogue-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.contact-intro,.auth-layout{gap:35px}}
-@media(max-width:900px){.catalog-hero .container{padding-top:145px;padding-bottom:75px}.catalog-hero p:not(.eyebrow){font-size:13px}.hero-coordinate{font-size:8px;letter-spacing:1.5px;margin-top:30px}.catalog-filter{padding:22px}.catalog-selects{grid-template-columns:1fr;gap:15px}.catalog-search input{font-size:15px}.catalog-results .section-heading{align-items:start;flex-direction:column}.catalog-sort{width:100%}.catalogue-grid{gap:16px}.catalogue-grid .trip-image{height:180px}.trek-hero .container{padding-top:125px;padding-bottom:50px}.breadcrumbs{margin-bottom:30px;font-size:10px}.trek-facts{grid-template-columns:1fr 1fr;gap:25px}.trek-facts div:nth-child(3){border:0;padding-left:0}.trek-facts dd{font-size:16px}.trek-facts dt{font-size:8px}.trek-layout,.booking-layout{grid-template-columns:1fr;gap:25px}.trek-reserve,.booking-summary{position:static;order:-1}.trek-reserve{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:24px}.trek-reserve .eyebrow,.trek-reserve>p:not(.reserve-price),.trek-reserve>small,.trek-reserve hr{display:none}.trek-reserve .reserve-price{grid-column:1/-1;font-size:34px}.trek-reserve .button{margin:0}.trek-section-nav{gap:20px;font-size:11px}.contact-intro,.auth-layout{grid-template-columns:1fr;padding-top:40px;gap:30px}.contact-photo{height:210px}.contact-form-panel{padding:25px}.form-columns{gap:15px}.account-bookings{grid-template-columns:1fr}.utility-page{padding-top:45px;padding-bottom:60px}.booking-form{padding:22px}.booking-summary h2{font-size:24px}.receipt h1{font-size:37px}.departure-list>div{gap:12px}.departure-list .button{padding:10px;font-size:10px}.journey-invitation{padding-top:45px;padding-bottom:55px}}
-@media(max-width:480px){.catalogue-grid,.inclusion-grid,.form-columns{grid-template-columns:1fr}.catalogue-grid .trip-image{height:230px}.catalog-hero h1{font-size:40px}.contact-intro h1{font-size:38px}.catalogue-grid .trip-content h3{font-size:18px}.booking-form .traveller-fields{padding:16px}.departure-list>div{grid-template-columns:1fr auto}.departure-list .button{grid-column:1/-1}.trek-section-nav{gap:18px}.trek-facts dt{letter-spacing:.5px}.receipt .receipt-reference{font-size:18px;letter-spacing:1px}}
-@media(prefers-reduced-motion:reduce){.catalogue-grid .trip-card{animation:none}}
+.journey-page {
+   background: #faf9f5;
+   min-height: 75vh
+}
 
-.inquiry-form,.inquiry-form label,.inquiry-form input,.inquiry-form textarea{min-width:0}.inquiry-form input,.inquiry-form textarea{max-width:100%}
+.journey-page h1 {
+   font-size: clamp(38px, 5.5vw, 76px);
+   line-height: 1.06;
+   letter-spacing: -.055em
+}
 
-.trek-gallery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:28px}.trek-gallery-grid img{display:block;width:100%;height:260px;object-fit:cover;border-radius:12px;background:#e4e9df}.trek-gallery-grid img:first-child:nth-last-child(odd){grid-column:1/-1;height:360px}
-@media(max-width:640px){.trek-gallery-grid{grid-template-columns:1fr}.trek-gallery-grid img,.trek-gallery-grid img:first-child:nth-last-child(odd){height:240px;grid-column:auto}}
+.journey-page h1 em,
+.journey-page h2 em {
+   font-family: Georgia, serif;
+   font-weight: 400;
+   color: #a78246;
+   letter-spacing: -.045em
+}
+
+.journey-page h2 {
+   font-size: clamp(27px, 3vw, 42px);
+   line-height: 1.15;
+   letter-spacing: -.035em
+}
+
+.journey-page p {
+   line-height: 1.8
+}
+
+.catalog-hero,
+.trek-hero {
+   position: relative;
+   isolation: isolate;
+   background: #102b23;
+   color: #fff;
+   overflow: hidden
+}
+
+.catalog-hero>img,
+.trek-hero>img {
+   position: absolute;
+   inset: 0;
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+   z-index: -2
+}
+
+.catalog-hero:after,
+.trek-hero:after {
+   content: '';
+   position: absolute;
+   inset: 0;
+   background: linear-gradient(90deg, #0a231dd9, #0a231d50), linear-gradient(0deg, #0a231d90, transparent);
+   z-index: -1
+}
+
+.catalog-hero .container {
+   padding-top: 178px;
+   padding-bottom: 98px
+}
+
+.catalog-hero h1 {
+   max-width: 930px
+}
+
+.catalog-hero h1 em {
+   color: #ead6af
+}
+
+.catalog-hero p:not(.eyebrow) {
+   margin: 24px 0;
+   color: #e0e7dd;
+   font-size: 16px
+}
+
+.hero-coordinate {
+   font-size: 9px;
+   letter-spacing: 2.8px;
+   display: block;
+   margin-top: 48px;
+   opacity: .65
+}
+
+.catalog-filter {
+   position: relative;
+   margin-top: -30px;
+   padding: 30px;
+   background: #fffffff5;
+   border: 1px solid #ece7dc;
+   border-radius: 18px;
+   box-shadow: 0 15px 45px #16352c09;
+   z-index: 5
+}
+
+.catalog-search {
+   display: block;
+   padding-bottom: 20px;
+   border-bottom: 1px solid #e5e7dc
+}
+
+.catalog-search input {
+   display: block;
+   width: 100%;
+   background: none;
+   border: 0;
+   padding: 10px 0;
+   font-size: 20px;
+   outline-offset: 5px;
+   color: var(--forest)
+}
+
+.catalog-selects {
+   display: grid;
+   grid-template-columns: repeat(3, minmax(0, 1fr));
+   gap: 25px;
+   padding-top: 20px
+}
+
+.catalog-results .section-heading p:not(.eyebrow) {
+   font-size: 13px;
+   margin-top: 12px
+}
+
+.catalog-sort {
+   width: 210px;
+   flex-shrink: 0
+}
+
+.sample-notice {
+   border-left: 2px solid #b49560;
+   background: #f2ede3;
+   padding: 14px 18px;
+   color: #675c48;
+   font-size: 12px;
+   margin-bottom: 28px
+}
+
+.clear-filters {
+   margin-bottom: 24px
+}
+
+.catalogue-grid {
+   grid-template-columns: repeat(3, minmax(0, 1fr))
+}
+
+.catalogue-grid .trip-image {
+   height: 235px
+}
+
+.journey-location {
+   font-size: 9px !important;
+   letter-spacing: 1.5px;
+   text-transform: uppercase;
+   color: #777d69;
+   margin: 0 0 8px
+}
+
+.trip-no-image small {
+   display: block;
+   text-align: center;
+   font-size: 10px;
+   letter-spacing: 2px;
+   margin-top: 10px;
+   text-transform: uppercase;
+   font-weight: 400
+}
+
+.journey-invitation {
+   padding: 65px 20px 85px;
+   text-align: center;
+   border-top: 1px solid #dfe3d7
+}
+
+.journey-invitation p {
+   max-width: 480px;
+   margin: 20px auto 28px
+}
+
+.trek-hero .container {
+   padding-top: 155px;
+   padding-bottom: 75px
+}
+
+.trek-hero h1 {
+   max-width: 900px;
+   font-size: clamp(38px, 5vw, 68px)
+}
+
+.trek-hero p:not(.eyebrow) {
+   margin-top: 25px;
+   color: #dae4db
+}
+
+.trek-hero-plain {
+   background: radial-gradient(ellipse at 80% 90%, #3d5b40, transparent 65%), #0c3026
+}
+
+.breadcrumbs {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 10px;
+   font-size: 11px;
+   margin-bottom: 45px;
+   color: #d0d8ce
+}
+
+.breadcrumbs a:hover {
+   color: #edd0a0
+}
+
+.trek-facts {
+   display: grid;
+   grid-template-columns: repeat(4, 1fr);
+   padding: 30px 0;
+   border-bottom: 1px solid #d8dfd6;
+   gap: 20px
+}
+
+.trek-facts div {
+   padding-left: 25px;
+   border-left: 1px solid #d8dfd6
+}
+
+.trek-facts div:first-child {
+   border: 0;
+   padding-left: 0
+}
+
+.trek-facts dt {
+   font-size: 9px;
+   letter-spacing: 1.4px;
+   color: #7a8273;
+   margin-bottom: 8px
+}
+
+.trek-facts dd {
+   font-size: 19px;
+   font-weight: 650
+}
+
+.trek-layout {
+   display: grid;
+   grid-template-columns: minmax(0, 1fr) 315px;
+   gap: 65px;
+   padding-top: 45px;
+   padding-bottom: 85px;
+   align-items: start
+}
+
+.trek-story section {
+   scroll-margin-top: 120px;
+   margin-bottom: 55px
+}
+
+.trek-story section>p:not(.eyebrow) {
+   margin-top: 25px;
+   color: #5f6b61;
+   font-size: 14px
+}
+
+.preserve-lines {
+   white-space: pre-line
+}
+
+.trek-section-nav {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 30px;
+   border-bottom: 1px solid #d8dfd6;
+   padding: 12px 0 20px;
+   margin-bottom: 45px;
+   font-size: 12px;
+   font-weight: 650
+}
+
+.trek-section-nav a:hover {
+   color: #a17b3e
+}
+
+.trek-reserve,
+.booking-summary {
+   position: sticky;
+   top: 118px;
+   border: 1px solid #d8dfd6;
+   border-radius: 15px;
+   padding: 28px;
+   background: #fffdf8;
+   box-shadow: 0 12px 30px #15372b07
+}
+
+.trek-reserve .eyebrow {
+   font-size: 9px
+}
+
+.reserve-price {
+   font-size: 42px;
+   font-weight: 700;
+   letter-spacing: -2px;
+   line-height: 1.4 !important
+}
+
+.reserve-price small {
+   display: block;
+   font-size: 11px;
+   letter-spacing: 0;
+   font-weight: 400;
+   color: #7b8578
+}
+
+.trek-reserve hr,
+.booking-summary hr {
+   border: 0;
+   border-top: 1px solid #dce1d6;
+   margin: 25px 0
+}
+
+.trek-reserve .button {
+   width: 100%;
+   margin-top: 15px;
+   font-size: 12px
+}
+
+.trek-reserve>small {
+   display: block;
+   text-align: center;
+   font-size: 10px;
+   margin-top: 20px;
+   color: #7b8578
+}
+
+.outline-dark {
+   border: 1px solid #becabf;
+   background: transparent;
+   color: #1b3b2c
+}
+
+.outline-dark:hover {
+   background: #e8ece5
+}
+
+.quiet-panel {
+   padding: 24px;
+   background: #f0f2ea;
+   border-radius: 10px;
+   margin-top: 25px;
+   font-size: 13px
+}
+
+.quiet-panel .button,
+.quiet-panel .text-link {
+   margin-top: 18px
+}
+
+.itinerary-list {
+   margin-top: 25px
+}
+
+.itinerary-list details {
+   border-bottom: 1px solid #d8dfd6
+}
+
+.itinerary-list summary {
+   display: flex;
+   align-items: center;
+   gap: 18px;
+   padding: 20px 0;
+   cursor: pointer;
+   list-style: none;
+   font-size: 14px;
+   font-weight: 600
+}
+
+.itinerary-list summary::-webkit-details-marker {
+   display: none
+}
+
+.itinerary-list summary small {
+   display: block;
+   font-size: 10px;
+   color: #967c4f;
+   font-weight: 400;
+   margin-top: 5px
+}
+
+.day-number {
+   font-family: Georgia, serif;
+   font-size: 23px;
+   color: #a08658
+}
+
+.itinerary-plus {
+   margin-left: auto;
+   font-size: 20px;
+   font-weight: 400
+}
+
+.itinerary-list details[open] .itinerary-plus {
+   transform: rotate(45deg)
+}
+
+.itinerary-list details>div {
+   padding: 0 0 24px 45px;
+   color: #667263;
+   font-size: 13px
+}
+
+.day-meta {
+   margin-top: 15px;
+   font-size: 11px;
+   color: #8c7957
+}
+
+.inclusion-grid {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 25px;
+   margin-top: 25px
+}
+
+.inclusion-grid>div {
+   background: #f0f2ea;
+   padding: 24px;
+   border-radius: 12px
+}
+
+.inclusion-grid h3 {
+   font-size: 15px;
+   margin-bottom: 16px
+}
+
+.inclusion-grid li,
+.packing-list li {
+   margin: 12px 0 12px 15px;
+   font-size: 13px;
+   line-height: 1.7;
+   list-style: disc;
+   color: #65705e
+}
+
+.inclusion-grid p {
+   font-size: 13px
+}
+
+.packing-list {
+   margin-top: 25px;
+   font-size: 14px
+}
+
+.packing-list summary {
+   padding: 15px 0;
+   cursor: pointer
+}
+
+.departure-list {
+   margin-top: 25px
+}
+
+.departure-list>div {
+   display: grid;
+   grid-template-columns: 1fr auto auto;
+   gap: 20px;
+   padding: 25px 0;
+   border-bottom: 1px solid #d8dfd6;
+   align-items: center;
+   font-size: 13px
+}
+
+.departure-list p {
+   font-size: 11px
+}
+
+.departure-list small {
+   display: block;
+   color: #7c8778;
+   font-size: 10px;
+   margin-top: 6px
+}
+
+.departure-list .button {
+   font-size: 11px;
+   padding: 12px 16px;
+   min-height: 40px
+}
+
+.utility-page {
+   padding-top: 150px;
+   padding-bottom: 90px;
+   min-height: 65vh
+}
+
+.utility-page>.text-link {
+   display: inline-block;
+   margin-bottom: 25px
+}
+
+.utility-page>p {
+   max-width: 700px;
+   margin: 22px 0
+}
+
+.utility-page.status {
+   margin-top: 0;
+   background: #f4f4eb;
+   border-radius: 0;
+   padding-inline: 25px
+}
+
+.journey-page:has(.utility-page),
+.journey-page:has(.contact-intro) {
+   border-top: 88px solid #123528
+}
+
+.utility-page {
+   padding-top: 70px
+}
+
+.contact-intro {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 70px;
+   padding-top: 70px;
+   padding-bottom: 90px;
+   align-items: start
+}
+
+.contact-intro h1,
+.auth-layout h1 {
+   font-size: clamp(36px, 4vw, 56px)
+}
+
+.contact-intro>div>p:not(.eyebrow),
+.auth-layout>div>p:not(.eyebrow) {
+   margin: 24px 0;
+   max-width: 450px;
+   font-size: 14px
+}
+
+.contact-photo {
+   position: relative;
+   height: 280px;
+   border-radius: 14px;
+   overflow: hidden;
+   margin-top: 35px
+}
+
+.contact-photo>img {
+   width: 100%;
+   height: 100%;
+   object-fit: cover
+}
+
+.contact-photo:after {
+   content: '';
+   position: absolute;
+   inset: 0;
+   background: linear-gradient(transparent, #102b23af)
+}
+
+.contact-photo>span {
+   position: absolute;
+   bottom: 25px;
+   left: 25px;
+   color: white;
+   z-index: 1;
+   font-family: Georgia, serif;
+   font-size: 29px
+}
+
+.contact-photo small {
+   font-family: inherit;
+   font-size: 12px
+}
+
+.contact-form-panel {
+   background: #fffdf9;
+   border: 1px solid #e1e3d8;
+   border-radius: 18px;
+   padding: 32px;
+   box-shadow: 0 15px 40px #19332205
+}
+
+.contact-form-panel h2 {
+   font-size: 28px;
+   margin-bottom: 12px
+}
+
+.inquiry-form fieldset {
+   border: 0;
+   padding: 0;
+   min-width: 0;
+   display: grid;
+   gap: 20px
+}
+
+.form-columns {
+   display: grid;
+   grid-template-columns: repeat(2, minmax(0, 1fr));
+   gap: 18px
+}
+
+.inquiry-form label small {
+   font-size: 10px;
+   font-weight: 400;
+   color: #788575
+}
+
+.inquiry-form textarea {
+   resize: vertical
+}
+
+.form-footnote {
+   font-size: 10px;
+   color: #7b8578;
+   line-height: 1.6
+}
+
+.auth-layout {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 80px;
+   align-items: start
+}
+
+.auth-links {
+   display: flex;
+   justify-content: space-between;
+   flex-wrap: wrap;
+   gap: 15px;
+   font-size: 12px
+}
+
+.auth-links a {
+   border-bottom: 1px solid #d8dfd6
+}
+
+.account-bookings {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 25px
+}
+
+.account-bookings article {
+   border: 1px solid #d8dfd6;
+   border-radius: 15px;
+   padding: 30px;
+   background: #fffdf9
+}
+
+.account-bookings article h2 {
+   font-size: 24px
+}
+
+.account-bookings article>p {
+   font-size: 12px;
+   margin: 12px 0 25px
+}
+
+.account-bookings dl {
+   margin-bottom: 20px
+}
+
+.account-bookings dl>div,
+.booking-summary dl>div,
+.receipt dl>div {
+   display: flex;
+   justify-content: space-between;
+   gap: 20px;
+   padding: 12px 0;
+   border-bottom: 1px solid #e3e5da;
+   font-size: 12px
+}
+
+.account-bookings dd,
+.booking-summary dd,
+.receipt dd {
+   font-weight: 700;
+   text-align: right
+}
+
+.booking-kicker {
+   margin-top: 20px !important
+}
+
+.booking-layout {
+   display: grid;
+   grid-template-columns: minmax(0, 1fr) 330px;
+   gap: 60px;
+   align-items: start;
+   margin-top: 45px
+}
+
+.booking-form {
+   background: #fffdf9;
+   border: 1px solid #dce0d4;
+   padding: 32px;
+   border-radius: 15px
+}
+
+.booking-step {
+   display: flex;
+   align-items: center;
+   gap: 16px;
+   padding-top: 10px
+}
+
+.booking-step:not(:first-child) {
+   border-top: 1px solid #dce0d4;
+   margin-top: 20px;
+   padding-top: 30px
+}
+
+.booking-step span {
+   font-family: Georgia, serif;
+   font-size: 22px;
+   color: #ab8b52
+}
+
+.booking-step h2 {
+   font-size: 24px
+}
+
+.booking-form p {
+   font-size: 12px
+}
+
+.booking-form p a {
+   text-decoration: underline
+}
+
+.booking-form .traveller-fields {
+   padding: 22px;
+   border: 1px solid #dce0d4;
+   border-radius: 10px
+}
+
+.traveller-fields legend,
+.payment-options legend {
+   font-size: 12px;
+   font-weight: 700;
+   padding: 0 8px
+}
+
+.booking-form .payment-options {
+   display: flex;
+   flex-direction: column;
+   gap: 12px;
+   padding-top: 15px
+}
+
+.payment-options label,
+.consent {
+   display: flex !important;
+   align-items: start;
+   gap: 10px;
+   font-size: 12px !important;
+   line-height: 1.7
+}
+
+.inquiry-form .payment-options input,
+.inquiry-form .consent input {
+   width: 16px;
+   min-width: 16px;
+   height: 16px;
+   margin-top: 3px;
+   accent-color: #214a32
+}
+
+.booking-summary h2 {
+   font-size: 26px
+}
+
+.booking-summary>p {
+   font-size: 13px;
+   margin-top: 20px
+}
+
+.booking-summary small {
+   display: block;
+   font-size: 10px;
+   line-height: 1.7;
+   margin-top: 20px;
+   color: #7b8578
+}
+
+.booking-summary .text-link {
+   display: inline-block;
+   margin-top: 25px
+}
+
+.receipt {
+   max-width: 780px
+}
+
+.receipt h1 {
+   font-size: 50px
+}
+
+.receipt .receipt-reference {
+   display: inline-block;
+   font-size: 22px;
+   font-weight: 600;
+   letter-spacing: 2px;
+   border: 1px solid #c8d2c5;
+   background: #f0f3e9;
+   padding: 16px 24px;
+   border-radius: 10px
+}
+
+.receipt h2 {
+   font-size: 25px
+}
+
+.receipt dl {
+   margin: 30px 0
+}
+
+.receipt>small {
+   display: block;
+   margin-top: 20px;
+   font-size: 11px;
+   color: #7b8578
+}
+
+.button:disabled {
+   opacity: .55;
+   cursor: not-allowed
+}
+
+.journey-page a:focus-visible,
+.journey-page summary:focus-visible {
+   outline: 3px solid #ba9559;
+   outline-offset: 5px
+}
+
+.journey-page .form-error {
+   overflow-wrap: anywhere
+}
+
+@media(min-width:901px) {
+   .catalogue-grid .trip-card {
+      animation: journey-enter .5s ease both
+   }
+
+   .catalogue-grid .trip-card:nth-child(2) {
+      animation-delay: .06s
+   }
+
+   .catalogue-grid .trip-card:nth-child(3) {
+      animation-delay: .12s
+   }
+}
+
+@keyframes journey-enter {
+   from {
+      opacity: 0;
+      transform: translateY(15px)
+   }
+
+   to {
+      opacity: 1;
+      transform: translateY(0)
+   }
+}
+
+@media(max-width:1050px) {
+   .trek-layout {
+      gap: 30px;
+      grid-template-columns: minmax(0, 1fr) 280px
+   }
+
+   .booking-layout {
+      gap: 30px;
+      grid-template-columns: minmax(0, 1fr) 290px
+   }
+
+   .catalogue-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+   }
+
+   .contact-intro,
+   .auth-layout {
+      gap: 35px
+   }
+}
+
+@media(max-width:900px) {
+   .catalog-hero .container {
+      padding-top: 145px;
+      padding-bottom: 75px
+   }
+
+   .catalog-hero p:not(.eyebrow) {
+      font-size: 13px
+   }
+
+   .hero-coordinate {
+      font-size: 8px;
+      letter-spacing: 1.5px;
+      margin-top: 30px
+   }
+
+   .catalog-filter {
+      padding: 22px
+   }
+
+   .catalog-selects {
+      grid-template-columns: 1fr;
+      gap: 15px
+   }
+
+   .catalog-search input {
+      font-size: 15px
+   }
+
+   .catalog-results .section-heading {
+      align-items: start;
+      flex-direction: column
+   }
+
+   .catalog-sort {
+      width: 100%
+   }
+
+   .catalogue-grid {
+      gap: 16px
+   }
+
+   .catalogue-grid .trip-image {
+      height: 180px
+   }
+
+   .trek-hero .container {
+      padding-top: 125px;
+      padding-bottom: 50px
+   }
+
+   .breadcrumbs {
+      margin-bottom: 30px;
+      font-size: 10px
+   }
+
+   .trek-facts {
+      grid-template-columns: 1fr 1fr;
+      gap: 25px
+   }
+
+   .trek-facts div:nth-child(3) {
+      border: 0;
+      padding-left: 0
+   }
+
+   .trek-facts dd {
+      font-size: 16px
+   }
+
+   .trek-facts dt {
+      font-size: 8px
+   }
+
+   .trek-layout,
+   .booking-layout {
+      grid-template-columns: 1fr;
+      gap: 25px
+   }
+
+   .trek-reserve,
+   .booking-summary {
+      position: static;
+      order: -1
+   }
+
+   .trek-reserve {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 24px
+   }
+
+   .trek-reserve .eyebrow,
+   .trek-reserve>p:not(.reserve-price),
+   .trek-reserve>small,
+   .trek-reserve hr {
+      display: none
+   }
+
+   .trek-reserve .reserve-price {
+      grid-column: 1/-1;
+      font-size: 34px
+   }
+
+   .trek-reserve .button {
+      margin: 0
+   }
+
+   .trek-section-nav {
+      gap: 20px;
+      font-size: 11px
+   }
+
+   .contact-intro,
+   .auth-layout {
+      grid-template-columns: 1fr;
+      padding-top: 40px;
+      gap: 30px
+   }
+
+   .contact-photo {
+      height: 210px
+   }
+
+   .contact-form-panel {
+      padding: 25px
+   }
+
+   .form-columns {
+      gap: 15px
+   }
+
+   .account-bookings {
+      grid-template-columns: 1fr
+   }
+
+   .utility-page {
+      padding-top: 45px;
+      padding-bottom: 60px
+   }
+
+   .booking-form {
+      padding: 22px
+   }
+
+   .booking-summary h2 {
+      font-size: 24px
+   }
+
+   .receipt h1 {
+      font-size: 37px
+   }
+
+   .departure-list>div {
+      gap: 12px
+   }
+
+   .departure-list .button {
+      padding: 10px;
+      font-size: 10px
+   }
+
+   .journey-invitation {
+      padding-top: 45px;
+      padding-bottom: 55px
+   }
+}
+
+@media(max-width:480px) {
+
+   .catalogue-grid,
+   .inclusion-grid,
+   .form-columns {
+      grid-template-columns: 1fr
+   }
+
+   .catalogue-grid .trip-image {
+      height: 230px
+   }
+
+   .catalog-hero h1 {
+      font-size: 40px
+   }
+
+   .contact-intro h1 {
+      font-size: 38px
+   }
+
+   .catalogue-grid .trip-content h3 {
+      font-size: 18px
+   }
+
+   .booking-form .traveller-fields {
+      padding: 16px
+   }
+
+   .departure-list>div {
+      grid-template-columns: 1fr auto
+   }
+
+   .departure-list .button {
+      grid-column: 1/-1
+   }
+
+   .trek-section-nav {
+      gap: 18px
+   }
+
+   .trek-facts dt {
+      letter-spacing: .5px
+   }
+
+   .receipt .receipt-reference {
+      font-size: 18px;
+      letter-spacing: 1px
+   }
+}
+
+@media(prefers-reduced-motion:reduce) {
+   .catalogue-grid .trip-card {
+      animation: none
+   }
+}
+
+.inquiry-form,
+.inquiry-form label,
+.inquiry-form input,
+.inquiry-form textarea {
+   min-width: 0
+}
+
+.inquiry-form input,
+.inquiry-form textarea {
+   max-width: 100%
+}
+
+.trek-gallery-grid {
+   display: grid;
+   grid-template-columns: repeat(2, minmax(0, 1fr));
+   gap: 14px;
+   margin-top: 28px
+}
+
+.trek-gallery-grid img {
+   display: block;
+   width: 100%;
+   height: 260px;
+   object-fit: cover;
+   border-radius: 12px;
+   background: #e4e9df
+}
+
+.trek-gallery-grid img:first-child:nth-last-child(odd) {
+   grid-column: 1/-1;
+   height: 360px
+}
+
+@media(max-width:640px) {
+   .trek-gallery-grid {
+      grid-template-columns: 1fr
+   }
+
+   .trek-gallery-grid img,
+   .trek-gallery-grid img:first-child:nth-last-child(odd) {
+      height: 240px;
+      grid-column: auto
+   }
+}
 
 /* Departure availability — seat pills and closed-batch rows. Status colour is
    driven by data-seats so it stays in step with the server's availability_state. */
-.departure-list .seat-pill{display:inline-block;margin-top:8px;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.3px;border:1px solid transparent}
-.departure-list .seat-pill[data-seats="AVAILABLE"]{background:#eaf1e6;border-color:#cbdcc2;color:#33613f}
-.departure-list .seat-pill[data-seats="FEW_SEATS_LEFT"]{background:#fdf1df;border-color:#ecd2a2;color:#8a6117}
-.departure-list .seat-pill[data-seats="WAITLIST"]{background:#eef0f7;border-color:#ccd3e6;color:#3f4b7a}
-.departure-list .seat-pill[data-seats="SOLD_OUT"],.departure-list .seat-pill[data-seats="CANCELLED"]{background:#f1f0ee;border-color:#d8d5cf;color:#6d675e}
-.departure-list>div[data-state="SOLD_OUT"],.departure-list>div[data-state="CANCELLED"]{opacity:.68}
-.departure-list .button.disabled{background:#eceae5;color:#77716a;pointer-events:none;box-shadow:none}
-.waitlist-panel{margin-top:25px;padding:26px;border:1px solid #ccd3e6;background:#f6f7fb;border-radius:14px}
-.waitlist-panel h2{font-size:24px}
-.waitlist-panel>p{font-size:13px;margin-top:12px}
-.waitlist-position{display:inline-block;margin-top:18px;padding:14px 22px;border-radius:10px;border:1px solid #ccd3e6;background:#fff;font-size:20px;font-weight:700;letter-spacing:1px}
-.related-treks{border-top:1px solid #d8dfd6;padding-top:55px;padding-bottom:85px}.trek-layout:has(+.related-treks){padding-bottom:55px}
-.page-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;color:#5f6b61}.page-loading-bar{display:block;width:140px;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#a78246,transparent) #e3e6dc;background-size:60% 100%;background-repeat:no-repeat;animation:page-loading 1.1s ease-in-out infinite}@keyframes page-loading{from{background-position:-100% 0}to{background-position:200% 0}}@media(prefers-reduced-motion:reduce){.page-loading-bar{animation:none;background-position:center}}
+.departure-list .seat-pill {
+   display: inline-block;
+   margin-top: 8px;
+   padding: 4px 10px;
+   border-radius: 999px;
+   font-size: 10px;
+   font-weight: 700;
+   letter-spacing: .3px;
+   border: 1px solid transparent
+}
+
+.departure-list .seat-pill[data-seats="AVAILABLE"] {
+   background: #eaf1e6;
+   border-color: #cbdcc2;
+   color: #33613f
+}
+
+.departure-list .seat-pill[data-seats="FEW_SEATS_LEFT"] {
+   background: #fdf1df;
+   border-color: #ecd2a2;
+   color: #8a6117
+}
+
+.departure-list .seat-pill[data-seats="WAITLIST"] {
+   background: #eef0f7;
+   border-color: #ccd3e6;
+   color: #3f4b7a
+}
+
+.departure-list .seat-pill[data-seats="SOLD_OUT"],
+.departure-list .seat-pill[data-seats="CANCELLED"] {
+   background: #f1f0ee;
+   border-color: #d8d5cf;
+   color: #6d675e
+}
+
+.departure-list>div[data-state="SOLD_OUT"],
+.departure-list>div[data-state="CANCELLED"] {
+   opacity: .68
+}
+
+.departure-list .button.disabled {
+   background: #eceae5;
+   color: #77716a;
+   pointer-events: none;
+   box-shadow: none
+}
+
+.waitlist-panel {
+   margin-top: 25px;
+   padding: 26px;
+   border: 1px solid #ccd3e6;
+   background: #f6f7fb;
+   border-radius: 14px
+}
+
+.waitlist-panel h2 {
+   font-size: 24px
+}
+
+.waitlist-panel>p {
+   font-size: 13px;
+   margin-top: 12px
+}
+
+.waitlist-position {
+   display: inline-block;
+   margin-top: 18px;
+   padding: 14px 22px;
+   border-radius: 10px;
+   border: 1px solid #ccd3e6;
+   background: #fff;
+   font-size: 20px;
+   font-weight: 700;
+   letter-spacing: 1px
+}
+
+.related-treks {
+   border-top: 1px solid #d8dfd6;
+   padding-top: 55px;
+   padding-bottom: 85px
+}
+
+.trek-layout:has(+.related-treks) {
+   padding-bottom: 55px
+}
+
+.page-loading {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   gap: 18px;
+   text-align: center;
+   color: #5f6b61
+}
+
+.page-loading-bar {
+   display: block;
+   width: 140px;
+   height: 3px;
+   border-radius: 3px;
+   background: linear-gradient(90deg, transparent, #a78246, transparent) #e3e6dc;
+   background-size: 60% 100%;
+   background-repeat: no-repeat;
+   animation: page-loading 1.1s ease-in-out infinite
+}
+
+@keyframes page-loading {
+   from {
+      background-position: -100% 0
+   }
+
+   to {
+      background-position: 200% 0
+   }
+}
+
+@media(prefers-reduced-motion:reduce) {
+   .page-loading-bar {
+      animation: none;
+      background-position: center
+   }
+}
+
 /* Trek page polish: hero, facts, itinerary timeline, inclusions, departures */
-.trek-hero .container{padding-top:190px;padding-bottom:90px}.trek-hero:after{background:linear-gradient(90deg,#0a231de6 0%,#0a231d8c 45%,#0a231d26 100%),linear-gradient(0deg,#0a231dcc,transparent 55%)}
-.trek-hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}.trek-hero-meta span{padding:8px 14px;border:1px solid #ffffff38;border-radius:99px;background:#ffffff14;backdrop-filter:blur(6px);font-size:11px;letter-spacing:.3px;color:#f1ece0}
-.trek-facts{position:relative;z-index:2;margin-top:-38px;padding:26px 30px;background:#fffdf8;border:1px solid #e3e3d6;border-bottom:1px solid #e3e3d6;border-radius:16px;box-shadow:0 18px 40px #15372b12}
-.trek-facts div{display:grid;grid-template-columns:auto 1fr;column-gap:14px;align-items:center}.trek-facts dt{grid-column:2;margin-bottom:4px}.trek-facts dd{grid-column:2}
-.fact-icon{grid-row:1/3;width:40px;height:40px;padding:9px;border-radius:12px;background:#f0ede2;color:#a78246}
-.itinerary-timeline{position:relative}.itinerary-timeline:before{content:'';position:absolute;left:21px;top:28px;bottom:28px;width:1px;background:linear-gradient(#d9ccb0,#d8dfd6)}
-.itinerary-timeline details{position:relative;border-bottom:0;margin-bottom:10px;border-radius:12px;transition:background .2s}.itinerary-timeline details:hover,.itinerary-timeline details[open]{background:#f3f2ea}
-.itinerary-timeline summary{padding:14px 16px 14px 0}.itinerary-timeline .day-number{position:relative;z-index:1;flex-shrink:0;display:grid;place-items:center;width:43px;height:43px;border-radius:50%;background:#fffdf8;border:1px solid #d9ccb0;font-size:16px}
-.itinerary-timeline details[open] .day-number{background:#103b2c;border-color:#103b2c;color:#ead6af}.itinerary-timeline summary small{display:inline-block;margin:6px 0 0;padding:2px 9px;border-radius:99px;background:#efe6d3;color:#86683a}
-.itinerary-timeline details>div{padding:0 20px 20px 61px}.itinerary-plus{transition:transform .2s}
-.inclusion-grid>div{border:1px solid #e1e4d8;background:#fbfaf5}.inclusion-grid h3{display:flex;align-items:center;gap:10px}.inclusion-grid h3:before{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;font-size:13px}
-.inclusion-yes h3:before{content:'✓';background:#e1eee4;color:#2d6a45}.inclusion-no h3:before{content:'✕';background:#f6e6e0;color:#a2503a}
-.inclusion-grid li{list-style:none;position:relative;margin-left:0;padding-left:24px}.inclusion-grid li:before{position:absolute;left:0;top:0;font-weight:700}.inclusion-yes li:before{content:'✓';color:#3d7a54}.inclusion-no li:before{content:'–';color:#a2503a}
-.departure-list>div{grid-template-columns:auto 1fr auto auto;gap:22px;padding:18px 20px;margin-bottom:12px;border:1px solid #e1e4d8;border-radius:14px;background:#fffdf8;transition:border-color .2s,box-shadow .2s}.departure-list>div:hover{border-color:#c9b58c;box-shadow:0 10px 24px #15372b0d}
-.departure-date{display:grid;place-items:center;width:58px;height:62px;border-radius:12px;background:#103b2c;color:#ead6af;font-size:9px;letter-spacing:1.4px;line-height:1.1}.departure-date b{font-family:Georgia,serif;font-size:24px;font-weight:400;letter-spacing:0;color:#fff}
-.departure-list>div[data-state=SOLD_OUT] .departure-date,.departure-list>div[data-state=WAITLIST] .departure-date{background:#8d958b}
-.trek-reserve{border-top:3px solid #a78246}
-@media(max-width:900px){.trek-hero .container{padding-top:130px;padding-bottom:70px}.trek-facts{margin-top:-28px;padding:20px}.fact-icon{width:34px;height:34px;padding:7px}.trek-facts div,.trek-facts div:nth-child(3){padding-left:0;border:0}.trek-reserve{grid-template-columns:1fr}.trek-reserve .button{white-space:nowrap}.departure-list>div{grid-template-columns:auto 1fr auto;gap:14px;padding:16px}.departure-list>div>:last-child{grid-column:1/-1;width:100%;text-align:center}}
-@media(max-width:480px){.trek-facts{grid-template-columns:1fr 1fr;gap:18px}.itinerary-timeline details>div{padding-left:20px}.departure-date{width:50px;height:54px}.departure-date b{font-size:20px}}
-@media(prefers-reduced-motion:reduce){.itinerary-timeline details,.departure-list>div,.itinerary-plus{transition:none}}
-.trek-hero .eyebrow{color:#ead6af;text-shadow:0 1px 8px #0a231d99}
+.trek-hero .container {
+   padding-top: 190px;
+   padding-bottom: 90px
+}
+
+.trek-hero:after {
+   background: linear-gradient(90deg, #0a231de6 0%, #0a231d8c 45%, #0a231d26 100%), linear-gradient(0deg, #0a231dcc, transparent 55%)
+}
+
+.trek-hero-meta {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 10px;
+   margin-top: 30px
+}
+
+.trek-hero-meta span {
+   padding: 8px 14px;
+   border: 1px solid #ffffff38;
+   border-radius: 99px;
+   background: #ffffff14;
+   backdrop-filter: blur(6px);
+   font-size: 11px;
+   letter-spacing: .3px;
+   color: #f1ece0
+}
+
+.trek-facts {
+   position: relative;
+   z-index: 2;
+   margin-top: -38px;
+   padding: 26px 30px;
+   background: #fffdf8;
+   border: 1px solid #e3e3d6;
+   border-bottom: 1px solid #e3e3d6;
+   border-radius: 16px;
+   box-shadow: 0 18px 40px #15372b12
+}
+
+.trek-facts div {
+   display: grid;
+   grid-template-columns: auto 1fr;
+   column-gap: 14px;
+   align-items: center
+}
+
+.trek-facts dt {
+   grid-column: 2;
+   margin-bottom: 4px
+}
+
+.trek-facts dd {
+   grid-column: 2
+}
+
+.fact-icon {
+   grid-row: 1/3;
+   width: 40px;
+   height: 40px;
+   padding: 9px;
+   border-radius: 12px;
+   background: #f0ede2;
+   color: #a78246
+}
+
+.itinerary-timeline {
+   position: relative
+}
+
+.itinerary-timeline:before {
+   content: '';
+   position: absolute;
+   left: 21px;
+   top: 28px;
+   bottom: 28px;
+   width: 1px;
+   background: linear-gradient(#d9ccb0, #d8dfd6)
+}
+
+.itinerary-timeline details {
+   position: relative;
+   border-bottom: 0;
+   margin-bottom: 10px;
+   border-radius: 12px;
+   transition: background .2s
+}
+
+.itinerary-timeline details:hover,
+.itinerary-timeline details[open] {
+   background: #f3f2ea
+}
+
+.itinerary-timeline summary {
+   padding: 14px 16px 14px 0
+}
+
+.itinerary-timeline .day-number {
+   position: relative;
+   z-index: 1;
+   flex-shrink: 0;
+   display: grid;
+   place-items: center;
+   width: 43px;
+   height: 43px;
+   border-radius: 50%;
+   background: #fffdf8;
+   border: 1px solid #d9ccb0;
+   font-size: 16px
+}
+
+.itinerary-timeline details[open] .day-number {
+   background: #103b2c;
+   border-color: #103b2c;
+   color: #ead6af
+}
+
+.itinerary-timeline summary small {
+   display: inline-block;
+   margin: 6px 0 0;
+   padding: 2px 9px;
+   border-radius: 99px;
+   background: #efe6d3;
+   color: #86683a
+}
+
+.itinerary-timeline details>div {
+   padding: 0 20px 20px 61px
+}
+
+.itinerary-plus {
+   transition: transform .2s
+}
+
+.inclusion-grid>div {
+   border: 1px solid #e1e4d8;
+   background: #fbfaf5
+}
+
+.inclusion-grid h3 {
+   display: flex;
+   align-items: center;
+   gap: 10px
+}
+
+.inclusion-grid h3:before {
+   display: grid;
+   place-items: center;
+   width: 26px;
+   height: 26px;
+   border-radius: 50%;
+   font-size: 13px
+}
+
+.inclusion-yes h3:before {
+   content: '✓';
+   background: #e1eee4;
+   color: #2d6a45
+}
+
+.inclusion-no h3:before {
+   content: '✕';
+   background: #f6e6e0;
+   color: #a2503a
+}
+
+.inclusion-grid li {
+   list-style: none;
+   position: relative;
+   margin-left: 0;
+   padding-left: 24px
+}
+
+.inclusion-grid li:before {
+   position: absolute;
+   left: 0;
+   top: 0;
+   font-weight: 700
+}
+
+.inclusion-yes li:before {
+   content: '✓';
+   color: #3d7a54
+}
+
+.inclusion-no li:before {
+   content: '–';
+   color: #a2503a
+}
+
+.departure-list>div {
+   grid-template-columns: auto 1fr auto auto;
+   gap: 22px;
+   padding: 18px 20px;
+   margin-bottom: 12px;
+   border: 1px solid #e1e4d8;
+   border-radius: 14px;
+   background: #fffdf8;
+   transition: border-color .2s, box-shadow .2s
+}
+
+.departure-list>div:hover {
+   border-color: #c9b58c;
+   box-shadow: 0 10px 24px #15372b0d
+}
+
+.departure-date {
+   display: grid;
+   place-items: center;
+   width: 58px;
+   height: 62px;
+   border-radius: 12px;
+   background: #103b2c;
+   color: #ead6af;
+   font-size: 9px;
+   letter-spacing: 1.4px;
+   line-height: 1.1
+}
+
+.departure-date b {
+   font-family: Georgia, serif;
+   font-size: 24px;
+   font-weight: 400;
+   letter-spacing: 0;
+   color: #fff
+}
+
+.departure-list>div[data-state=SOLD_OUT] .departure-date,
+.departure-list>div[data-state=WAITLIST] .departure-date {
+   background: #8d958b
+}
+
+.trek-reserve {
+   border-top: 3px solid #a78246
+}
+
+@media(max-width:900px) {
+   .trek-hero .container {
+      padding-top: 130px;
+      padding-bottom: 70px
+   }
+
+   .trek-facts {
+      margin-top: -28px;
+      padding: 20px
+   }
+
+   .fact-icon {
+      width: 34px;
+      height: 34px;
+      padding: 7px
+   }
+
+   .trek-facts div,
+   .trek-facts div:nth-child(3) {
+      padding-left: 0;
+      border: 0
+   }
+
+   .trek-reserve {
+      grid-template-columns: 1fr
+   }
+
+   .trek-reserve .button {
+      white-space: nowrap
+   }
+
+   .departure-list>div {
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      padding: 16px
+   }
+
+   .departure-list>div>:last-child {
+      grid-column: 1/-1;
+      width: 100%;
+      text-align: center
+   }
+}
+
+@media(max-width:480px) {
+   .trek-facts {
+      grid-template-columns: 1fr 1fr;
+      gap: 18px
+   }
+
+   .itinerary-timeline details>div {
+      padding-left: 20px
+   }
+
+   .departure-date {
+      width: 50px;
+      height: 54px
+   }
+
+   .departure-date b {
+      font-size: 20px
+   }
+}
+
+@media(prefers-reduced-motion:reduce) {
+
+   .itinerary-timeline details,
+   .departure-list>div,
+   .itinerary-plus {
+      transition: none
+   }
+}
+
+.trek-hero .eyebrow {
+   color: #ead6af;
+   text-shadow: 0 1px 8px #0a231d99
+}
+
 /* Trek page: altitude profile chart */
-.altitude-profile{border-top:1px solid #d8dfd6;padding-top:55px;padding-bottom:65px;scroll-margin-top:120px}.altitude-profile>p:not(.eyebrow){margin-top:18px;color:#5f6b61;font-size:14px}
-.altitude-chart{margin-top:28px;padding:22px 22px 14px;background:#fffdf8;border:1px solid #e1e4d8;border-radius:16px}
-.altitude-frame{position:relative;width:100%}.altitude-frame svg{display:block;overflow:visible;outline:none}.altitude-frame svg:focus-visible{outline:3px solid #ba9559;outline-offset:6px;border-radius:8px}
-.altitude-grid{stroke:#e6e8df;stroke-width:1}.altitude-axis{fill:#7a8273;font-size:11px;font-variant-numeric:tabular-nums}
-.altitude-line{fill:none;stroke:#1d5a44;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}.altitude-area{fill:#1d5a44;opacity:.1}
-.altitude-dot{fill:#1d5a44;stroke:#fffdf8;stroke-width:2}.altitude-peak-label{fill:#133e2f;font-size:12px;font-weight:700}
-.altitude-crosshair{stroke:#9aa596;stroke-width:1}.altitude-hit{fill:transparent;cursor:crosshair;touch-action:pan-y}
-.altitude-tooltip{position:absolute;transform:translateX(-50%);min-width:150px;max-width:220px;padding:10px 12px;border-radius:10px;background:#102b23;color:#e8efe9;box-shadow:0 10px 24px #0a231d33;pointer-events:none;display:grid;gap:2px}.altitude-tooltip strong{font-size:16px;color:#fff}.altitude-tooltip span{font-size:11px;color:#ead6af}.altitude-tooltip small{font-size:11px;color:#c3d0c7;line-height:1.4}
-.altitude-table{margin-top:10px;font-size:12px}.altitude-table summary{cursor:pointer;padding:8px 0;color:#5f6b61;font-weight:600}.altitude-table table{width:100%;border-collapse:collapse;margin-top:6px}.altitude-table th,.altitude-table td{text-align:left;padding:8px 6px;border-bottom:1px solid #e6e8df}.altitude-table th{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#7a8273}.altitude-table td:last-child,.altitude-table th:last-child{text-align:right;font-variant-numeric:tabular-nums}
-@media(max-width:480px){.altitude-chart{padding:14px 10px 8px}}
+.altitude-profile {
+   border-top: 1px solid #d8dfd6;
+   padding-top: 55px;
+   padding-bottom: 65px;
+   scroll-margin-top: 120px
+}
+
+.altitude-profile>p:not(.eyebrow) {
+   margin-top: 18px;
+   color: #5f6b61;
+   font-size: 14px
+}
+
+.altitude-chart {
+   margin-top: 28px;
+   padding: 22px 22px 14px;
+   background: #fffdf8;
+   border: 1px solid #e1e4d8;
+   border-radius: 16px
+}
+
+.altitude-frame {
+   position: relative;
+   width: 100%
+}
+
+.altitude-frame svg {
+   display: block;
+   overflow: visible;
+   outline: none
+}
+
+.altitude-frame svg:focus-visible {
+   outline: 3px solid #ba9559;
+   outline-offset: 6px;
+   border-radius: 8px
+}
+
+.altitude-grid {
+   stroke: #e6e8df;
+   stroke-width: 1
+}
+
+.altitude-axis {
+   fill: #7a8273;
+   font-size: 11px;
+   font-variant-numeric: tabular-nums
+}
+
+.altitude-line {
+   fill: none;
+   stroke: #1d5a44;
+   stroke-width: 2;
+   stroke-linejoin: round;
+   stroke-linecap: round
+}
+
+.altitude-area {
+   fill: #1d5a44;
+   opacity: .1
+}
+
+.altitude-dot {
+   fill: #1d5a44;
+   stroke: #fffdf8;
+   stroke-width: 2
+}
+
+.altitude-peak-label {
+   fill: #133e2f;
+   font-size: 12px;
+   font-weight: 700
+}
+
+.altitude-crosshair {
+   stroke: #9aa596;
+   stroke-width: 1
+}
+
+.altitude-hit {
+   fill: transparent;
+   cursor: crosshair;
+   touch-action: pan-y
+}
+
+.altitude-tooltip {
+   position: absolute;
+   transform: translateX(-50%);
+   min-width: 150px;
+   max-width: 220px;
+   padding: 10px 12px;
+   border-radius: 10px;
+   background: #102b23;
+   color: #e8efe9;
+   box-shadow: 0 10px 24px #0a231d33;
+   pointer-events: none;
+   display: grid;
+   gap: 2px
+}
+
+.altitude-tooltip strong {
+   font-size: 16px;
+   color: #fff
+}
+
+.altitude-tooltip span {
+   font-size: 11px;
+   color: #ead6af
+}
+
+.altitude-tooltip small {
+   font-size: 11px;
+   color: #c3d0c7;
+   line-height: 1.4
+}
+
+.altitude-table {
+   margin-top: 10px;
+   font-size: 12px
+}
+
+.altitude-table summary {
+   cursor: pointer;
+   padding: 8px 0;
+   color: #5f6b61;
+   font-weight: 600
+}
+
+.altitude-table table {
+   width: 100%;
+   border-collapse: collapse;
+   margin-top: 6px
+}
+
+.altitude-table th,
+.altitude-table td {
+   text-align: left;
+   padding: 8px 6px;
+   border-bottom: 1px solid #e6e8df
+}
+
+.altitude-table th {
+   font-size: 10px;
+   letter-spacing: 1px;
+   text-transform: uppercase;
+   color: #7a8273
+}
+
+.altitude-table td:last-child,
+.altitude-table th:last-child {
+   text-align: right;
+   font-variant-numeric: tabular-nums
+}
+
+@media(max-width:480px) {
+   .altitude-chart {
+      padding: 14px 10px 8px
+   }
+}

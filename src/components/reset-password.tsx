@@ -1,0 +1,10 @@
+'use client';
+import {useState,type FormEvent} from 'react';
+import Link from 'next/link';
+import JourneyShell from './journey-shell';
+import {errorText} from '@/lib/format';
+export default function ResetPassword(){
+  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[saved,setSaved]=useState(false);
+  async function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();setBusy(true);setError('');try{const r=await fetch('/api/auth/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(e.currentTarget)))});const data=await r.json();if(!r.ok||data.success!==true)throw new Error(errorText(data));setSaved(true);}catch(e){setError(e instanceof Error?e.message:'Unable to reset password.');}finally{setBusy(false);}}
+  return <JourneyShell page="account"><section className="utility-page container auth-layout"><div><p className="eyebrow">YOUR JOURNEY CONTINUES</p><h1>A fresh start.</h1><p>Use the UID and token from your password-reset email to choose a new password.</p></div><form className="inquiry-form contact-form-panel" onSubmit={submit}><h2>Choose a new password</h2>{saved?<p className="form-success" role="status">Your password has been updated. <Link href="/login">Sign in to continue.</Link></p>:<><fieldset disabled={busy}><label>UID from your email<input name="uid" required maxLength={255} autoComplete="off"/></label><label>Token from your email<input name="token" required maxLength={255} autoComplete="off"/></label><label>New password<input name="new_password" type="password" required maxLength={1024} autoComplete="new-password"/></label><label>Confirm new password<input name="new_password_confirm" type="password" required maxLength={1024} autoComplete="new-password"/></label></fieldset>{error&&<p className="form-error" role="alert">{error}</p>}<button className="button gold" disabled={busy}>{busy?'Updating…':'Update password'}</button><Link href="/forgot-password" className="text-link">Request another email</Link></>}</form></section></JourneyShell>;
+}

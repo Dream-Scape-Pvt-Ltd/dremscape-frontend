@@ -3,7 +3,7 @@ import Link from 'next/link';
 import {usePhotoLightbox} from './photo-lightbox';
 import {useEffect,useRef,useState} from 'react';
 import {memoryPhotos} from '@/lib/trek-memories';
-import {MemoryImage} from '@/app/blog/components/trek-memories';
+import {MemoryImage} from '@/components/trek-memories';
 
 const photos=['together-in-the-mountains','a-pause-on-the-ridge','village-street','last-light','forest-footsteps'].map(id=>memoryPhotos.find(photo=>photo.id===id)!);
 

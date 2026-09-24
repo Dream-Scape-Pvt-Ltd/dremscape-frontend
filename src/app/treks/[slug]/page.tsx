@@ -3,7 +3,7 @@ import {notFound} from 'next/navigation';
 import {getJourney} from '@/lib/journeys';
 import RelatedTreks from '../components/related-treks';
 import {BackendError} from '@/lib/backend';
-import JourneyDetail from '../components/journey-detail';
+import JourneyDetail from '@/components/journey-detail';
 import JourneyShell from '@/components/journey-shell';
 import {cache,Suspense} from 'react';
 const load=cache(getJourney);

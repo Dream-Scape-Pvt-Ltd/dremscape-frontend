@@ -3584,7 +3584,7 @@ function TrekFullDetailEditor({
     onChange(prev => prev ? {...prev, itinerary_days: [...prev.itinerary_days, newDay]} : null);
   };
 
-  const handleUpdateDay = (index: number, field: keyof AdminItineraryDay, value: any) => {
+  const handleUpdateDay = <K extends keyof AdminItineraryDay>(index: number, field: K, value: AdminItineraryDay[K]) => {
     onChange(prev => {
       if (!prev) return null;
       const updatedDays = [...prev.itinerary_days];
