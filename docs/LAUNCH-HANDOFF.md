@@ -3,7 +3,7 @@
 ## Editing the website
 Open `/admin` directly and sign in with a backend ADMIN account. The public Staff Access footer link has been removed; authentication remains required.
 
-- **Settings**: homepage photo URL and description; office address, map query and zoom; Journal headline, introduction and featured story slug. A blank homepage image uses the original trek photograph.
+- **Settings**: homepage photo, caption and location; homepage destination, difficulty and budget filter options; Nepal and Beyond Nepal titles, descriptions and images; admin sign-in background; YouTube preview title, description and thumbnail; office location and map settings; and Journal headline, introduction and featured story slug.
 - **Destinations**: add or edit names, countries, photographs, introductory copy, highlights and travel style. NEPAL entries appear in Nepal; other countries appear in Beyond Nepal.
 - **Blog studio**: change story introduction, cover, gallery and article content; publish or unpublish.
 - **Treks**: existing backend trip editor manages itinerary, images, prices and departures. The current local database has no published trips; add verified trips before launch.
@@ -40,6 +40,6 @@ Backend: see `DEPLOYMENT.md` in the backend repo. Production requires PostgreSQL
 - Payment processing remains dependent on the backend team's merchant gateway. Do not present card payment as live before that integration is tested.
 
 ## Verification
-`npm run build`; `node scripts/check-launch.mjs` against running local services.
+`npm run build`; `npm run typecheck`; `npm run lint`; `npm test`; `node scripts/check-launch.mjs` against running local services.
 Backend: `python manage.py test apps.content_cms.test_site_settings apps.content_cms.tests apps.destinations --noinput`.
 The browser check covers eight routes at 1440, 768, 390 and 320 pixels, horizontal overflow, public Staff Access removal and the footer illustration. It does not simulate a real card transaction or production hosting.

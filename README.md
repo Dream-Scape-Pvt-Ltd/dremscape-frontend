@@ -33,11 +33,11 @@ Restart Next.js after changing the environment. Browser requests go through the 
 
 ## Included
 
-The homepage now uses a prominent “Beyond the Horizon” hero, custom keyboard-accessible journey pickers (arrows, Home/End, type-to-select, Escape), a warmer editorial palette, and an animated Nepal preview opened by Explore Treks.
+The homepage now uses a prominent “Beyond the Horizon” hero, custom keyboard-accessible journey pickers (arrows, Home/End, type-to-select, Escape), a warmer editorial palette, and an Explore Treks film modal.
 
-### Add the real trekking film
+### Dreamscape YouTube film
 
-Place your MP4 in `public/videos/nepal-trekking.mp4`, then set `NEXT_PUBLIC_TREK_FILM_URL=/videos/nepal-trekking.mp4` in `.env.local` and rebuild/restart. A hosted video URL also works. The real video uses native playback controls and starts when the visitor presses Play. With no URL, a clearly labelled animated photographic preview offers pause/play, scene selection, and reduced-motion support. Use `node scripts/check-experience.mjs` with the server running to test the selectors and preview.
+“Explore Treks” looks up the latest public, embeddable upload from `@Dreamscapetreks` when `YOUTUBE_API_KEY` is configured. Set `YOUTUBE_CHANNEL_ID` if you want to use the channel ID instead of the default handle. If the channel has no eligible upload or the API is not configured, the modal shows the CMS-managed preview title, description and thumbnail and links to the channel. Keep the preview copy accurate until the channel has a public video.
 
 Homepage sections, responsive header/mobile menu, journey filters and empty/error states, trip detail pages, inquiry forms, keyboard-accessible native dialogs, entrance/reveal/hover animations and reduced-motion support. Assets come from the provided Figma file; source URLs are recorded in `scripts/figma-assets.json`.
 
@@ -45,7 +45,7 @@ Homepage sections, responsive header/mobile menu, journey filters and empty/erro
 
 - Figma refused the storytelling section's design-context request due to its Starter plan quota. That section uses its available text/layout metadata and already-exported collage images; review it against the original.
 - Public pages, articles, gallery and staff dashboard are implemented. The shared footer links to every main section. The dashboard requires a real staff account and connected Django service.
-- Email is dreamscapetrek@gmail.com. WhatsApp currently displays a clearly marked placeholder. Set NEXT_PUBLIC_COMPANY_WHATSAPP in .env.local to the real company number including country code, then rebuild/restart. Shared defaults live in src/lib/company.ts.
+- Email is dreamscapetrek@gmail.com and WhatsApp is +977 9761424745. Both can be overridden with `NEXT_PUBLIC_COMPANY_EMAIL` and `NEXT_PUBLIC_COMPANY_WHATSAPP` in `.env.local`; the phone value must include its country code. Shared defaults live in `src/lib/company.ts`.
 - Journal includes three original articles and can show published backend guides. Reviews use published backend records and moderation; no fake testimonials are displayed. The former newsletter form now links to the journal.
 - Privacy and booking terms pages contain website notes marked as pending company approval. Review these and the curated editorial copy before publication.
 - Booking lookup/payment pages show backend-authorized records. Payment processing remains unavailable because the supplied backend has no registered payment routes. No card details are collected.
@@ -57,6 +57,7 @@ Homepage sections, responsive header/mobile menu, journey filters and empty/erro
 ```powershell
 npm run build
 npm run typecheck
+npm run lint
 npm test
 # Start the production server in another terminal, with no BACKEND_API_URL:
 npm run start
