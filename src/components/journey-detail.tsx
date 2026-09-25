@@ -9,6 +9,7 @@ import {asset} from '@/lib/assets';
 import {difficulty,dateLabel,money} from '@/lib/format';
 import JourneyShell from './journey-shell';
 import InquiryDialog from './inquiry-dialog';
+import BookingInquiryDialog from './booking-inquiry-dialog';
 
 const PHOTO_INTERVAL=6500;
 const highlightDescriptions:Record<string,string>={
@@ -34,6 +35,7 @@ const photoCredits:Record<string,{author:string;source:string;caption:string;lic
 
 export default function JourneyDetail({journey:t,demo,related}:{journey:Journey;demo:boolean;related?:ReactNode}) {
   const [inquiry,setInquiry]=useState(false);
+  const [requestId,setRequestId]=useState<string|null>(null);
   const [activePhoto,setActivePhoto]=useState(0);
   const [paused,setPaused]=useState(false);
   const [hovering,setHovering]=useState(false);
@@ -45,6 +47,12 @@ export default function JourneyDetail({journey:t,demo,related}:{journey:Journey;
   const highlights=(t.tags||'Mountain landscapes · Local culture · Time on the trail').split('·').map(value=>value.trim()).filter(Boolean).slice(0,3);
   const compactRoute=t.slug==='everest-base-camp-cho-la';
   const departures=t.departures.filter(d=>d.available_seats>0&&['LIMITED','GUARANTEED'].includes(d.status)&&d.start_date>=new Date().toISOString().slice(0,10));
+
+  // Shared links (and the old /booking URLs, which redirect here) open the request for that date.
+  // The query is dropped once read, so closing the popup doesn't reopen it on the next render or refresh.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(()=>{const id=new URLSearchParams(window.location.search).get('departure');if(!id)return;if(departures.some(d=>d.id===id))setRequestId(id);window.history.replaceState(window.history.state,'',window.location.pathname+window.location.hash);},[]);
+  const requested=demo?undefined:departures.find(d=>d.id===requestId);
 
   useEffect(()=>{if(!playing)return;const timer=window.setTimeout(()=>setActivePhoto(index=>(index+1)%photos.length),PHOTO_INTERVAL);return()=>window.clearTimeout(timer);},[activePhoto,playing,photos.length]);
   function movePhoto(step:number){setActivePhoto(index=>(index+step+photos.length)%photos.length);}
@@ -86,12 +94,13 @@ export default function JourneyDetail({journey:t,demo,related}:{journey:Journey;
           {!compactRoute&&<section id="highlights" className="journey-copy-section"><p className="eyebrow">WHY THIS ROUTE</p><h2>Moments along the way.</h2><div className="journey-highlight-grid">{highlights.map((item,index)=><div key={item}><span>0{index+1}</span><h3>{item}</h3><p>{highlightDescriptions[item]||`A closer look at ${item.toLowerCase()} along the route.`}</p></div>)}</div></section>}
           <section id="itinerary" className="journey-copy-section"><p className="eyebrow">DAY BY DAY {demo&&<span className="journey-draft-label">· SAMPLE PLAN</span>}</p><h2>The path ahead.</h2>{!compactRoute&&<p className="journey-section-intro">{demo?'This draft gives you a feel for the route. Your guide will adjust travel, walking stages and rest days to current conditions.':'Follow the route day by day, with room for the mountain conditions to guide the journey.'}</p>}{t.itinerary_days.length?<div className="itinerary-grid">{[...t.itinerary_days].sort((a,b)=>a.day_number-b.day_number).map(day=><article className="itinerary-day-card" key={day.day_number}><span className="day-number">DAY {String(day.day_number).padStart(2,'0')}</span><h3>{day.title}</h3>{day.overnight_stay&&<p className="itinerary-overnight">Overnight · {day.overnight_stay}</p>}<p className="preserve-lines">{day.description}</p>{day.elevation_meters&&<p className="day-meta">Approx. {day.elevation_meters.toLocaleString()} m</p>}{day.is_acclimatization_day&&<span className="itinerary-acclimatization">Acclimatization day</span>}</article>)}</div>:<div className="quiet-panel"><p>The detailed itinerary is being prepared. Ask the team for the current route and daily walking plan.</p><button className="text-link" onClick={()=>setInquiry(true)}>Ask for the itinerary ↗</button></div>}</section>
           {!compactRoute&&<section id="included" className="journey-copy-section"><p className="eyebrow">BEFORE YOU GO</p><h2>What to expect.</h2>{demo&&<p className="journey-section-intro">These are example arrangements. The exact inclusions will appear in your confirmed proposal.</p>}<div className="inclusion-grid">{[[demo?'Possible inclusions':'Included',t.inclusions],[demo?'Usually arranged separately':'Not included',t.exclusions]].map(([title,list])=><div key={String(title)}><h3>{String(title)}</h3>{Array.isArray(list)&&list.length?<ul>{list.map((item,i)=><li key={i}>{item}</li>)}</ul>:<p>To be confirmed with your itinerary.</p>}</div>)}</div>{t.packing_list?.length>0&&<details className="packing-list"><summary>Suggested packing essentials <span aria-hidden="true">+</span></summary><ul>{t.packing_list.map((item,i)=><li key={i}>{item}</li>)}</ul></details>}</section>}
-          <section id="departures" className="journey-copy-section"><p className="eyebrow">TRAVEL WHEN IT FITS</p><h2>Dates &amp; rates.</h2>{departures.length?<div className="departure-list">{departures.map(d=><div key={d.id}><div><strong>{dateLabel(d.start_date)}</strong><p>to {dateLabel(d.end_date)}</p><small>{d.available_seats} seats available</small></div><div><strong>{money(d.price_usd)}</strong><small>per person</small></div><Link className="button green" href={`/booking?trek=${t.slug}&departure=${d.id}`}>Choose date ↗</Link></div>)}</div>:<div className="quiet-panel"><p>No bookable dates are listed yet. Tell us when you hope to travel and we’ll suggest a plan.</p><button className="button green" onClick={()=>setInquiry(true)}>Ask about dates ↗</button></div>}</section>
+          <section id="departures" className="journey-copy-section"><p className="eyebrow">TRAVEL WHEN IT FITS</p><h2>Dates &amp; rates.</h2>{departures.length?<div className="departure-list">{departures.map(d=><div key={d.id}><div><strong>{dateLabel(d.start_date)}</strong><p>to {dateLabel(d.end_date)}</p><small>{d.available_seats} seats available</small></div><div><strong>{money(d.price_usd)}</strong><small>per person</small></div>{demo?<button className="button green" onClick={()=>setInquiry(true)}>Ask about this date ↗</button>:<button className="button green" onClick={()=>setRequestId(d.id)}>Choose date ↗</button>}</div>)}</div>:<div className="quiet-panel"><p>No bookable dates are listed yet. Tell us when you hope to travel and we’ll suggest a plan.</p><button className="button green" onClick={()=>setInquiry(true)}>Ask about dates ↗</button></div>}</section>
         </article><aside className="trek-reserve journey-reserve"><span className="eyebrow">YOUR JOURNEY</span><p className="reserve-price">{demo&&<small>Illustrative from</small>}{money(t.starting_price_usd)}<small>USD per person{demo?' · final quote on request':''}</small></p><hr/><p>{t.duration_days} days in {t.destination_name}.</p><button className="button gold" onClick={()=>setInquiry(true)}>{demo?'Request a real quote':'Plan this journey'} <span aria-hidden="true">↗</span></button><a className="button outline-dark" href="#itinerary">See day-by-day plan ↓</a><small>No commitment. Start with a conversation.</small></aside></div>
       </div>
       {related}
     </div>
     {related}
     {inquiry&&<InquiryDialog journey={t.title} tripId={demo?undefined:t.id} onClose={()=>setInquiry(false)}/>}
+    {requested&&<BookingInquiryDialog journey={t} departure={requested} onClose={()=>setRequestId(null)}/>}
   </JourneyShell>;
 }

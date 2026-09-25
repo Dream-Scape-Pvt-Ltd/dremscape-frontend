@@ -57,39 +57,13 @@ test('a website inquiry can be worked from intake to closed in the staff CRM', a
   const drawer = page.getByRole('complementary', {name: 'Inquiry details'});
   await expect(drawer.getByText(reference)).toBeVisible();
   await expect(drawer.getByText('We would love to trek in the spring.')).toBeVisible();
-  const sections = drawer.getByRole('navigation', {name: 'Inquiry sections'});
 
   // 4. Internal note.
   await drawer.getByPlaceholder('Add an internal note').fill('Prefers a small group in April.');
   await drawer.getByRole('button', {name: 'Add note'}).click();
   await expect(drawer.getByText('Prefers a small group in April.')).toBeVisible();
 
-  // 5. Logged call shows on the timeline.
-  await sections.getByRole('button', {name: 'Timeline'}).click();
-  await drawer.locator('form select').selectOption('CALL');
-  await drawer.getByPlaceholder('What happened on this call/email/WhatsApp touch?').fill('Called to discuss permits.');
-  await drawer.getByRole('button', {name: 'Log activity'}).click();
-  await expect(drawer.getByText('Called to discuss permits.')).toBeVisible();
-
-  // 6. Follow-up task, completed and reopened.
-  await sections.getByRole('button', {name: /^Tasks/}).click();
-  await drawer.getByPlaceholder('Follow-up title').fill('Send the packing list');
-  await drawer.locator('input[type="datetime-local"]').fill(new Date(Date.now() + 2 * 86_400_000).toISOString().slice(0, 16));
-  await drawer.getByRole('button', {name: '+ Add'}).click();
-  await expect(drawer.getByText('Send the packing list')).toBeVisible();
-  await drawer.getByRole('button', {name: 'Mark done'}).click();
-  await drawer.getByRole('button', {name: 'Reopen'}).click();
-  await expect(drawer.getByRole('button', {name: 'Mark done'})).toBeVisible();
-
-  // 7. New tag attached.
-  const tagName = `e2e-${stamp}`;
-  await sections.getByRole('button', {name: /^Tags/}).click();
-  await drawer.getByPlaceholder('Or create a new tag').fill(tagName);
-  await drawer.getByRole('button', {name: 'Add tag'}).click();
-  await expect(drawer.getByRole('button', {name: `Remove tag ${tagName}`})).toBeVisible();
-
-  // 8. Closing requires a lost reason.
-  await sections.getByRole('button', {name: 'Details'}).click();
+  // 5. Closing requires a lost reason.
   await drawer.locator('dd select').first().selectOption('CLOSED');
   const confirm = drawer.getByRole('button', {name: 'Confirm close'});
   await expect(confirm).toBeDisabled();
@@ -103,13 +77,13 @@ test('a website inquiry can be worked from intake to closed in the staff CRM', a
   // The drawer keeps the full lead after a status change.
   await expect(drawer.getByText('We would love to trek in the spring.')).toBeVisible();
 
-  // 9. Pipeline analytics load for staff.
+  // 6. Pipeline analytics load for staff.
   await nav.getByRole('button', {name: 'CRM'}).click();
   for (const path of ['/api/admin/crm/pipeline-summary', '/api/admin/crm/funnel', '/api/admin/crm/treks']) {
     expect((await page.request.get(path)).status(), path).toBe(200);
   }
 
-  // 10. Signing out locks the workspace again.
+  // 7. Signing out locks the workspace again.
   await page.getByRole('button', {name: 'Sign out'}).click();
   await expect(page.getByRole('heading', {name: 'Login to continue'})).toBeVisible();
 });
@@ -161,11 +135,10 @@ test('revenue grows only when a trek is completed, plus manual entries', async (
   expect(await thisMonth()).toBeCloseTo(before + earned, 2);
 });
 
-test('a sales agent can work leads but not change lead routing', async ({page}) => {
+test('a sales agent can work leads', async ({page}) => {
   await login(page, AGENT);
   expect((await page.request.get('/api/admin/crm/funnel')).status()).toBe(200);
   expect((await page.request.get('/api/admin/inquiries')).status()).toBe(200);
-  expect((await page.request.get('/api/admin/assignment-rules')).status()).toBe(403);
 });
 
 test('wrong credentials stay on the login screen with an error', async ({page}) => {

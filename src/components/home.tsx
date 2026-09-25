@@ -19,7 +19,9 @@ import {journalPosts} from '@/lib/editorial-content';
 
 function Icon({name='heroContext-imgSvg',className=''}:{name?:string;className?:string}) {return <img className={`icon ${className}`} src={asset(name)} width="18" height="18" alt="" />;}
 function Eyebrow({children}:{children:ReactNode}) {return <p className="eyebrow"><span />{children}</p>;}
-function Photo({name,alt,className=''}:{name:string;alt:string;className?:string}) {return <img src={asset(name)} alt={alt} className={className} loading="lazy" />;}
+// CMS content can arrive without an image (e.g. a journal post with no cover); show a house photo instead of failing the page.
+const FALLBACK_PHOTO='/images/trek-memories/mountain-amphitheatre.jpg';
+function Photo({name,alt,className=''}:{name?:string;alt:string;className?:string}) {return <img src={asset(name?.trim()||FALLBACK_PHOTO)} alt={alt} className={className} loading="lazy" />;}
 function HomeRouteIdea({trip}:{trip:Trip}) {return <article className="trip-card home-route-idea"><div className="trip-image"><Image src={asset(trip.image||'222-242-imgEverestBaseCampChoLaPassTrekkingRoute')} alt={`${trip.destination_name} mountain route`} loading="lazy" width={640} height={420}/><span className="badge">Route inspiration</span></div><div className="trip-content"><p className="journey-location">{trip.destination_name}</p><h3>{trip.title}</h3><p className="trip-tags">{trip.duration_days} days · {trip.difficulty_grade} · {trip.tags}</p><div className="trip-bottom"><span><small>MAKE IT YOURS</small><strong>Explore this trek</strong></span><Link className="round-arrow" aria-label={`View trek details for ${trip.title}`} href={`/treks/${trip.slug}`}>↗</Link></div></div></article>;}
 const defaultDestinations = [
   {name:'Everest & Khumbu',slug:'everest',image:'222-78-imgNepalEverestBaseCampAndAmaDablamPeak',tag:'FLAGSHIP SANCTUARY',description:'Everest Base Camp · Gokyo Ri · Cho La · Ama Dablam'},

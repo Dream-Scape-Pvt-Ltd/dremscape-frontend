@@ -35,3 +35,100 @@
 @media(prefers-reduced-motion:reduce){.button,.button>.icon,.button>span[aria-hidden=true],.round-arrow,.destination-arrow,.hero-caption>a,.explore-link .play,.payment-steps li,.itinerary-plus{transition:none!important;animation:none!important}.film-loading-ring{animation:none}}
 .payment-layout .payment-unavailable{background:#f3f7f4;border:1px solid #dce7df;box-shadow:0 12px 32px #103b2c06}
 @media(max-width:600px){.payment-layout aside .contact-channel{padding:16px 12px;gap:8px}.payment-layout aside .contact-channel .channel-icon{display:none}.payment-layout aside .contact-channel strong{font-size:12px}.payment-layout aside .contact-channel>span:last-child{display:none}}
+
+/* Booking request popup (components/booking-inquiry-dialog.tsx) */
+.booking-inquiry{width:min(560px,calc(100vw - 32px))}
+.booking-inquiry .dialog-inner{padding:34px 36px 30px}
+.booking-inquiry h2{margin-top:6px}
+.booking-inquiry-summary{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.booking-inquiry-summary span{display:inline-flex;align-items:baseline;gap:4px;background:#eef2e8;border-radius:30px;padding:7px 13px;font-size:12px;color:#29503a}
+.booking-inquiry-summary small{font-size:10px;color:#6f7d69}
+.booking-inquiry-form{margin-top:22px}
+.booking-inquiry-form fieldset{gap:16px}
+.booking-inquiry-trekkers{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:12px;font-weight:650}
+.trekker-stepper{display:inline-flex;align-items:center;border:1px solid #c9d4cd;border-radius:30px;overflow:hidden;background:#fff}
+.trekker-stepper button{width:44px;height:42px;border:0;background:transparent;font-size:20px;color:var(--forest);cursor:pointer}
+.trekker-stepper button:hover:not(:disabled){background:#eef2e8}
+.trekker-stepper button:disabled{color:#b8c3bb;cursor:not-allowed}
+.trekker-stepper output{min-width:34px;text-align:center;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+.booking-inquiry-estimate{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;margin:0;padding:13px 15px;border-radius:10px;background:#f6f4ec;font-size:12px;color:#5f6c59}
+.booking-inquiry-estimate strong{font-size:17px;color:var(--forest)}
+.booking-inquiry-estimate small{font-size:11px;color:#86917f}
+.booking-inquiry-form>.button{width:100%;justify-content:center}
+.booking-inquiry-success{display:grid;gap:10px}
+.booking-inquiry-success h3{font-size:20px}
+.booking-inquiry-success p{font-size:13px;margin:0}
+.booking-inquiry-success .button{justify-self:start;margin-top:6px}
+@media(max-width:600px){.booking-inquiry .dialog-inner{padding:30px 16px 22px}.booking-inquiry .form-columns{grid-template-columns:1fr}.booking-inquiry-success .button{justify-self:stretch;justify-content:center}}
+
+/* Blog article: sectioned story layout (app/blog/[slug]/page.tsx, StorySections) */
+.story-sections{max-width:1140px;padding-top:40px;padding-bottom:20px}
+.story-toc{margin:0 auto 56px;padding:22px 0;border-block:1px solid #dce3d4;text-align:center}
+.story-toc>div{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:14px}
+.story-toc a{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border:1px solid #d3dccb;border-radius:30px;background:#fffdf8;font-size:12px;color:#29503a;transition:border-color .2s,background .2s}
+.story-toc a:hover{border-color:#ad8a4c;background:#f6f1e4}
+.story-toc a span{font-family:Georgia,serif;color:#b49969}
+.story-section{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:64px;align-items:center;margin-bottom:88px;scroll-margin-top:130px}
+.story-section:not([data-has-image]){grid-template-columns:minmax(0,690px);justify-content:center}
+.story-section[data-flip][data-has-image] .story-text{order:2}
+.story-section[data-flip][data-has-image] .story-figure{order:1}
+.story-text h2{font-size:31px;line-height:1.25;margin:10px 0 20px}
+.story-text h3{font-size:21px;margin:26px 0 12px}
+.story-text p{font-size:15px;line-height:2;margin-bottom:20px;color:#5e6d57}
+.story-text ul{margin:0 0 20px}
+.story-text li{font-size:14px;margin:8px 0 8px 20px;list-style:disc;line-height:1.9;color:#5e6d57}
+.story-figure{margin:0}
+.story-figure img{display:block;width:100%;height:auto;max-height:620px;object-fit:cover;border-radius:16px;box-shadow:0 22px 50px #16332214}
+.story-figure figcaption{margin-top:12px;font-size:12px;font-style:italic;color:#7f8a76;text-align:center}
+.story-endnote{max-width:690px;margin:0 auto}
+@media(max-width:900px){
+  .story-sections{padding-top:28px}
+  .story-toc{margin-bottom:40px}
+  .story-section,.story-section:not([data-has-image]){grid-template-columns:minmax(0,1fr);gap:24px;margin-bottom:56px}
+  .story-section[data-flip][data-has-image] .story-text,.story-section[data-flip][data-has-image] .story-figure{order:0}
+  .story-text h2{font-size:26px}
+  .story-text p{font-size:14px}
+}
+.story-toc .eyebrow{justify-content:center;text-align:center}
+
+/* Footer: fifth column for "Partner with us" */
+.complete-footer-grid{grid-template-columns:1.2fr 1fr 1fr 1fr 1.2fr;gap:38px}
+@media(max-width:1100px){.complete-footer-grid{grid-template-columns:1.2fr 1fr 1fr 1fr;gap:30px}}
+@media(max-width:760px){.complete-footer-grid{grid-template-columns:1fr 1fr}.complete-footer-grid>div:first-child{grid-column:1/-1}}
+@media(max-width:560px){.complete-footer-grid>div:last-child{grid-column:auto;border-top:0;padding-top:0}}
+
+/* B2B partnership page (app/partners/page.tsx) */
+.partner-index{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding-top:34px}
+.partner-index a{padding:10px 18px;border:1px solid #d3dccb;border-radius:30px;background:#fffdf8;font-size:12px;color:#29503a;transition:border-color .2s,background .2s}
+.partner-index a:hover{border-color:#ad8a4c;background:#f6f1e4}
+.partner-index .partner-index-cta{background:#173e2c;border-color:#173e2c;color:#fff}
+.partner-index .partner-index-cta:hover{background:#1f5640;border-color:#1f5640}
+.partner-section{scroll-margin-top:110px}
+.partner-section h2,.partner-enquire h2{margin-top:10px}
+.partner-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:42px}
+.partner-grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.partner-card{padding:28px 26px;border:1px solid #dfe4d7;border-radius:16px;background:#fffdf9;transition:transform .25s,box-shadow .25s}
+.partner-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px #16332210}
+.partner-card h3{font-size:18px;line-height:1.35;letter-spacing:-.3px;margin-bottom:12px}
+.partner-card p{font-size:13px;line-height:1.85;color:#6d7866}
+.partner-card-numbered>span{display:block;font:italic 26px Georgia,serif;color:#a98c56;margin-bottom:16px}
+.partner-steps{list-style:none;margin:44px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;counter-reset:none}
+.partner-steps li{position:relative;padding:24px 20px 22px;border-top:2px solid #b49969;background:linear-gradient(#f6f1e4,transparent 70%);border-radius:0 0 14px 14px}
+.partner-steps span{font:italic 30px Georgia,serif;color:#a98c56}
+.partner-steps h3{font-size:16px;line-height:1.4;margin:14px 0 10px}
+.partner-steps p{font-size:12.5px;line-height:1.8;color:#6d7866}
+.partner-enquire{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:70px;align-items:start;scroll-margin-top:110px}
+.partner-enquire>div:first-child>p:not(.eyebrow){margin-top:22px;font-size:14px;line-height:1.9;color:#5e6d57}
+.partner-contact{margin-top:34px;padding:24px;border:1px solid #dce3d4;border-radius:14px;background:#f3f1e9}
+.partner-contact a{display:block;margin-top:12px;font-size:14px;font-weight:650;color:#173e2c;overflow-wrap:anywhere}
+.partner-contact a:hover{color:#9c7a3c}
+.partner-contact span{display:block;margin-top:12px;font-size:12px;color:#7a8674}
+.partner-form-panel{padding:34px;border-radius:24px;background:#fffdf8;border:1px solid #e1e6da;box-shadow:0 22px 60px #204b3a12}
+.partner-form{margin-top:0}
+.partner-form select{padding:12px;border:1px solid #c9d4cd;border-radius:10px;background:#fff;color:var(--forest);font:inherit;font-size:13px;min-width:0;max-width:100%}
+.partner-form>.button{justify-self:start}
+.partner-success h3{font-size:22px;margin-bottom:10px}
+.partner-success p{font-size:13px;margin:6px 0 0}
+@media(max-width:1100px){.partner-grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}.partner-steps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){.partner-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.partner-enquire{grid-template-columns:1fr;gap:36px}}
+@media(max-width:600px){.partner-grid,.partner-grid-4,.partner-steps{grid-template-columns:1fr}.partner-form-panel{padding:24px 18px}.partner-form .form-columns{grid-template-columns:1fr}.partner-form>.button{justify-self:stretch;justify-content:center}.partner-form select{font-size:16px}}

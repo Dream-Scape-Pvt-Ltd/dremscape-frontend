@@ -11,11 +11,12 @@ export const ROUTES = {
   TREK_DETAIL: (slug: string) => `/treks/${slug}`,
   ACTIVITIES: '/activities',
   ACTIVITY_DETAIL: (slug: string) => `/activities/${slug}`,
+  /** A departure's booking request: the trek page opens the request popup for it. */
   BOOKING: (trekSlug?: string, departureId?: string) => {
     if (trekSlug && departureId) {
-      return `/booking?trek=${encodeURIComponent(trekSlug)}&departure=${encodeURIComponent(departureId)}`;
+      return `/treks/${encodeURIComponent(trekSlug)}?departure=${encodeURIComponent(departureId)}#departures`;
     }
-    return '/booking';
+    return '/treks';
   },
   BOOKING_CONFIRMATION: (reference: string) => `/booking/confirmation/${encodeURIComponent(reference)}`,
   PAYMENT: '/payment',

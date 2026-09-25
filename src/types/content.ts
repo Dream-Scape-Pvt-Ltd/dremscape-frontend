@@ -7,6 +7,14 @@ export interface BlogComment {
   created_at: string;
 }
 
+/** One part of an article: its heading, story text and optional photo. */
+export interface GuideSection {
+  heading: string;
+  body: string;
+  image_url: string;
+  image_caption: string;
+}
+
 export interface TravelGuideAdminItem {
   id: string;
   title: string;
@@ -28,6 +36,7 @@ export interface TravelGuideAdminItem {
 
 export interface TravelGuideDetail extends TravelGuideAdminItem {
   body_markdown?: string;
+  sections?: GuideSection[];
   meta_title?: string;
   meta_description?: string;
   comments?: BlogComment[];
@@ -43,6 +52,7 @@ export interface GuidePayload {
   summary?: string;
   hero_image_url?: string;
   gallery_images?: string[];
+  sections?: GuideSection[];
   body_markdown?: string;
   meta_title?: string;
   meta_description?: string;

@@ -34,11 +34,11 @@ export function assertSameOrigin(request: Request) {
   const expectedOrigin=`${protocol}://${request.headers.get('host') || new URL(request.url).host}`;
   if (origin && origin !== expectedOrigin) throw new BackendError('Please submit this form from the Dreamscape website.',403);
 }
-export async function readInput(request: Request): Promise<Record<string, unknown>> {
+export async function readInput(request: Request, maxChars=60000): Promise<Record<string, unknown>> {
   assertSameOrigin(request);
   if (!request.headers.get('content-type')?.includes('application/json')) throw new BackendError('Please submit a valid form.',415);
   const text=await request.text();
-  if (text.length>60000) throw new BackendError('The form is too large.',413);
+  if (text.length>maxChars) throw new BackendError('The form is too large.',413);
   let data: unknown;
   try {data=JSON.parse(text);} catch {throw new BackendError('Please submit a valid form.',400);}
   if (!data || typeof data!=='object' || Array.isArray(data)) throw new BackendError('Please submit a valid form.',400);

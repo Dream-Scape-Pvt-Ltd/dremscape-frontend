@@ -6,37 +6,30 @@ import type {
   Inquiry,
   InquiryNote,
   InquiryStatus,
-  Activity,
-  ActivityChannel,
-  Task,
-  TaskStatus,
-  Tag,
   LostReason,
-  TimelineEntry,
   PipelineSummary,
   FunnelData,
   CustomerProfile,
   TrekPipeline,
   TrekPipelineRow,
 } from '@/types/inquiry';
-import type {TravelGuideAdminItem, TravelGuideDetail, GuidePayload} from '@/types/content';
+import type {TravelGuideAdminItem, TravelGuideDetail, GuidePayload, GuideSection} from '@/types/content';
 import AdminLogin from '@/components/admin-login';
 import ReviewEditor from './review-editor';
-import AssignmentRulesView from './assignment-rules-view';
-import CapacityView from './capacity-view';
 import DeparturesEditor from './departures-editor';
+import ScheduleBoard from './schedule-board';
 import SiteSettingsEditor from './site-settings-editor';
 import DestinationEditor from './destination-editor';
 import RevenueView from './revenue-view';
-import type {Agent, AdminDeparture} from './capacity-types';
+import type {AdminDeparture} from './capacity-types';
 import styles from '@/app/admin/admin.module.css';
 import {fallbackTrekImage} from '@/lib/trek-images';
 
-type Tab = 'dashboard' | 'treks' | 'capacity' | 'revenue' | 'journal' | 'inquiries' | 'pipeline' | 'reviews' | 'settings' | 'destinations';
+type Tab = 'dashboard' | 'treks' | 'revenue' | 'journal' | 'inquiries' | 'pipeline' | 'reviews' | 'settings' | 'destinations';
 type Page<T> = {count: number; next: string | null; previous: string | null; results: T[]};
 interface AdminProfile {full_name: string; role: string; email?: string;}
-const statuses: InquiryStatus[] = ['NEW','ASSIGNED','IN_CONTACT','BOOKED','TRAVELING','COMPLETED','CLOSED'];
-/** Where an agent books a lead onto a departure, and for how many people. */
+const statuses: InquiryStatus[] = ['NEW','IN_CONTACT','BOOKED','TRAVELING','COMPLETED','CLOSED'];
+/** Which departure a lead is booked onto, and for how many people. */
 type BookingChoice = {departureId: string; travelersCount: number};
 /** Statuses in which a lead's travellers occupy seats on its departure. */
 function holdsSeats(value: InquiryStatus) {
@@ -50,13 +43,34 @@ const lostReasonOptions: {value: LostReason; label: string}[] = [
   {value: 'NOT_SUITABLE', label: 'Trip Not Suitable'},
   {value: 'OTHER', label: 'Other'},
 ];
-const activityChannelOptions: {value: ActivityChannel; label: string}[] = [
-  {value: 'CALL', label: 'Phone Call'},
-  {value: 'EMAIL', label: 'Email'},
-  {value: 'WHATSAPP', label: 'WhatsApp'},
-  {value: 'NOTE', label: 'Internal Note'},
-];
-const emptyGuide: GuidePayload = {title: '', slug: '', country: 'NEPAL', body_markdown: '', category: 'ADVENTURE', hero_image_url: '', gallery_images: [], is_published: false};
+const emptySection = (): GuideSection => ({heading: '', body: '', image_url: '', image_caption: ''});
+const emptyGuide: GuidePayload = {title: '', slug: '', country: 'NEPAL', category: 'ADVENTURE', hero_image_url: '', gallery_images: [], sections: [emptySection()], is_published: false};
+/**
+ * The editor always works in sections. A post written before sections existed
+ * is split on its `## ` headings (text before the first heading becomes an
+ * untitled section), and its old story images are placed on sections in order.
+ */
+function sectionsForEditor(guide: TravelGuideDetail): GuideSection[] {
+  if (guide.sections?.length) return guide.sections.map(section => ({...emptySection(), ...section}));
+  const markdown = (guide.body_markdown || '').trim();
+  const sections: GuideSection[] = [];
+  if (markdown) {
+    for (const block of markdown.split(/^## /m)) {
+      if (!block.trim()) continue;
+      const startsWithHeading = sections.length > 0 || markdown.startsWith('## ');
+      const newline = block.indexOf('\n');
+      const heading = startsWithHeading ? (newline === -1 ? block : block.slice(0, newline)).trim() : '';
+      const body = startsWithHeading ? (newline === -1 ? '' : block.slice(newline + 1)).trim() : block.trim();
+      sections.push({...emptySection(), heading, body});
+    }
+  }
+  if (!sections.length) sections.push(emptySection());
+  (guide.gallery_images || []).forEach((url, index) => {
+    if (sections[index]) sections[index].image_url = url;
+    else sections.push({...emptySection(), image_url: url});
+  });
+  return sections;
+}
 
 export interface AnalyticsMetrics {
   total_treks: number;
@@ -116,6 +130,7 @@ export interface AdminTrek {
   starting_price_usd: string | number;
   altitude_max_meters?: number | null;
   difficulty_grade: string;
+  max_group_size?: number;
   hero_image_url?: string;
   gallery_images?: string[];
   is_featured?: boolean;
@@ -213,6 +228,13 @@ function date(value?: string | null) {
   return value ? new Intl.DateTimeFormat('en-US', {month: 'short', day: 'numeric', year: 'numeric'}).format(new Date(value)) : '—';
 }
 
+/** What a lead is about: its trek, or its kind when it has none (B2B partnership, general…). */
+function interestLabel(item: {trip_title?: string | null; inquiry_type?: string | null}) {
+  if (item.trip_title) return item.trip_title;
+  if (item.inquiry_type === 'PARTNER_DMC') return 'B2B partnership';
+  if (item.inquiry_type === 'TAILOR_MADE') return 'Tailor-made trip';
+  return 'General inquiry';
+}
 function label(value?: string | null) {
   return value?.replaceAll('_', ' ') || '—';
 }
@@ -259,13 +281,6 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
   const [saving, setSaving] = useState(false);
   const [editor, setEditor] = useState<TravelGuideDetail | null>(null);
 
-  // CRM: inquiry drawer sub-tabs (timeline, tasks, tags)
-  const [drawerTab, setDrawerTab] = useState<'details' | 'timeline' | 'tasks' | 'tags'>('details');
-  const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [inquiryTags, setInquiryTags] = useState<Tag[]>([]);
-  const [allTags, setAllTags] = useState<Tag[]>([]);
-
   // CRM: pipeline board + funnel analytics
   const [pipelineSummary, setPipelineSummary] = useState<PipelineSummary | null>(null);
   const [funnel, setFunnel] = useState<FunnelData | null>(null);
@@ -275,12 +290,10 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
   const [crmTrek, setCrmTrek] = useState<string | null>(null);
   const [trekPipeline, setTrekPipeline] = useState<TrekPipeline | null>(null);
 
-  // CRM: tour-based filtering, assignment and bulk actions
-  const [agents, setAgents] = useState<Agent[]>([]);
+  // CRM: tour-based filtering
   const [tripFilter, setTripFilter] = useState('ALL');
-  const [agentFilter, setAgentFilter] = useState('ALL');
-  const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
-  const [capacityAlerts, setCapacityAlerts] = useState(0);
+  const [scheduleTrek, setScheduleTrek] = useState<AdminTrek | null>(null);
+  const [capacityAlerts, setCapacityAlerts] =useState<{total: number; bySlug: Record<string, number>}>({total: 0, bySlug: {}});
 
   // CRM: customer 360
   const [customerProfile, setCustomerProfile] = useState<CustomerProfile | null>(null);
@@ -330,9 +343,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
     try {
       const params = new URLSearchParams({status, search: query});
       if (tripFilter !== 'ALL') params.set('trip', tripFilter);
-      if (agentFilter !== 'ALL') params.set('assigned_agent', agentFilter);
       setInquiries(await api<Page<Inquiry>>(`/api/admin/inquiries?${params}`));
-      setSelectedLeads([]);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to load inquiries.');
     } finally {
@@ -340,25 +351,21 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
     }
   };
 
-  const loadAgents = async () => {
-    if (!adminUser) return;
-    try {
-      setAgents(await api<Agent[]>('/api/admin/agents'));
-    } catch {
-      // A missing agent list only disables the assignee pickers; it must not
-      // take down the rest of the workspace.
-      setAgents([]);
-    }
-  };
-
-  /** Badge count for the Capacity tab: batches that are full or oversubscribed. */
+  /**
+   * Oversubscribed departures across every trek: the total badges the Trek
+   * Management tab, the per-slug counts flag rows in the trek list.
+   */
   const loadCapacityAlerts = async () => {
     if (!adminUser) return;
     try {
-      const page = await api<Page<{id: string}>>('/api/admin/departures?capacity_state=OVERSUBSCRIBED');
-      setCapacityAlerts(page.count);
+      const page = await api<Page<AdminDeparture>>('/api/admin/departures?capacity_state=OVERSUBSCRIBED');
+      const bySlug: Record<string, number> = {};
+      for (const row of page.results) {
+        if (row.trip_slug) bySlug[row.trip_slug] = (bySlug[row.trip_slug] || 0) + 1;
+      }
+      setCapacityAlerts({total: page.count, bySlug});
     } catch {
-      setCapacityAlerts(0);
+      setCapacityAlerts({total: 0, bySlug: {}});
     }
   };
 
@@ -449,7 +456,6 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
       void loadInquiries();
       void loadGuides();
       void loadTreks();
-      void loadAgents();
       void loadCapacityAlerts();
     }
   }, [adminUser]);
@@ -458,20 +464,22 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
     if (!adminUser) return;
     if (tab === 'dashboard') void loadAnalytics();
     if (tab === 'inquiries') void loadInquiries();
-    if (tab === 'capacity') void loadCapacityAlerts();
     if (tab === 'journal') void loadGuides();
-    if (tab === 'treks') void loadTreks();
+    if (tab === 'treks') {
+      void loadTreks();
+      void loadCapacityAlerts();
+    }
     if (tab === 'pipeline') void loadPipeline();
     if (tab !== 'treks') {
       setSelectedTrekSlug(null);
       setSelectedTrekDetail(null);
     }
-  }, [tab, status, tripFilter, agentFilter, adminUser, crmTrek]);
+  }, [tab, status, tripFilter, adminUser, crmTrek]);
 
   const metrics = useMemo(() => ({
     total: inquiries?.count || 0,
     new: inquiries?.results.filter(item => item.status === 'NEW').length || 0,
-    active: inquiries?.results.filter(item => ['ASSIGNED', 'IN_CONTACT', 'BOOKED', 'TRAVELING'].includes(item.status)).length || 0,
+    active: inquiries?.results.filter(item => ['IN_CONTACT', 'BOOKED', 'TRAVELING'].includes(item.status)).length || 0,
     published: guides?.results.filter(item => item.is_published).length || 0
   }), [guides, inquiries]);
 
@@ -795,23 +803,13 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
   async function openInquiry(reference: string) {
     setMessage('');
     setNotes([]);
-    setTimeline([]);
-    setTasks([]);
-    setInquiryTags([]);
-    setDrawerTab('details');
     try {
-      const [detail, noteList, timelineList, taskList] = await Promise.all([
+      const [detail, noteList] = await Promise.all([
         api<Inquiry>(`/api/admin/inquiries/${reference}`),
         api<InquiryNote[] | Page<InquiryNote>>(`/api/admin/inquiries/${reference}/notes`),
-        api<TimelineEntry[]>(`/api/admin/inquiries/${reference}/timeline`),
-        api<Page<Task>>(`/api/admin/inquiries/${reference}/tasks`),
       ]);
       setSelectedInquiry(detail);
       setNotes(Array.isArray(noteList) ? noteList : noteList.results);
-      setTimeline(timelineList);
-      setTasks(taskList.results);
-      setInquiryTags(detail.tags ?? []);
-      if (allTags.length === 0) void loadAllTags();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to open this inquiry.');
     }
@@ -849,145 +847,6 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
     }
   }
 
-  /** Reassign the open inquiry to an agent, from the drawer's picker. */
-  async function assignAgent(agentId: string) {
-    if (!selectedInquiry) return;
-    setSaving(true);
-    setMessage('');
-    try {
-      const saved = await api<Inquiry>(`/api/admin/inquiries/${selectedInquiry.inquiry_number}`, {
-        method: 'PATCH',
-        body: JSON.stringify({status: selectedInquiry.status, assigned_agent_id: agentId || null})
-      });
-      setSelectedInquiry(saved);
-      setInquiries(current => current && {
-        ...current,
-        results: current.results.map(item =>
-          item.inquiry_number === saved.inquiry_number
-            ? {...item, assigned_agent_name: saved.assigned_agent_name, assigned_agent_id: saved.assigned_agent_id}
-            : item
-        )
-      });
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to reassign this inquiry.');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  /** Reassign every currently selected lead to one agent. */
-  async function bulkAssign(agentId: string) {
-    if (!selectedLeads.length) return;
-    setSaving(true);
-    setMessage('');
-    try {
-      const result = await api<{matched: number; reassigned: number}>('/api/admin/inquiries/bulk-assign', {
-        method: 'POST',
-        body: JSON.stringify({inquiry_numbers: selectedLeads, agent_id: agentId})
-      });
-      setMessage(`${result.reassigned} of ${result.matched} lead(s) reassigned.`);
-      setSelectedLeads([]);
-      await loadInquiries();
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to reassign these leads.');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function loadAllTags() {
-    try {
-      const page = await api<Page<Tag>>('/api/admin/inquiries/tags');
-      setAllTags(page.results);
-    } catch {
-      // Non-critical — tag picker just stays empty.
-    }
-  }
-
-  async function logActivity(reference: string, channel: ActivityChannel, body: string) {
-    setSaving(true);
-    setMessage('');
-    try {
-      const saved = await api<Activity>(`/api/admin/inquiries/${reference}/activities`, {
-        method: 'POST',
-        body: JSON.stringify({channel, body}),
-      });
-      setTimeline(items => [{entry_type: 'activity', created_at: saved.created_at, data: saved}, ...items]);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to log this activity.');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function addTask(reference: string, title: string, dueAt: string) {
-    setSaving(true);
-    setMessage('');
-    try {
-      const saved = await api<Task>(`/api/admin/inquiries/${reference}/tasks`, {
-        method: 'POST',
-        body: JSON.stringify({title, due_at: dueAt}),
-      });
-      setTasks(items => [...items, saved]);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to add the task.');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function toggleTaskDone(task: Task) {
-    const nextStatus: TaskStatus = task.status === 'DONE' ? 'OPEN' : 'DONE';
-    try {
-      const saved = await api<Task>(`/api/admin/inquiries/tasks/${task.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({status: nextStatus}),
-      });
-      setTasks(items => items.map(item => item.id === task.id ? saved : item));
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to update the task.');
-    }
-  }
-
-  async function attachTag(reference: string, tagId: string) {
-    setSaving(true);
-    setMessage('');
-    try {
-      const saved = await api<Tag[]>(`/api/admin/inquiries/${reference}/tags`, {
-        method: 'POST',
-        body: JSON.stringify({tag_id: tagId}),
-      });
-      setInquiryTags(saved);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to attach the tag.');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function detachTag(reference: string, tagId: string) {
-    try {
-      const saved = await api<Tag[]>(`/api/admin/inquiries/${reference}/tags/${tagId}`, {method: 'DELETE'});
-      setInquiryTags(saved);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to remove the tag.');
-    }
-  }
-
-  async function createTag(name: string) {
-    try {
-      const saved = await api<Tag>('/api/admin/inquiries/tags', {
-        method: 'POST',
-        body: JSON.stringify({name}),
-      });
-      setAllTags(items => [...items, saved]);
-      return saved;
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to create the tag.');
-      return null;
-    }
-  }
-
   async function openCustomer(email: string) {
     setMessage('');
     setLoadingCustomer(true);
@@ -1022,7 +881,8 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
   async function editGuide(item?: TravelGuideAdminItem) {
     setMessage('');
     try {
-      setEditor(item ? await api<TravelGuideDetail>(`/api/admin/guides/${item.slug}`) : {...emptyGuide, id: '', slug: ''});
+      const detail = item ? await api<TravelGuideDetail>(`/api/admin/guides/${item.slug}`) : {...emptyGuide, id: '', slug: ''};
+      setEditor({...detail, sections: sectionsForEditor(detail)});
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to open the editor.');
     }
@@ -1033,7 +893,15 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
     if (!editor) return;
     setSaving(true);
     setMessage('');
-    const {id, ...payload} = editor;
+    const {id, body_markdown, ...rest} = editor;
+    void id; void body_markdown;
+    const sections = (editor.sections || []).filter(section => section.heading.trim() || section.body.trim() || section.image_url);
+    if (!sections.length) {
+      setSaving(false);
+      setMessage('Add at least one section with some text or a photo before saving.');
+      return;
+    }
+    const payload = {...rest, sections};
     try {
       const saved = await api<TravelGuideDetail>(editor.id ? `/api/admin/guides/${editor.slug}` : '/api/admin/guides', {
         method: editor.id ? 'PATCH' : 'POST',
@@ -1054,19 +922,42 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
     }
   }
 
-  async function deleteGuide() {
-    if (!editor?.id || !window.confirm(`Archive “${editor.title}”?`)) return;
+  /** Takes a post off the public blog but keeps it as a draft. */
+  async function unpublishGuide() {
+    if (!editor?.id || !window.confirm(`Unpublish “${editor.title}”? It stays in the admin as a draft.`)) return;
     setSaving(true);
+    setMessage('');
     try {
       await api(`/api/admin/guides/${editor.slug}`, {method: 'DELETE'});
       setGuides(current => current && {
         ...current,
-        results: current.results.filter(item => item.slug !== editor.slug),
-        count: current.count - 1
+        results: current.results.map(item => item.slug === editor.slug ? {...item, is_published: false} : item)
       });
       setEditor(null);
+      setMessage(`“${editor.title}” is unpublished and saved as a draft.`);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to archive the guide.');
+      setMessage(error instanceof Error ? error.message : 'Unable to unpublish the post.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  /** Removes a post and its comments for good, from the editor or the blog list. */
+  async function deleteGuidePermanently(guide: {slug: string; title: string}) {
+    if (!window.confirm(`Delete “${guide.title}” permanently?\n\nThe post, its photos list and all reader comments will be removed. This cannot be undone.`)) return;
+    setSaving(true);
+    setMessage('');
+    try {
+      await api(`/api/admin/guides/${guide.slug}?permanent=true`, {method: 'DELETE'});
+      setGuides(current => current && {
+        ...current,
+        results: current.results.filter(item => item.slug !== guide.slug),
+        count: Math.max(0, current.count - 1)
+      });
+      if (editor?.slug === guide.slug) setEditor(null);
+      setMessage(`“${guide.title}” was deleted.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to delete the post.');
     } finally {
       setSaving(false);
     }
@@ -1103,6 +994,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
     {
       id: 'treks',
       label: 'Trek Management',
+      badge: capacityAlerts.total > 0 ? capacityAlerts.total : undefined,
       icon: (
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="m8 3 4 8 5-5 5 15H2L8 3z"/>
@@ -1116,17 +1008,6 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="m3 17 5-8 4 5 3-4 6 7H3Z"/>
           <circle cx="17" cy="5" r="2"/>
-        </svg>
-      )
-    },
-    {
-      id: 'capacity',
-      label: 'Departure Capacity',
-      badge: capacityAlerts > 0 ? capacityAlerts : undefined,
-      icon: (
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="4" width="18" height="17" rx="2"/>
-          <path d="M16 2v4M8 2v4M3 10h18"/>
         </svg>
       )
     },
@@ -1532,16 +1413,10 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
             query={query}
             status={status}
             treks={treks}
-            agents={agents}
             tripFilter={tripFilter}
-            agentFilter={agentFilter}
-            selected={selectedLeads}
             onQuery={setQuery}
             onStatus={setStatus}
             onTrip={setTripFilter}
-            onAgent={setAgentFilter}
-            onSelect={setSelectedLeads}
-            onBulkAssign={agentId => void bulkAssign(agentId)}
             onSearch={() => void loadInquiries()}
             onOpen={openInquiry}
           />
@@ -1579,6 +1454,8 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
             loading={loading}
             onCreate={() => void editGuide()}
             onEdit={item => void editGuide(item)}
+            onDelete={item => void deleteGuidePermanently(item)}
+            deleting={saving}
           />
         )}
 
@@ -1590,6 +1467,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
               slug={selectedTrekSlug}
               destinations={destinations}
               categories={categories}
+              formatDate={date}
               saving={trekSaving}
               loading={loadingTrekDetail}
               onMessage={setMessage}
@@ -1597,6 +1475,8 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
               onBack={() => {
                 setSelectedTrekSlug(null);
                 setSelectedTrekDetail(null);
+                // Seat edits in section 05 may have cleared or caused alerts.
+                void loadCapacityAlerts();
               }}
               onSave={handleSaveFullTrek}
               onToggleActive={() => {
@@ -1616,24 +1496,16 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
               loading={loadingTreks}
               query={trekQuery}
               statusFilter={trekStatusFilter}
+              oversubscribed={capacityAlerts.bySlug}
               onQueryChange={setTrekQuery}
               onStatusFilterChange={setTrekStatusFilter}
               onSelectTrek={slug => void loadTrekDetail(slug)}
               onToggleActive={handleToggleTrekActive}
               onToggleFeatured={handleToggleTrekFeatured}
               onDeleteTrek={trek => setTrekToDelete(trek)}
+              onSchedule={trek => setScheduleTrek(trek)}
             />
           )
-        )}
-
-        {/* Tab: Departure Capacity Board */}
-        {tab === 'capacity' && (
-          <CapacityView
-            api={api}
-            agents={agents}
-            onMessage={setMessage}
-            formatDate={date}
-          />
         )}
 
         {/* Tab: Full Revenue & Financial Analytics View */}
@@ -1641,18 +1513,8 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
           <RevenueView api={api} isAdmin={adminUser.role === 'ADMIN'} treks={treks} />
         )}
 
-        {/* Tab: Settings — CRM lead routing rules */}
-        {tab === 'settings' && (
-          <>
-            <AssignmentRulesView
-              api={api}
-              agents={agents}
-              treks={treks}
-              onMessage={setMessage}
-            />
-            <SiteSettingsEditor/>
-          </>
-        )}
+        {/* Tab: Settings */}
+        {tab === 'settings' && <SiteSettingsEditor/>}
 
         {tab === 'reviews' && <ReviewEditor/>}
         {tab === 'destinations' && <DestinationEditor/>}
@@ -1665,27 +1527,10 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
           notes={notes}
           noteText={noteText}
           saving={saving}
-          agents={agents}
-          onAssign={agentId => void assignAgent(agentId)}
           onClose={() => setSelectedInquiry(null)}
           onStatus={updateStatus}
           onNoteText={setNoteText}
           onSubmit={submitNote}
-          drawerTab={drawerTab}
-          onDrawerTab={setDrawerTab}
-          timeline={timeline}
-          tasks={tasks}
-          tags={inquiryTags}
-          allTags={allTags}
-          onLogActivity={(channel, body) => void logActivity(selectedInquiry.inquiry_number, channel, body)}
-          onAddTask={(title, dueAt) => void addTask(selectedInquiry.inquiry_number, title, dueAt)}
-          onToggleTask={task => void toggleTaskDone(task)}
-          onAttachTag={tagId => void attachTag(selectedInquiry.inquiry_number, tagId)}
-          onDetachTag={tagId => void detachTag(selectedInquiry.inquiry_number, tagId)}
-          onCreateTag={async name => {
-            const created = await createTag(name);
-            if (created) void attachTag(selectedInquiry.inquiry_number, created.id);
-          }}
           onViewCustomer={() => void openCustomer(selectedInquiry.email)}
         />
       )}
@@ -1711,8 +1556,21 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
           onChange={setEditor}
           onClose={() => setEditor(null)}
           onSave={saveGuide}
-          onDelete={() => void deleteGuide()}
+          onUnpublish={() => void unpublishGuide()}
+          onDelete={() => editor && void deleteGuidePermanently(editor)}
           onDeleteComment={commentId => void deleteGuideComment(commentId)}
+        />
+      )}
+
+      {/* Trek Schedule pop-up: departures and seat capacity for one trek */}
+      {scheduleTrek && (
+        <ScheduleModal
+          trek={scheduleTrek}
+          onClose={() => {
+            setScheduleTrek(null);
+            // Seat edits in the pop-up may have cleared or caused alerts.
+            void loadCapacityAlerts();
+          }}
         />
       )}
 
@@ -1751,28 +1609,20 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
 }
 
 function InquiriesView({
-  inquiries, loading, query, status, treks, agents, tripFilter, agentFilter,
-  selected, onQuery, onStatus, onTrip, onAgent, onSelect, onBulkAssign, onSearch, onOpen
+  inquiries, loading, query, status, treks, tripFilter, onQuery, onStatus, onTrip, onSearch, onOpen
 }: {
   inquiries: Inquiry[];
   loading: boolean;
   query: string;
   status: string;
   treks: AdminTrek[];
-  agents: Agent[];
   tripFilter: string;
-  agentFilter: string;
-  selected: string[];
   onQuery: (value: string) => void;
   onStatus: (value: string) => void;
   onTrip: (value: string) => void;
-  onAgent: (value: string) => void;
-  onSelect: (numbers: string[]) => void;
-  onBulkAssign: (agentId: string) => void;
   onSearch: () => void;
   onOpen: (reference: string) => void;
 }) {
-  const allSelected = inquiries.length > 0 && selected.length === inquiries.length;
   return (
     <section className={styles.panel}>
       <div className={styles.toolbar}>
@@ -1796,38 +1646,8 @@ function InquiriesView({
             <option key={trek.slug} value={trek.slug}>{trek.title}</option>
           ))}
         </select>
-        <select value={agentFilter} onChange={event => onAgent(event.target.value)} aria-label="Filter by agent">
-          <option value="ALL">All agents</option>
-          <option value="me">Assigned to me</option>
-          <option value="unassigned">Unassigned</option>
-          {agents.map(agent => (
-            <option key={agent.id} value={agent.id}>{agent.full_name || agent.email}</option>
-          ))}
-        </select>
         <button className={styles.primary} onClick={onSearch}>Search</button>
       </div>
-      {selected.length > 0 && (
-        <div className={styles.toolbar}>
-          <span style={{fontSize: '12px', fontWeight: 700, color: '#133e2f'}}>
-            {selected.length} lead{selected.length === 1 ? '' : 's'} selected
-          </span>
-          <select
-            defaultValue=""
-            aria-label="Assign selected leads to an agent"
-            onChange={event => {
-              if (!event.target.value) return;
-              onBulkAssign(event.target.value);
-              event.target.value = '';
-            }}
-          >
-            <option value="">Assign selected to...</option>
-            {agents.map(agent => (
-              <option key={agent.id} value={agent.id}>{agent.full_name || agent.email}</option>
-            ))}
-          </select>
-          <button className={styles.actionBtnToggle} onClick={() => onSelect([])}>Clear selection</button>
-        </div>
-      )}
       {loading ? (
         <p className={styles.empty}>Loading inquiries…</p>
       ) : inquiries.length ? (
@@ -1835,17 +1655,8 @@ function InquiriesView({
           <table className={styles.modernTable}>
             <thead>
               <tr>
-                <th>
-                  <input
-                    type="checkbox"
-                    checked={allSelected}
-                    aria-label="Select all leads in this view"
-                    onChange={event => onSelect(event.target.checked ? inquiries.map(i => i.inquiry_number) : [])}
-                  />
-                </th>
                 <th>Traveler</th>
                 <th>Trip interest</th>
-                <th>Agent</th>
                 <th>Status</th>
                 <th>Received</th>
                 <th></th>
@@ -1855,18 +1666,6 @@ function InquiriesView({
               {inquiries.map(item => (
                 <tr key={item.inquiry_number}>
                   <td>
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(item.inquiry_number)}
-                      aria-label={`Select the inquiry from ${item.full_name}`}
-                      onChange={event => onSelect(
-                        event.target.checked
-                          ? [...selected, item.inquiry_number]
-                          : selected.filter(number => number !== item.inquiry_number)
-                      )}
-                    />
-                  </td>
-                  <td>
                     <strong className={styles.travelerName}>{item.full_name}</strong>
                     <small style={{fontSize: '11px', color: '#6d8276'}}>{item.email}</small>
                   </td>
@@ -1874,13 +1673,10 @@ function InquiriesView({
                     {/* trip_title is what the serializer actually sends. The old
                         item.trip / item.journey reads were stripped by the field
                         allowlist, so this column always fell through to the type. */}
-                    <span>{item.trip_title || 'General inquiry'}</span>
+                    <span>{interestLabel(item)}</span>
                     {item.departure_label && (
                       <small style={{display: 'block', fontSize: '11px', color: '#6d8276'}}>{item.departure_label}</small>
                     )}
-                  </td>
-                  <td>
-                    {item.assigned_agent_name || <span style={{color: '#a8b8ae'}}>Unassigned</span>}
                   </td>
                   <td>
                     <em data-status={item.status}>{label(item.status)}</em>
@@ -1903,7 +1699,7 @@ function InquiriesView({
   );
 }
 
-function JournalView({guides, loading, onCreate, onEdit}: {guides: TravelGuideAdminItem[]; loading: boolean; onCreate: () => void; onEdit: (guide: TravelGuideAdminItem) => void}) {
+function JournalView({guides, loading, deleting, onCreate, onEdit, onDelete}: {guides: TravelGuideAdminItem[]; loading: boolean; deleting: boolean; onCreate: () => void; onEdit: (guide: TravelGuideAdminItem) => void; onDelete: (guide: TravelGuideAdminItem) => void}) {
   return (
     <section className={styles.panel}>
       <div className={styles.panelHead}>
@@ -1946,7 +1742,12 @@ function JournalView({guides, loading, onCreate, onEdit}: {guides: TravelGuideAd
                   <td data-label="Comments">{guide.comment_count || 0}</td>
                   <td data-label="Updated">{date(guide.updated_at || guide.published_at)}</td>
                   <td data-label="Action">
-                    <button onClick={() => onEdit(guide)}>Edit</button>
+                    <div className={styles.actionBtnGroup}>
+                      <RowActionsMenu label={guide.title} actions={[
+                        {label: 'Edit post', onSelect: () => onEdit(guide)},
+                        {label: 'Delete post', onSelect: () => onDelete(guide), danger: true, disabled: deleting},
+                      ]}/>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -1961,32 +1762,15 @@ function JournalView({guides, loading, onCreate, onEdit}: {guides: TravelGuideAd
 }
 
 function InquiryDrawer({
-  inquiry, notes, noteText, saving, agents, onAssign, onClose, onStatus, onNoteText, onSubmit,
-  drawerTab, onDrawerTab, timeline, tasks, tags, allTags,
-  onLogActivity, onAddTask, onToggleTask, onAttachTag, onDetachTag, onCreateTag, onViewCustomer,
+  inquiry, notes, noteText, saving, onClose, onStatus, onNoteText, onSubmit, onViewCustomer,
 }: {
   inquiry: Inquiry; notes: InquiryNote[]; noteText: string; saving: boolean;
-  agents: Agent[]; onAssign: (agentId: string) => void;
   onClose: () => void; onStatus: (value: InquiryStatus, lostReason?: LostReason | '', booking?: BookingChoice) => void;
   onNoteText: (value: string) => void; onSubmit: (event: FormEvent) => void;
-  drawerTab: 'details' | 'timeline' | 'tasks' | 'tags'; onDrawerTab: (tab: 'details' | 'timeline' | 'tasks' | 'tags') => void;
-  timeline: TimelineEntry[]; tasks: Task[]; tags: Tag[]; allTags: Tag[];
-  onLogActivity: (channel: ActivityChannel, body: string) => void;
-  onAddTask: (title: string, dueAt: string) => void;
-  onToggleTask: (task: Task) => void;
-  onAttachTag: (tagId: string) => void;
-  onDetachTag: (tagId: string) => void;
-  onCreateTag: (name: string) => void;
   onViewCustomer: () => void;
 }) {
   const [pendingStatus, setPendingStatus] = useState<InquiryStatus | null>(null);
   const [lostReason, setLostReason] = useState<LostReason | ''>('');
-  const [activityChannel, setActivityChannel] = useState<ActivityChannel>('CALL');
-  const [activityBody, setActivityBody] = useState('');
-  const [taskTitle, setTaskTitle] = useState('');
-  const [taskDueAt, setTaskDueAt] = useState('');
-  const [tagPick, setTagPick] = useState('');
-  const [newTagName, setNewTagName] = useState('');
 
   const needsLostReason = pendingStatus === 'CLOSED' && !inquiry.converted_booking_reference;
 
@@ -2010,8 +1794,6 @@ function InquiryDrawer({
     setPendingStatus(null);
   }
 
-  const availableTags = allTags.filter(tag => !tags.some(t => t.id === tag.id));
-
   return (
     <aside className={styles.drawer} aria-label="Inquiry details">
       <button className={styles.close} onClick={onClose}>×</button>
@@ -2021,21 +1803,7 @@ function InquiryDrawer({
       {inquiry.phone && <a href={`tel:${inquiry.phone}`}>{inquiry.phone}</a>}
       <button type="button" className={styles.drawerHistoryBtn} onClick={onViewCustomer}>View customer history →</button>
 
-      <nav className={styles.drawerTabs} aria-label="Inquiry sections">
-        {(['details', 'timeline', 'tasks', 'tags'] as const).map(value => (
-          <button
-            key={value}
-            type="button"
-            className={`${styles.drawerTab} ${drawerTab === value ? styles.drawerTabActive : ''}`}
-            onClick={() => onDrawerTab(value)}
-          >
-            {value === 'details' ? 'Details' : value === 'timeline' ? 'Timeline' : value === 'tasks' ? `Tasks (${tasks.filter(t => t.status === 'OPEN').length})` : `Tags (${tags.length})`}
-          </button>
-        ))}
-      </nav>
-
-      {drawerTab === 'details' && (
-        <>
+      <>
           <dl>
             <div>
               <dt>Status</dt>
@@ -2068,25 +1836,10 @@ function InquiryDrawer({
               </dd>
             </div>
             <div>
-              <dt>Assigned agent</dt>
-              <dd>
-                <select
-                  value={inquiry.assigned_agent_id || ''}
-                  disabled={saving}
-                  onChange={event => onAssign(event.target.value)}
-                >
-                  <option value="">Unassigned</option>
-                  {agents.map(agent => (
-                    <option key={agent.id} value={agent.id}>{agent.full_name || agent.email}</option>
-                  ))}
-                </select>
-              </dd>
-            </div>
-            <div>
               <dt>Trip interest</dt>
               {/* trip_title is the field the serializer actually sends; trip and
                   journey are stripped by the staff field allowlist. */}
-              <dd>{inquiry.trip_title || 'General inquiry'}</dd>
+              <dd>{interestLabel(inquiry)}</dd>
             </div>
             <div>
               <dt>Departure</dt>
@@ -2127,120 +1880,7 @@ function InquiryDrawer({
               </button>
             </form>
           </section>
-        </>
-      )}
-
-      {drawerTab === 'timeline' && (
-        <section>
-          <h3>Activity timeline</h3>
-          <div className={styles.timelineList}>
-            {timeline.length === 0 && <p className={styles.empty}>No activity logged yet.</p>}
-            {timeline.map((entry, index) => {
-              const isActivity = entry.entry_type === 'activity';
-              const activity = isActivity ? entry.data as Activity : null;
-              const note = !isActivity ? entry.data as InquiryNote : null;
-              return (
-                <article key={`${entry.entry_type}-${entry.data.id}-${index}`} className={styles.timelineEntry} data-channel={activity?.channel || 'NOTE'}>
-                  <div className={styles.timelineHead}>
-                    <span className={styles.timelineChannel}>{isActivity ? label(activity!.channel) : 'Note'}</span>
-                    <span className={styles.timelineAuthor}>{isActivity ? activity!.author?.full_name || 'Staff' : authorName(note?.author)}</span>
-                    <span className={styles.timelineTime}>{date(entry.created_at)}</span>
-                  </div>
-                  <p className={styles.timelineBody}>{isActivity ? activity!.body : note!.note_text}</p>
-                </article>
-              );
-            })}
-          </div>
-          <form
-            className={styles.activityForm}
-            onSubmit={event => {
-              event.preventDefault();
-              if (!activityBody.trim() && activityChannel !== 'NOTE') return;
-              onLogActivity(activityChannel, activityBody);
-              setActivityBody('');
-            }}
-          >
-            <select value={activityChannel} onChange={event => setActivityChannel(event.target.value as ActivityChannel)}>
-              {activityChannelOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-            </select>
-            <textarea
-              value={activityBody}
-              onChange={event => setActivityBody(event.target.value)}
-              placeholder="What happened on this call/email/WhatsApp touch?"
-              maxLength={5000}
-            />
-            <button className={styles.primary} disabled={saving}>{saving ? 'Saving…' : 'Log activity'}</button>
-          </form>
-        </section>
-      )}
-
-      {drawerTab === 'tasks' && (
-        <section>
-          <h3>Follow-up tasks</h3>
-          <div className={styles.taskList}>
-            {tasks.length === 0 && <p className={styles.empty}>No follow-ups scheduled.</p>}
-            {tasks.map(task => (
-              <div key={task.id} className={styles.taskRow} data-status={task.status}>
-                <div className={styles.taskRowTitle}>
-                  {task.title}
-                  <div className={styles.taskRowDue}>Due {date(task.due_at)}</div>
-                </div>
-                {task.status !== 'CANCELLED' && (
-                  <button type="button" className={styles.taskDoneBtn} onClick={() => onToggleTask(task)}>
-                    {task.status === 'DONE' ? 'Reopen' : 'Mark done'}
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-          <form
-            className={styles.taskForm}
-            onSubmit={event => {
-              event.preventDefault();
-              if (!taskTitle.trim() || !taskDueAt) return;
-              onAddTask(taskTitle, new Date(taskDueAt).toISOString());
-              setTaskTitle('');
-              setTaskDueAt('');
-            }}
-          >
-            <input type="text" value={taskTitle} onChange={event => setTaskTitle(event.target.value)} placeholder="Follow-up title" maxLength={255} />
-            <input type="datetime-local" value={taskDueAt} onChange={event => setTaskDueAt(event.target.value)} />
-            <button className={styles.primary} disabled={saving || !taskTitle.trim() || !taskDueAt}>+ Add</button>
-          </form>
-        </section>
-      )}
-
-      {drawerTab === 'tags' && (
-        <section>
-          <h3>Tags</h3>
-          <div className={styles.chipRow}>
-            {tags.length === 0 && <p className={styles.empty}>No tags attached.</p>}
-            {tags.map(tag => (
-              <span key={tag.id} className={styles.chip} style={{background: tag.color ? `${tag.color}33` : undefined}}>
-                {tag.name}
-                <button type="button" className={styles.chipRemove} onClick={() => onDetachTag(tag.id)} aria-label={`Remove tag ${tag.name}`}>×</button>
-              </span>
-            ))}
-          </div>
-          <form
-            className={styles.addChipForm}
-            onSubmit={event => {
-              event.preventDefault();
-              if (tagPick) { onAttachTag(tagPick); setTagPick(''); return; }
-              if (newTagName.trim()) { onCreateTag(newTagName.trim()); setNewTagName(''); }
-            }}
-          >
-            {availableTags.length > 0 && (
-              <select value={tagPick} onChange={event => setTagPick(event.target.value)}>
-                <option value="">Pick existing tag…</option>
-                {availableTags.map(tag => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
-              </select>
-            )}
-            <input type="text" value={newTagName} onChange={event => setNewTagName(event.target.value)} placeholder="Or create a new tag" maxLength={50} />
-            <button className={styles.primary} disabled={!tagPick && !newTagName.trim()}>Add tag</button>
-          </form>
-        </section>
-      )}
+      </>
     </aside>
   );
 }
@@ -2253,7 +1893,7 @@ function CrmTrekList({pipeline, summary, loading, onOpen}: {
   onOpen: (slug: string) => void;
 }) {
   const rows = pipeline?.results ?? [];
-  const openLeads = (row: TrekPipelineRow) => row.by_status.NEW + row.by_status.ASSIGNED + row.by_status.IN_CONTACT;
+  const openLeads = (row: TrekPipelineRow) => row.by_status.NEW + row.by_status.IN_CONTACT;
 
   return (
     <section className={styles.panel}>
@@ -2277,10 +1917,6 @@ function CrmTrekList({pipeline, summary, loading, onOpen}: {
         <div className={styles.statCard}>
           <span className={styles.statLabel}>SLA breaches</span>
           <strong className={styles.statValue}>{summary?.sla_breached_count ?? '—'}</strong>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>Unassigned</span>
-          <strong className={styles.statValue}>{summary?.unassigned_open_leads ?? '—'}</strong>
         </div>
       </div>
 
@@ -2379,10 +2015,6 @@ function PipelineView({summary, funnel, trek, inquiries, loading, onBack, onOpen
               <span className={styles.statLabel}>SLA breaches</span>
               <strong className={styles.statValue}>{summary?.sla_breached_count ?? '—'}</strong>
             </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Unassigned</span>
-              <strong className={styles.statValue}>{summary?.unassigned_open_leads ?? '—'}</strong>
-            </div>
           </>
         )}
       </div>
@@ -2436,7 +2068,7 @@ function KanbanCard({inquiry, onOpen, onStatusChange}: {
     <div className={styles.kanbanCard}>
       <div onClick={() => onOpen(inquiry.inquiry_number)} role="button" tabIndex={0}>
         <strong>{inquiry.full_name}</strong>
-        <small>{inquiry.trip_title || inquiry.journey || label(inquiry.inquiry_type) || 'General inquiry'}</small>
+        <small>{inquiry.trip_title || inquiry.journey || interestLabel(inquiry)}</small>
         {inquiry.departure_label && <small>{inquiry.departure_label}</small>}
         {holdsSeats(inquiry.status) && inquiry.travelers_count ? (
           <small>
@@ -2482,7 +2114,7 @@ function KanbanCard({inquiry, onOpen, onStatusChange}: {
 
 /**
  * Asks which departure a lead is booked on and how many people are going.
- * Confirming adds them to that departure's booked seats on the capacity board.
+ * Confirming adds them to that departure's booked seats, shown in the trek editor's Departures & Capacity section.
  */
 function BookingPrompt({inquiry, saving = false, onConfirm, onCancel}: {
   inquiry: Inquiry;
@@ -2587,7 +2219,7 @@ function CustomerProfileModal({customer, loading, onClose, onOpenInquiry}: {
                   <strong>{item.inquiry_number}</strong>
                   <small>{date(item.created_at)} · {label(item.status)}</small>
                   <p>
-                    {item.trip_title || label(item.inquiry_type)}{' '}
+                    {interestLabel(item)}{' '}
                     <button type="button" className={styles.taskDoneBtn} onClick={() => onOpenInquiry(item.inquiry_number)}>Open →</button>
                   </p>
                 </article>
@@ -2612,10 +2244,26 @@ function CustomerProfileModal({customer, loading, onClose, onOpenInquiry}: {
   );
 }
 
-function GuideEditor({guide, saving, onChange, onClose, onSave, onDelete, onDeleteComment}: {guide: TravelGuideDetail; saving: boolean; onChange: (guide: TravelGuideDetail) => void; onClose: () => void; onSave: (event: FormEvent) => void; onDelete: () => void; onDeleteComment: (commentId: string) => void}) {
+function GuideEditor({guide, saving, onChange, onClose, onSave, onUnpublish, onDelete, onDeleteComment}: {guide: TravelGuideDetail; saving: boolean; onChange: (guide: TravelGuideDetail) => void; onClose: () => void; onSave: (event: FormEvent) => void; onUnpublish: () => void; onDelete: () => void; onDeleteComment: (commentId: string) => void}) {
   const [uploadingHero, setUploadingHero] = useState(false);
-  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [uploadingSection, setUploadingSection] = useState<number | null>(null);
   const [mediaError, setMediaError] = useState('');
+  const sections = guide.sections?.length ? guide.sections : [emptySection()];
+  const setSections = (next: GuideSection[]) => onChange({...guide, sections: next});
+  const updateSection = (index: number, changes: Partial<GuideSection>) =>
+    setSections(sections.map((section, i) => i === index ? {...section, ...changes} : section));
+  function moveSection(index: number, step: number) {
+    const target = index + step;
+    if (target < 0 || target >= sections.length) return;
+    const next = [...sections];
+    [next[index], next[target]] = [next[target], next[index]];
+    setSections(next);
+  }
+  function removeSection(index: number) {
+    const section = sections[index];
+    if ((section.heading || section.body || section.image_url) && !window.confirm(`Remove section ${index + 1}${section.heading ? ` “${section.heading}”` : ''}?`)) return;
+    setSections(sections.length === 1 ? [emptySection()] : sections.filter((_, i) => i !== index));
+  }
   const field = (key: keyof TravelGuideDetail) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     onChange({...guide, [key]: event.target.type === 'checkbox' ? (event.target as HTMLInputElement).checked : event.target.value});
 
@@ -2635,14 +2283,14 @@ function GuideEditor({guide, saving, onChange, onClose, onSave, onDelete, onDele
     finally { setUploadingHero(false); }
   }
 
-  async function uploadGallery(files: File[]) {
-    if (!files.length) return;
-    setUploadingGallery(true); setMediaError('');
+  async function uploadSectionImage(index: number, file?: File) {
+    if (!file) return;
+    setUploadingSection(index); setMediaError('');
     try {
-      const result = await uploadImages(files);
-      onChange({...guide, gallery_images:[...(guide.gallery_images || []), ...result.files.map(file => file.url)]});
-    } catch (error) { setMediaError(error instanceof Error ? error.message : 'The story images could not be uploaded.'); }
-    finally { setUploadingGallery(false); }
+      const result = await uploadImages([file]);
+      if (result.files[0]) updateSection(index, {image_url: result.files[0].url});
+    } catch (error) { setMediaError(error instanceof Error ? error.message : 'The section photo could not be uploaded.'); }
+    finally { setUploadingSection(null); }
   }
 
   return (
@@ -2672,27 +2320,57 @@ function GuideEditor({guide, saving, onChange, onClose, onSave, onDelete, onDele
         </section>
 
         <section className={styles.blogEditorSection}>
-          <div className={styles.blogSectionHeading}><span>02</span><div><h3>Photos</h3><p>Choose a hero image and supporting images from your computer.</p></div></div>
-          <div className={styles.blogMediaColumns}>
+          <div className={styles.blogSectionHeading}><span>02</span><div><h3>Cover photo</h3><p>The main photo shown on the blog card and at the top of the post.</p></div></div>
+          <div className={styles.blogMediaColumns} data-single>
             <div className={styles.blogMediaPanel}>
               <div className={styles.blogMediaLabel}><strong>Hero image</strong><small>Shown on the blog card and at the top of the post</small></div>
               {guide.hero_image_url ? <div className={styles.blogHeroPreview}><img src={guide.hero_image_url} alt="Hero preview"/><button type="button" onClick={() => onChange({...guide, hero_image_url:''})}>Remove</button></div> : <div className={styles.blogImageEmpty}><span>◇</span><p>No hero image selected</p></div>}
               <label className={styles.blogUploadButton}><input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploadingHero} onChange={event => {void uploadHero(event.currentTarget.files?.[0]); event.currentTarget.value='';}}/>{uploadingHero ? 'Uploading…' : guide.hero_image_url ? 'Replace hero image' : 'Choose hero image'}</label>
             </div>
-            <div className={styles.blogMediaPanel}>
-              <div className={styles.blogMediaLabel}><strong>Story images</strong><small>Add up to 12 supporting photos at a time</small></div>
-              <label className={`${styles.blogUploadButton} ${styles.blogUploadSecondary}`}><input type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={uploadingGallery} onChange={event => {void uploadGallery(Array.from(event.currentTarget.files || [])); event.currentTarget.value='';}}/>{uploadingGallery ? 'Uploading…' : 'Choose story images'}</label>
-              <div className={styles.blogGalleryGrid}>{(guide.gallery_images || []).map((url,index)=><div key={`${url}-${index}`}><img src={url} alt={`Story image ${index+1}`}/><button type="button" aria-label={`Remove story image ${index+1}`} onClick={() => onChange({...guide, gallery_images:(guide.gallery_images || []).filter((_,itemIndex)=>itemIndex!==index)})}>×</button></div>)}</div>
-              {!(guide.gallery_images || []).length && <div className={styles.blogGalleryEmpty}>Supporting images will appear here.</div>}
-            </div>
           </div>
-          {mediaError && <p className={styles.mediaError} role="alert">{mediaError}</p>}
           <p className={styles.blogUploadHint}>JPG, PNG or WebP · maximum 10 MB per image</p>
         </section>
 
         <section className={styles.blogEditorSection}>
-          <div className={styles.blogSectionHeading}><span>03</span><div><h3>Article</h3><p>Write the story using plain text or simple Markdown headings and lists.</p></div></div>
-          <label className={styles.blogBodyLabel}>Article content<textarea required className={styles.markdown} value={guide.body_markdown || ''} onChange={field('body_markdown')} placeholder={'## Begin the story\n\nWrite your article here…'} /></label>
+          <div className={styles.blogSectionHeading}><span>03</span><div><h3>Article sections</h3><p>Tell the story part by part. Each section has its own heading, text and photo; readers see text and photo side by side.</p></div></div>
+          {mediaError && <p className={styles.mediaError} role="alert">{mediaError}</p>}
+          <ol className={styles.blogSections}>
+            {sections.map((section, index) => (
+              <li key={index} className={styles.blogSectionCard}>
+                <div className={styles.blogSectionCardHead}>
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <strong>{section.heading || `Section ${index + 1}`}</strong>
+                  <div>
+                    <button type="button" onClick={() => moveSection(index, -1)} disabled={index === 0} aria-label={`Move section ${index + 1} up`}>↑</button>
+                    <button type="button" onClick={() => moveSection(index, 1)} disabled={index === sections.length - 1} aria-label={`Move section ${index + 1} down`}>↓</button>
+                    <button type="button" className={styles.danger} onClick={() => removeSection(index)} aria-label={`Remove section ${index + 1}`}>Remove</button>
+                  </div>
+                </div>
+                <div className={styles.blogSectionCardBody}>
+                  <div>
+                    <label>Heading<input value={section.heading} maxLength={200} placeholder="e.g. The climb to Namche" onChange={event => updateSection(index, {heading: event.target.value})}/></label>
+                    <label>Story<textarea value={section.body} maxLength={20000} rows={7} placeholder="Write this part of the story…" onChange={event => updateSection(index, {body: event.target.value})}/></label>
+                    <small className={styles.blogUploadHint}>Leave a blank line between paragraphs. Start lines with “- ” for a bullet list.</small>
+                  </div>
+                  <div className={styles.blogSectionPhoto}>
+                    {section.image_url ? (
+                      <div className={styles.blogHeroPreview}><img src={section.image_url} alt={`Section ${index + 1} photo`}/><button type="button" onClick={() => updateSection(index, {image_url: '', image_caption: ''})}>Remove</button></div>
+                    ) : (
+                      <div className={styles.blogImageEmpty}><span>◇</span><p>No photo for this section</p></div>
+                    )}
+                    <label className={`${styles.blogUploadButton} ${styles.blogUploadSecondary}`}>
+                      <input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploadingSection !== null} onChange={event => {void uploadSectionImage(index, event.currentTarget.files?.[0]); event.currentTarget.value='';}}/>
+                      {uploadingSection === index ? 'Uploading…' : section.image_url ? 'Replace photo' : 'Choose photo'}
+                    </label>
+                    {section.image_url && <label>Caption <small>(optional)</small><input value={section.image_caption} maxLength={300} placeholder="Where or when was this taken?" onChange={event => updateSection(index, {image_caption: event.target.value})}/></label>}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <button type="button" className={styles.addDayDashedBtn} onClick={() => setSections([...sections, emptySection()])} disabled={sections.length >= 30}>
+            + Add section
+          </button>
         </section>
 
         <section className={`${styles.blogEditorSection} ${styles.blogPublishSection}`}>
@@ -2707,10 +2385,11 @@ function GuideEditor({guide, saving, onChange, onClose, onSave, onDelete, onDele
           {(guide.comments || []).length ? guide.comments!.map(comment => <article key={comment.id}><div><strong>{comment.author_name}</strong><small>{date(comment.created_at)}</small></div><p>{comment.body}</p><button type="button" className={styles.danger} disabled={saving} onClick={() => onDeleteComment(comment.id)}>Remove</button></article>) : <p className={styles.blogGalleryEmpty}>No comments on this post yet.</p>}
         </section>}
         <footer>
-          {guide.id && <button type="button" className={styles.danger} disabled={saving} onClick={onDelete}>Archive</button>}
+          {guide.id && <button type="button" className={styles.danger} disabled={saving} onClick={onDelete}>Delete post</button>}
+          {guide.id && guide.is_published && <button type="button" disabled={saving} onClick={onUnpublish}>Unpublish</button>}
           <span />
           <button type="button" onClick={onClose}>Cancel</button>
-          <button className={styles.primary} disabled={saving || uploadingHero || uploadingGallery}>
+          <button className={styles.primary} disabled={saving || uploadingHero || uploadingSection !== null}>
             {saving ? 'Saving…' : guide.is_published ? 'Save & publish' : 'Save draft'}
           </button>
         </footer>
@@ -3252,28 +2931,149 @@ function AltitudeProfileGraph({
   );
 }
 
+/** Pop-up card from the trek list's Schedule column: that trek's departures. */
+function ScheduleModal({trek, onClose}: {
+  trek: AdminTrek;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className={styles.modalBackdrop}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Schedule departures for ${trek.title}`}
+      onMouseDown={event => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className={styles.scheduleModal}>
+        <ScheduleBoard
+          trek={trek}
+          api={api}
+          formatDate={date}
+          onClose={onClose}
+        />
+      </div>
+    </div>
+  );
+}
+
+type RowAction = {label: string; onSelect: () => void; danger?: boolean; disabled?: boolean};
+
+/**
+ * A table row's 3-dot actions menu (treks, blog posts). It is positioned
+ * `fixed` from the button's rect so the table's scroll container can't clip
+ * it; any scroll, resize, outside click or Escape closes it.
+ */
+function RowActionsMenu({label, actions}: {label: string; actions: RowAction[]}) {
+  const [position, setPosition] = useState<{top: number; right: number} | null>(null);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!position) return;
+    const close = () => setPosition(null);
+    const onPointer = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (!menuRef.current?.contains(target) && !buttonRef.current?.contains(target)) close();
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') close();
+    };
+    document.addEventListener('mousedown', onPointer);
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    return () => {
+      document.removeEventListener('mousedown', onPointer);
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+    };
+  }, [position]);
+
+  function toggle() {
+    if (position) {
+      setPosition(null);
+      return;
+    }
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    // Open upward when the row sits near the bottom of the viewport.
+    const menuHeight = actions.length * 38 + 14;
+    const top = rect.bottom + menuHeight > window.innerHeight ? rect.top - menuHeight - 6 : rect.bottom + 6;
+    setPosition({top, right: window.innerWidth - rect.right});
+  }
+
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        type="button"
+        className={styles.kebabBtn}
+        onClick={toggle}
+        aria-haspopup="menu"
+        aria-expanded={Boolean(position)}
+        aria-label={`Actions for ${label}`}
+        title="More actions"
+      >
+        ⋮
+      </button>
+      {position && (
+        <div ref={menuRef} className={styles.kebabMenu} role="menu" style={{top: position.top, right: position.right}}>
+          {actions.map(action => (
+            <button
+              key={action.label}
+              type="button"
+              role="menuitem"
+              disabled={action.disabled}
+              className={action.danger ? `${styles.kebabItem} ${styles.kebabItemDanger}` : styles.kebabItem}
+              onClick={() => { setPosition(null); action.onSelect(); }}
+            >
+              {action.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 function TrekManagementView({
   treks,
   loading,
   query,
   statusFilter,
+  oversubscribed,
   onQueryChange,
   onStatusFilterChange,
   onSelectTrek,
   onToggleActive,
   onToggleFeatured,
   onDeleteTrek,
+  onSchedule,
 }: {
   treks: AdminTrek[];
   loading: boolean;
   query: string;
   statusFilter: 'ALL' | 'ACTIVE' | 'INACTIVE' | 'FEATURED';
+  /** Oversubscribed departure count per trek slug. */
+  oversubscribed: Record<string, number>;
   onQueryChange: (val: string) => void;
   onStatusFilterChange: (val: 'ALL' | 'ACTIVE' | 'INACTIVE' | 'FEATURED') => void;
   onSelectTrek: (slug: string) => void;
   onToggleActive: (trek: AdminTrek) => void;
   onToggleFeatured: (trek: AdminTrek) => void;
   onDeleteTrek: (trek: AdminTrek) => void;
+  onSchedule: (trek: AdminTrek) => void;
 }) {
   const filtered = useMemo(() => {
     return treks.filter(t => {
@@ -3344,6 +3144,7 @@ function TrekManagementView({
                 <th>Starting Price</th>
                 <th>Featured (Top 5)</th>
                 <th>Status</th>
+                <th>Schedule</th>
                 <th style={{textAlign: 'right'}}>Actions</th>
               </tr>
             </thead>
@@ -3408,31 +3209,34 @@ function TrekManagementView({
                     </span>
                   </td>
                   <td>
+                    <button
+                      type="button"
+                      className={styles.scheduleBtn}
+                      onClick={() => onSchedule(trek)}
+                      title="Schedule departures and manage seat capacity"
+                    >
+                      Schedule
+                    </button>
+                    {oversubscribed[trek.slug] ? (
+                      <button
+                        type="button"
+                        className={styles.statBadgeRed}
+                        style={{display: 'block', marginTop: '6px', border: 0, cursor: 'pointer'}}
+                        onClick={() => onSchedule(trek)}
+                        title="Open this trek's departures to fix capacity"
+                      >
+                        {oversubscribed[trek.slug]} oversubscribed
+                      </button>
+                    ) : null}
+                  </td>
+                  <td>
                     <div className={styles.actionBtnGroup}>
-                      <button
-                        type="button"
-                        className={styles.actionBtnToggle}
-                        onClick={() => onToggleActive(trek)}
-                        title={trek.is_active ? 'Deactivate this trek' : 'Activate this trek'}
-                      >
-                        {trek.is_active ? 'Deactivate' : 'Activate'}
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.actionBtnEdit}
-                        onClick={() => onSelectTrek(trek.slug)}
-                        title="Open full editable trek detail page"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.actionBtnDelete}
-                        onClick={() => onDeleteTrek(trek)}
-                        title="Delete this trek"
-                      >
-                        Delete
-                      </button>
+                      <RowActionsMenu label={trek.title} actions={[
+                        {label: 'Edit trek', onSelect: () => onSelectTrek(trek.slug)},
+                        {label: trek.is_active ? 'Deactivate' : 'Activate', onSelect: () => onToggleActive(trek)},
+                        {label: trek.is_featured ? 'Remove from featured' : 'Mark as featured', onSelect: () => onToggleFeatured(trek)},
+                        {label: 'Delete trek', onSelect: () => onDeleteTrek(trek), danger: true},
+                      ]}/>
                     </div>
                   </td>
                 </tr>
@@ -3450,6 +3254,7 @@ function TrekFullDetailEditor({
   slug,
   destinations,
   categories,
+  formatDate,
   saving,
   loading,
   onMessage,
@@ -3463,6 +3268,7 @@ function TrekFullDetailEditor({
   slug: string;
   destinations: DestinationOption[];
   categories: CategoryOption[];
+  formatDate: (value?: string | null) => string;
   saving: boolean;
   loading: boolean;
   onMessage: (text: string) => void;
@@ -4290,8 +4096,14 @@ function TrekFullDetailEditor({
         </div>
       </section>
 
-      {/* Section 05 — Departures & Seats */}
-      <DeparturesEditor slug={slug} api={api} onMessage={onMessage} />
+      {/* Section 05 — Departures & Capacity */}
+      <DeparturesEditor
+        slug={slug}
+        api={api}
+        onMessage={onMessage}
+        formatDate={formatDate}
+        defaultSeats={trek.max_group_size ? Number(trek.max_group_size) : undefined}
+      />
 
       {/* Footer Actions */}
       <div className={styles.detailTopNav}>

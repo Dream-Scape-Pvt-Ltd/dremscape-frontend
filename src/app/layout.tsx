@@ -19,7 +19,9 @@ import 'photoswipe/style.css';
 import './photo-experience.css';
 import './final-polish.css';
 import './brand-correction.css';
+import './connection-status.css';
 import PageMotion from '@/components/page-motion';
+import BackendStatus from '@/components/backend-status';
 import {AuthProvider} from '@/context/AuthContext';
 
 export const metadata: Metadata = {
@@ -35,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
-        <AuthProvider>{children}<PageMotion/></AuthProvider>
+        <AuthProvider>{children}<PageMotion/><BackendStatus/></AuthProvider>
       </body>
     </html>
   );

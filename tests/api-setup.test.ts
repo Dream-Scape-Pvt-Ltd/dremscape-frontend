@@ -69,7 +69,7 @@ test('API endpoints and Routes constants match expectations', () => {
 
   assert.equal(ROUTES.HOME, '/');
   assert.equal(ROUTES.TREK_DETAIL('everest'), '/treks/everest');
-  assert.equal(ROUTES.BOOKING('everest', 'dep-123'), '/booking?trek=everest&departure=dep-123');
+  assert.equal(ROUTES.BOOKING('everest', 'dep-123'), '/treks/everest?departure=dep-123#departures');
 });
 
 test('ApiClient normalizes trailing slashes and unrolls Django envelopes', async () => {

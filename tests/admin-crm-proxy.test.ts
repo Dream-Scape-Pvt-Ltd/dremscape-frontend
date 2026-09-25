@@ -11,7 +11,7 @@ registerHooks({resolve(specifier, context, next) {
 }});
 
 const {backend, BackendError, apiError, assertSameOrigin, readInput, requiredText, emailInput} = await import('../src/lib/backend.ts');
-const {projectTask, projectTasks, projectInquiries, projectTimeline, projectCustomer, projectTagArray} = await import('../src/lib/admin.ts');
+const {projectInquiry, projectInquiries, projectDepartures, projectCustomer} = await import('../src/lib/admin.ts');
 
 const realFetch = globalThis.fetch;
 function stubFetch(respond: (url: string, init: RequestInit) => Response | Promise<Response>) {
@@ -88,7 +88,7 @@ test('apiError keeps known statuses and masks unknown errors', async () => {
   assert.equal((await unknown.json()).error, 'The request could not be completed.');
 });
 
-const post = (body: string, headers: Record<string, string> = {}) => new Request('http://127.0.0.1:3000/api/admin/inquiries/INQ-1/tasks', {
+const post = (body: string, headers: Record<string, string> = {}) => new Request('http://127.0.0.1:3000/api/admin/inquiries/INQ-1/notes', {
   method: 'POST', body, headers: {host: '127.0.0.1:3000', 'content-type': 'application/json', ...headers},
 });
 
@@ -115,24 +115,15 @@ test('requiredText and emailInput validate and trim', () => {
   assert.throws(() => emailInput({email: 'not-an-email'}), /valid email/);
 });
 
-test('task and inquiry projections drop fields staff screens should not receive', () => {
-  const task = projectTask({id: 't1', title: 'Call', status: 'OPEN', due_at: '2026-10-01T09:00:00Z', reminder_sent_at: '2026-10-01T08:00:00Z'});
-  assert.deepEqual(Object.keys(task).sort(), ['due_at', 'id', 'status', 'title']);
+test('inquiry projections drop fields staff screens should not receive', () => {
+  const inquiry = projectInquiry({inquiry_number: 'INQ-1', status: 'NEW', phone: '+977', customer: {id: 'c1'}, password_hash: 'x'});
+  assert.deepEqual(Object.keys(inquiry).sort(), ['inquiry_number', 'phone', 'status']);
 
-  const page = projectTasks({count: 3, next: 'http://django/internal?page=2', results: [{id: 't1', password_hash: 'x'}]});
-  assert.deepEqual(page, {count: 3, next: 'http://django/internal?page=2', previous: null, results: [{id: 't1'}]});
+  const page = projectDepartures({count: 3, next: 'http://django/internal?page=2', results: [{id: 'd1', password_hash: 'x'}]});
+  assert.deepEqual(page, {count: 3, next: 'http://django/internal?page=2', previous: null, results: [{id: 'd1'}]});
 
   const inquiries = projectInquiries({results: [{inquiry_number: 'INQ-1', status: 'NEW', sla_breached: true, customer: {id: 'c1'}}]});
   assert.deepEqual(inquiries.results, [{inquiry_number: 'INQ-1', status: 'NEW', sla_breached: true}]);
-});
-
-test('timeline entries are filtered by their own type', () => {
-  const [activity, note] = projectTimeline([
-    {entry_type: 'activity', created_at: '2', data: {id: 'a', channel: 'CALL', body: 'Rang', metadata: {ip: '10.0.0.1'}}},
-    {entry_type: 'note', created_at: '1', data: {id: 'n', note_text: 'Prefers May', inquiry: 'secret-uuid'}},
-  ]);
-  assert.deepEqual(activity.data, {id: 'a', channel: 'CALL', body: 'Rang'});
-  assert.deepEqual(note.data, {id: 'n', note_text: 'Prefers May'});
 });
 
 test('customer 360 filters nested inquiries and bookings', () => {
@@ -147,8 +138,7 @@ test('customer 360 filters nested inquiries and bookings', () => {
 });
 
 test('malformed staff responses become a 502 instead of crashing the dashboard', () => {
-  for (const bad of [null, 'oops', [1]]) assert.throws(() => projectTask(bad), BackendError);
-  assert.throws(() => projectTasks({results: 'nope'}), BackendError);
-  assert.throws(() => projectTimeline({}), BackendError);
-  assert.throws(() => projectTagArray({results: []}), BackendError);
+  for (const bad of [null, 'oops', [1]]) assert.throws(() => projectInquiry(bad), BackendError);
+  assert.throws(() => projectInquiries({results: 'nope'}), BackendError);
+  assert.throws(() => projectCustomer([]), BackendError);
 });

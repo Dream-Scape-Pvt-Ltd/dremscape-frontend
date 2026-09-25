@@ -4,7 +4,7 @@ import {backend, apiError, noStore, readInput, requiredText, BackendError} from 
 import {projectInquiry} from '@/lib/admin';
 
 type Context = {params: Promise<{reference: string}>};
-const statuses = new Set(['NEW','ASSIGNED','IN_CONTACT','BOOKED','TRAVELING','COMPLETED','CLOSED']);
+const statuses = new Set(['NEW','IN_CONTACT','BOOKED','TRAVELING','COMPLETED','CLOSED']);
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const lostReasons = new Set(['PRICE','DATES','COMPETITOR','NO_RESPONSE','NOT_SUITABLE','OTHER']);
 function referenceIsValid(reference: string) { if (!/^[\w-]{1,100}$/.test(reference)) throw new BackendError('Invalid inquiry reference.', 400); }
@@ -19,11 +19,6 @@ export async function PATCH(request: Request, {params}: Context) {
     if (!statuses.has(status)) throw new BackendError('Please select a valid inquiry status.', 400);
 
     const body: Record<string, unknown> = {status};
-    if ('assigned_agent_id' in input) {
-      const agentId = input.assigned_agent_id;
-      if (agentId !== null && typeof agentId !== 'string') throw new BackendError('Please select a valid agent.', 400);
-      body.assigned_agent_id = agentId;
-    }
     if ('lost_reason' in input) {
       const lostReason = input.lost_reason;
       if (lostReason !== '' && !(typeof lostReason === 'string' && lostReasons.has(lostReason))) {
