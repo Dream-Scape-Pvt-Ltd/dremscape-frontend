@@ -980,6 +980,39 @@
     height: auto;
     width: 100%;
     position: static;
+    padding: 14px 12px 10px;
+    gap: 6px;
+  }
+  .brand {
+    padding: 0 6px 7px;
+  }
+  .brandTitle {
+    font-size: 17px;
+  }
+  .sidebar nav {
+    flex: none;
+    flex-direction: row;
+    gap: 5px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    scrollbar-width: thin;
+  }
+  .navItem {
+    width: auto;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 9px 11px;
+  }
+  .sidebarFoot {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0;
+    padding: 3px 6px 0;
+  }
+  .sidebarFoot .settingsBtn {
+    width: auto;
+    padding: 8px 0;
   }
   .content {
     padding: 20px 16px;
@@ -3282,9 +3315,65 @@
 .kanbanCard select { font-size: 10px; padding: 3px 5px; }
 .slaDot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #d64545; margin-right: 5px; }
 
+/* CRM: active-trek landing page */
+.secondary { border: 1px solid #cfdcd4; border-radius: 9px; background: #fff; color: #103b2c; padding: 9px 14px; font-weight: 700; cursor: pointer; }
+.crmBackBtn { background: none; border: 0; padding: 0; margin: 0 0 4px; font-size: 11px; font-weight: 800; color: #74897d; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+.crmTrekGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.crmTrekCard { display: flex; flex-direction: column; gap: 6px; text-align: left; background: #fff; border: 1px solid #e3ebe6; border-radius: 12px; padding: 14px; cursor: pointer; font: inherit; }
+.crmTrekCard:hover { border-color: #103b2c; }
+.crmTrekCard strong { font-size: 14px; color: #133e2f; }
+.crmTrekCard small { font-size: 11px; color: #6d8276; }
+.crmTrekCounts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 6px; }
+.crmTrekCounts span { display: flex; flex-direction: column; align-items: center; background: #f5f7f5; border-radius: 8px; padding: 6px 2px; font-size: 10px; color: #6d8276; }
+.crmTrekCounts b { font-size: 15px; color: #133e2f; }
+.crmTrekRevenue { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid #eef3f0; padding-top: 8px; margin-top: 4px; font-size: 11px; color: #6d8276; }
+.crmTrekRevenue strong { font-size: 15px; }
+.kanbanCard small + small { margin-top: 2px; }
+
 /* CRM: Customer 360 modal */
 .customerStats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 16px 0 22px; }
 .customerStats div { background: #f5f7f5; border-radius: 10px; padding: 12px; }
 .customerStats strong { display: block; font-size: 18px; color: #133e2f; }
 .customerStats span { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #74897d; }
 @media(max-width:760px){.blogEditorHeader{align-items:flex-start;flex-direction:column;padding:28px 24px 22px}.blogEditorSection{margin:16px 14px 0;padding:20px}.blogMediaColumns,.blogEditor .formGrid{grid-template-columns:1fr}.blogPublishSection{align-items:flex-start;flex-direction:column}.blogEditor footer{padding:15px 16px}.blogGalleryGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* CMS controls remain usable when the sidebar becomes a horizontal menu. */
+.capacityStats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.capacityStats .statCard{min-width:0}
+.workspace input:focus:not([type=checkbox]):not([type=radio]),.workspace textarea:focus,.workspace select:focus{border-color:#2b7152!important;box-shadow:0 0 0 3px rgba(43,113,82,.12)!important;outline:none}
+@media(max-width:800px){
+  .content{min-width:0}
+  .panel,.tablePanel,.sectionCard{min-width:0}
+  .panelHead{flex-wrap:wrap}
+  .toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:end;gap:10px}
+  .toolbar label{min-width:0;grid-column:1/-1}
+  .toolbar input,.toolbar select{box-sizing:border-box;min-width:0;width:100%}
+  .toolbar .primary{min-height:40px}
+  .trekHeaderBar{display:grid;grid-template-columns:1fr;align-items:stretch}
+  .trekFilters{display:grid;grid-template-columns:1fr 1fr;max-width:none;min-width:0;width:100%}
+  .trekSearchInput{min-width:0;width:100%;box-sizing:border-box}
+  .trekStatusSelect{min-width:0;width:100%;box-sizing:border-box}
+  .trekAddBtn{justify-content:center;margin:0}
+  .tableWrap{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin}
+  .tableWrap table:not(.journalTable){min-width:680px}
+  .tableWrap:not(:has(.journalTable))::before{content:"Swipe sideways to see the full table";display:block;margin:0 0 10px;color:#768b7d;font-size:11px}
+  .capacityStats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .capacityStats .statCard{padding:15px}
+  .journalTable,.journalTable tbody{display:block;width:100%}
+  .journalTable thead{display:none}
+  .journalTable tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px;padding:15px 0;border-top:1px solid #e8eee9}
+  .journalTable td{display:flex;align-items:center;justify-content:space-between;gap:8px;border:0;padding:7px 0;min-width:0;font-size:12px}
+  .journalTable td::before{content:attr(data-label);flex:0 0 auto;color:#7a8d80;font-size:10px;font-weight:750;text-transform:uppercase;letter-spacing:.04em}
+  .journalTable td:first-child{grid-column:1/-1;display:block;padding-top:0}
+  .journalTable td:first-child::before{display:none}
+  .journalTable td:first-child strong{font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+  .journalTable td:first-child small{overflow-wrap:anywhere}
+  .journalTable td:last-child{grid-column:1/-1;justify-content:flex-end}
+}
+@media(max-width:500px){
+  .content{padding:18px 14px}
+  .panel,.tablePanel{padding:18px}
+  .trekFilters{grid-template-columns:1fr}
+  .toolbar .primary{grid-column:1/-1}
+  .capacityStats .statLabel{font-size:11px;line-height:1.35}
+}

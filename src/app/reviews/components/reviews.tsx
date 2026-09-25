@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useState, useEffect, type FormEvent } from 'react';
 import type { Trip } from '@/lib/catalog';
 import JourneySelect from '@/components/journey-select';
@@ -118,7 +119,7 @@ export default function Reviews() {
       ) : error ? (
         <div className="status" role="alert">
           <p>{error}</p>
-          <a href="/reviews" className="button green">Try again</a>
+          <Link href="/reviews" className="button green">Try again</Link>
         </div>
       ) : (
         <>

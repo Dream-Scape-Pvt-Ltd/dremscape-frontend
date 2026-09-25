@@ -19,7 +19,10 @@ export default function AdminLogin({backgroundImage='/images/admin-login-backgro
     try {
       const response=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:form.get('password')})});
       const result=await response.json();
-      if(!response.ok||result.success!==true)throw new Error(errorText(result));
+      if(!response.ok||result.success!==true){
+        if(response.status===400||response.status===401)throw new Error(`Sign-in failed for ${email.trim()}. Check the email address and password, then try again.`);
+        throw new Error(errorText(result));
+      }
       const access=await fetch('/api/admin?resource=inquiries&page=1');
       if(!access.ok){const detail=await access.json();throw new Error(errorText(detail));}
       try{if(remember)localStorage.setItem('dreamscape-admin-email',email);else localStorage.removeItem('dreamscape-admin-email');}catch{}

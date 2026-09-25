@@ -156,7 +156,7 @@ export default function CapacityView({api, agents, onMessage, formatDate}: Props
         </label>
       </div>
 
-      <div className={styles.statsRow} style={{gridTemplateColumns: 'repeat(5, minmax(0, 1fr))'}}>
+      <div className={styles.capacityStats}>
         {[
           ['Departures', totals.departures],
           ['Seats booked', totals.booked],

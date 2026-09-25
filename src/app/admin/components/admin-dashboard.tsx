@@ -2,7 +2,6 @@
 
 import React, {FormEvent, useEffect, useMemo, useState} from 'react';
 import Link from 'next/link';
-import {useAuthContext} from '@/context/AuthContext';
 import type {
   Inquiry,
   InquiryNote,
@@ -17,22 +16,31 @@ import type {
   PipelineSummary,
   FunnelData,
   CustomerProfile,
+  TrekPipeline,
+  TrekPipelineRow,
 } from '@/types/inquiry';
 import type {TravelGuideAdminItem, TravelGuideDetail, GuidePayload} from '@/types/content';
-import AdminLogin from './admin-login';
+import AdminLogin from '@/components/admin-login';
 import ReviewEditor from './review-editor';
 import AssignmentRulesView from './assignment-rules-view';
 import CapacityView from './capacity-view';
 import DeparturesEditor from './departures-editor';
 import SiteSettingsEditor from './site-settings-editor';
 import DestinationEditor from './destination-editor';
-import type {Agent} from './capacity-types';
+import type {Agent, AdminDeparture} from './capacity-types';
 import styles from '@/app/admin/admin.module.css';
+import {fallbackTrekImage} from '@/lib/trek-images';
 
 type Tab = 'dashboard' | 'treks' | 'capacity' | 'revenue' | 'journal' | 'inquiries' | 'pipeline' | 'reviews' | 'settings' | 'destinations';
 type Page<T> = {count: number; next: string | null; previous: string | null; results: T[]};
 interface AdminProfile {full_name: string; role: string; email?: string;}
-const statuses: InquiryStatus[] = ['NEW','ASSIGNED','IN_CONTACT','TRAVELING','COMPLETED','CLOSED'];
+const statuses: InquiryStatus[] = ['NEW','ASSIGNED','IN_CONTACT','BOOKED','TRAVELING','COMPLETED','CLOSED'];
+/** Where an agent books a lead onto a departure, and for how many people. */
+type BookingChoice = {departureId: string; travelersCount: number};
+/** Statuses in which a lead's travellers occupy seats on its departure. */
+function holdsSeats(value: InquiryStatus) {
+  return value === 'BOOKED' || value === 'TRAVELING' || value === 'COMPLETED';
+}
 const lostReasonOptions: {value: LostReason; label: string}[] = [
   {value: 'PRICE', label: 'Price Too High'},
   {value: 'DATES', label: "Dates Didn't Work"},
@@ -162,23 +170,7 @@ export function getTrekImage(slug?: string, destSlug?: string, customImage?: str
   if (customImage && typeof customImage === 'string' && customImage.trim()) {
     return customImage.trim();
   }
-  const s = `${slug || ''} ${destSlug || ''}`.toLowerCase();
-  if (s.includes('everest') || s.includes('khumbu') || s.includes('gokyo') || s.includes('chola') || s.includes('cho-la')) {
-    return '/images/222-242-imgEverestBaseCampChoLaPassTrekkingRoute.png';
-  }
-  if (s.includes('annapurna') || s.includes('tilicho') || s.includes('poon')) {
-    return '/images/222-242-imgAnnapurnaCircuitAndTilichoLakeHighGlacialLake.png';
-  }
-  if (s.includes('manaslu') || s.includes('larkya') || s.includes('tsum') || s.includes('langtang')) {
-    return '/images/222-242-imgManasluCircuitLarkyaPassRemoteHimalayas.png';
-  }
-  if (s.includes('mustang') || s.includes('lo-manthang')) {
-    return '/images/222-242-imgUpperMustangLoManthangWalledCityRedCliffs.png';
-  }
-  if (s.includes('dolpo') || s.includes('phoksundo')) {
-    return '/images/151-31-imgDolpoAndSheyPhoksundoDeepWilderness.png';
-  }
-  return '/images/151-31-imgNepalHimalayanRangeWithAmaDablam.png';
+  return fallbackTrekImage(slug, destSlug);
 }
 
 export interface DestinationOption {
@@ -241,8 +233,7 @@ function formatNumber(num: number): string {
   return num < 10 && num >= 0 ? `0${num}` : `${num}`;
 }
 
-export default function AdminDashboard() {
-  const {userName, user} = useAuthContext();
+export default function AdminDashboard({backgroundImage}: {backgroundImage?: string}) {
   const [adminUser, setAdminUser] = useState<AdminProfile | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
@@ -274,6 +265,9 @@ export default function AdminDashboard() {
   const [funnel, setFunnel] = useState<FunnelData | null>(null);
   const [pipelineInquiries, setPipelineInquiries] = useState<Inquiry[]>([]);
   const [loadingPipeline, setLoadingPipeline] = useState(false);
+  // CRM lives under each active trek: null shows the trek list, 'ALL' every lead.
+  const [crmTrek, setCrmTrek] = useState<string | null>(null);
+  const [trekPipeline, setTrekPipeline] = useState<TrekPipeline | null>(null);
 
   // CRM: tour-based filtering, assignment and bulk actions
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -299,16 +293,9 @@ export default function AdminDashboard() {
   const [trekToDelete, setTrekToDelete] = useState<AdminTrek | null>(null);
   const [trekSaving, setTrekSaving] = useState(false);
 
-  // Check if this tab/browser session has unlocked the admin panel
+  // The server-issued session cookie is the source of truth for admin access.
   useEffect(() => {
     async function verifySession() {
-      const isUnlocked = typeof window !== 'undefined' && sessionStorage.getItem('dreamscape_admin_unlocked') === 'true';
-      if (!isUnlocked) {
-        setAdminUser(null);
-        setCheckingAuth(false);
-        return;
-      }
-
       try {
         const res = await fetch('/api/admin/verify');
         const data = await res.json();
@@ -406,13 +393,16 @@ export default function AdminDashboard() {
     if (!adminUser) return;
     setLoadingPipeline(true);
     try {
-      const [summary, funnelData, ...columns] = await Promise.all([
+      const trekQuery = crmTrek && crmTrek !== 'ALL' ? `&trip=${encodeURIComponent(crmTrek)}` : '';
+      const [summary, funnelData, treksData, ...columns] = await Promise.all([
         api<PipelineSummary>('/api/admin/crm/pipeline-summary'),
         api<FunnelData>('/api/admin/crm/funnel'),
-        ...statuses.map(value => api<Page<Inquiry>>(`/api/admin/inquiries?status=${encodeURIComponent(value)}`)),
+        api<TrekPipeline>('/api/admin/crm/treks'),
+        ...(crmTrek ? statuses.map(value => api<Page<Inquiry>>(`/api/admin/inquiries?status=${encodeURIComponent(value)}${trekQuery}`)) : []),
       ]);
       setPipelineSummary(summary);
       setFunnel(funnelData);
+      setTrekPipeline(treksData);
       setPipelineInquiries(columns.flatMap(page => page.results));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to load the pipeline.');
@@ -470,12 +460,12 @@ export default function AdminDashboard() {
       setSelectedTrekSlug(null);
       setSelectedTrekDetail(null);
     }
-  }, [tab, status, tripFilter, agentFilter, adminUser]);
+  }, [tab, status, tripFilter, agentFilter, adminUser, crmTrek]);
 
   const metrics = useMemo(() => ({
     total: inquiries?.count || 0,
     new: inquiries?.results.filter(item => item.status === 'NEW').length || 0,
-    active: inquiries?.results.filter(item => ['ASSIGNED', 'IN_CONTACT', 'TRAVELING'].includes(item.status)).length || 0,
+    active: inquiries?.results.filter(item => ['ASSIGNED', 'IN_CONTACT', 'BOOKED', 'TRAVELING'].includes(item.status)).length || 0,
     published: guides?.results.filter(item => item.is_published).length || 0
   }), [guides, inquiries]);
 
@@ -754,11 +744,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleLoginSuccess = (profile: AdminProfile) => {
-    setAdminUser(profile);
-    setMessage('');
-  };
-
   const handleLockWorkspace = async () => {
     try {
       await fetch('/api/admin/logout', {method: 'POST'});
@@ -783,12 +768,7 @@ export default function AdminDashboard() {
         status: item.status,
       }));
     }
-    return [
-      { inquiry_number: 'INQ-101', full_name: 'Eleanor Vance', trip: 'Everest Base Camp', dateFormatted: 'Oct 24, 2024', status: 'NEW' },
-      { inquiry_number: 'INQ-102', full_name: 'Marcus Reid', trip: 'Annapurna Circuit', dateFormatted: 'Oct 23, 2024', status: 'CONTACTED' },
-      { inquiry_number: 'INQ-103', full_name: 'Sarah Jenkins', trip: 'Manaslu Circuit', dateFormatted: 'Oct 22, 2024', status: 'NEW' },
-      { inquiry_number: 'INQ-104', full_name: 'David Chen', trip: 'Langtang Valley', dateFormatted: 'Oct 21, 2024', status: 'CONTACTED' },
-    ];
+    return [];
   }, [inquiries]);
 
   if (checkingAuth) {
@@ -803,7 +783,7 @@ export default function AdminDashboard() {
   }
 
   if (!adminUser) {
-    return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
+    return <AdminLogin backgroundImage={backgroundImage} />;
   }
 
   async function openInquiry(reference: string) {
@@ -831,23 +811,31 @@ export default function AdminDashboard() {
     }
   }
 
-  async function updateStatus(next: InquiryStatus, lostReason?: LostReason | '') {
-    if (!selectedInquiry) return;
+  async function updateStatus(next: InquiryStatus, lostReason?: LostReason | '', booking?: BookingChoice, target: Inquiry | null = selectedInquiry) {
+    if (!target) return;
     setSaving(true);
     setMessage('');
     try {
       const body: Record<string, unknown> = {status: next};
       if (next === 'CLOSED') body.lost_reason = lostReason || '';
-      const saved = await api<Inquiry>(`/api/admin/inquiries/${selectedInquiry.inquiry_number}`, {
+      if (booking) {
+        body.departure_id = booking.departureId;
+        body.travelers_count = booking.travelersCount;
+      }
+      const saved = await api<Inquiry>(`/api/admin/inquiries/${target.inquiry_number}`, {
         method: 'PATCH',
         body: JSON.stringify(body)
       });
-      setSelectedInquiry(saved);
+      if (selectedInquiry?.inquiry_number === saved.inquiry_number) setSelectedInquiry(saved);
       setInquiries(current => current && {
         ...current,
         results: current.results.map(item => item.inquiry_number === saved.inquiry_number ? {...item, status: saved.status} : item)
       });
-      setPipelineInquiries(current => current.map(item => item.inquiry_number === saved.inquiry_number ? {...item, status: saved.status} : item));
+      const {status: savedStatus, travelers_count, revenue_usd} = saved;
+      setPipelineInquiries(current => current.map(item => item.inquiry_number === saved.inquiry_number ? {...item, status: savedStatus, travelers_count, revenue_usd} : item));
+      if (tab === 'pipeline') {
+        api<TrekPipeline>('/api/admin/crm/treks').then(setTrekPipeline).catch(() => undefined);
+      }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to update the inquiry.');
     } finally {
@@ -1116,6 +1104,16 @@ export default function AdminDashboard() {
       )
     },
     {
+      id: 'destinations',
+      label: 'Destinations',
+      icon: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="m3 17 5-8 4 5 3-4 6 7H3Z"/>
+          <circle cx="17" cy="5" r="2"/>
+        </svg>
+      )
+    },
+    {
       id: 'capacity',
       label: 'Departure Capacity',
       badge: capacityAlerts > 0 ? capacityAlerts : undefined,
@@ -1149,7 +1147,7 @@ export default function AdminDashboard() {
     {
       id: 'inquiries',
       label: 'Inquiries',
-      badge: metrics.new > 0 ? metrics.new : 12,
+      badge: metrics.new > 0 ? metrics.new : undefined,
       icon: (
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -1245,11 +1243,11 @@ export default function AdminDashboard() {
           <div className={styles.topRight}>
             <div className={styles.profileWidget}>
               <div className={styles.profileInfo}>
-                <span className={styles.profileName}>{adminUser.full_name || userName || 'Admin User'}</span>
+                <span className={styles.profileName}>{adminUser.full_name || 'Admin User'}</span>
                 <span className={styles.profileRole}>{label(adminUser.role || 'Superadmin')}</span>
               </div>
               <div className={styles.profileAvatar}>
-                {(adminUser.full_name || userName || 'A').slice(0, 1).toUpperCase()}
+                {(adminUser.full_name || 'A').slice(0, 1).toUpperCase()}
               </div>
             </div>
           </div>
@@ -1262,7 +1260,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Tab 1: Mockup Redesigned Dashboard Overview */}
+        {/* Dashboard overview */}
         {tab === 'dashboard' && (
           <>
             {/* Live Synchronization Status & Refresh Button */}
@@ -1304,14 +1302,14 @@ export default function AdminDashboard() {
                   </svg>
                 </div>
                 <div className={styles.statValue}>
-                  {analytics ? analytics.metrics.total_treks : (treks.length > 0 ? treks.length : 24)}
+                  {analytics ? analytics.metrics.total_treks : treks.length}
                 </div>
                 <p className={styles.statSub}>
                   {analytics
                     ? (analytics.metrics.treks_this_month > 0
                         ? `+${analytics.metrics.treks_this_month} this month`
                         : `${analytics.metrics.active_treks} active in catalog`)
-                    : '+2 this month'}
+                    : 'Loading catalog'}
                 </p>
               </div>
 
@@ -1335,7 +1333,7 @@ export default function AdminDashboard() {
                   )}
                 </div>
                 <div className={styles.statValue}>
-                  {analytics ? analytics.metrics.new_inquiries : (metrics.new > 0 ? metrics.new : 3)}
+                  {analytics ? analytics.metrics.new_inquiries : metrics.new}
                 </div>
                 <p className={styles.statSub}>
                   {analytics && analytics.metrics.inquiries_last_48h > 0
@@ -1365,7 +1363,7 @@ export default function AdminDashboard() {
                   </svg>
                 </div>
                 <div className={styles.statValue}>
-                  {analytics ? formatNumber(analytics.metrics.active_expeditions) : '08'}
+                  {analytics ? formatNumber(analytics.metrics.active_expeditions) : '—'}
                 </div>
                 <p className={styles.statSub}>currently en route</p>
               </div>
@@ -1386,16 +1384,12 @@ export default function AdminDashboard() {
                   </svg>
                 </div>
                 <div className={styles.statValue}>
-                  {analytics
-                    ? (analytics.metrics.monthly_revenue > 0
-                        ? formatCurrency(analytics.metrics.monthly_revenue)
-                        : (analytics.metrics.total_revenue > 0 ? formatCurrency(analytics.metrics.total_revenue) : '$124k'))
-                    : '$124k'}
+                  {analytics ? formatCurrency(analytics.metrics.monthly_revenue) : '—'}
                 </div>
                 <p className={styles.statSub}>
                   {analytics && analytics.metrics.mom_growth_percent !== 0
                     ? `${analytics.metrics.mom_growth_percent > 0 ? '+' : ''}${analytics.metrics.mom_growth_percent}% MoM`
-                    : '+15% MoM'}
+                    : 'No comparison yet'}
                 </p>
               </div>
             </div>
@@ -1447,6 +1441,9 @@ export default function AdminDashboard() {
                           </td>
                         </tr>
                       ))}
+                      {displayInquiries.length === 0 && (
+                        <tr><td colSpan={5}>No recent inquiries yet.</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1510,39 +1507,7 @@ export default function AdminDashboard() {
                         </div>
                       ))
                     ) : (
-                      <>
-                        <div className={styles.timelineItem}>
-                          <div className={`${styles.timelineDot} ${styles.timelineDotActive}`} />
-                          <div className={styles.timelineContent}>
-                            <strong>System updated itinerary for Everest Base Camp.</strong>
-                            <small>2 hours ago</small>
-                          </div>
-                        </div>
-
-                        <div className={styles.timelineItem}>
-                          <div className={styles.timelineDot} />
-                          <div className={styles.timelineContent}>
-                            <strong>Admin User published new journal post: &quot;Preparing for the Cold&quot;.</strong>
-                            <small>5 hours ago</small>
-                          </div>
-                        </div>
-
-                        <div className={styles.timelineItem}>
-                          <div className={styles.timelineDot} />
-                          <div className={styles.timelineContent}>
-                            <strong>A reader commented on a published blog post.</strong>
-                            <small>Yesterday at 14:30</small>
-                          </div>
-                        </div>
-
-                        <div className={styles.timelineItem}>
-                          <div className={styles.timelineDot} />
-                          <div className={styles.timelineContent}>
-                            <strong>Payment received for Annapurna Circuit Booking #442.</strong>
-                            <small>Yesterday at 09:15</small>
-                          </div>
-                        </div>
-                      </>
+                      <p>No recent activity yet.</p>
                     )}
                   </div>
                 </section>
@@ -1576,17 +1541,27 @@ export default function AdminDashboard() {
 
         {/* Tab: CRM Pipeline (Kanban + conversion funnel) */}
         {tab === 'pipeline' && (
-          <PipelineView
-            summary={pipelineSummary}
-            funnel={funnel}
-            inquiries={pipelineInquiries}
-            loading={loadingPipeline}
-            onOpen={openInquiry}
-            onStatusChange={(inquiry, next, lostReason) => {
-              setSelectedInquiry(inquiry);
-              void updateStatus(next, lostReason);
-            }}
-          />
+          crmTrek === null ? (
+            <CrmTrekList
+              pipeline={trekPipeline}
+              summary={pipelineSummary}
+              loading={loadingPipeline}
+              onOpen={setCrmTrek}
+            />
+          ) : (
+            <PipelineView
+              summary={pipelineSummary}
+              funnel={funnel}
+              trek={trekPipeline?.results.find(row => row.slug === crmTrek) ?? null}
+              inquiries={pipelineInquiries}
+              loading={loadingPipeline}
+              onBack={() => setCrmTrek(null)}
+              onOpen={openInquiry}
+              onStatusChange={(inquiry, next, lostReason, booking) => {
+                void updateStatus(next, lostReason, booking, inquiry);
+              }}
+            />
+          )
         )}
 
         {/* Tab 3: Full Journal CMS View */}
@@ -1938,7 +1913,7 @@ function JournalView({guides, loading, onCreate, onEdit}: {guides: TravelGuideAd
         <p className={styles.empty}>Loading guides…</p>
       ) : guides.length ? (
         <div className={styles.tableWrap}>
-          <table>
+          <table className={styles.journalTable}>
             <thead>
               <tr>
                 <th>Blog post</th>
@@ -1953,20 +1928,20 @@ function JournalView({guides, loading, onCreate, onEdit}: {guides: TravelGuideAd
             <tbody>
               {guides.map(guide => (
                 <tr key={guide.id}>
-                  <td>
+                  <td data-label="Blog post">
                     <strong>{guide.title}</strong>
                     <small>/{guide.slug}</small>
                   </td>
-                  <td>{label(guide.category)}</td>
-                  <td>
+                  <td data-label="Category">{label(guide.category)}</td>
+                  <td data-label="State">
                     <em data-status={guide.is_published ? 'PUBLISHED' : 'DRAFT'}>
                       {guide.is_published ? 'Published' : 'Draft'}
                     </em>
                   </td>
-                  <td>{(guide.view_count || 0).toLocaleString()}</td>
-                  <td>{guide.comment_count || 0}</td>
-                  <td>{date(guide.updated_at || guide.published_at)}</td>
-                  <td>
+                  <td data-label="Views">{(guide.view_count || 0).toLocaleString()}</td>
+                  <td data-label="Comments">{guide.comment_count || 0}</td>
+                  <td data-label="Updated">{date(guide.updated_at || guide.published_at)}</td>
+                  <td data-label="Action">
                     <button onClick={() => onEdit(guide)}>Edit</button>
                   </td>
                 </tr>
@@ -1988,7 +1963,7 @@ function InquiryDrawer({
 }: {
   inquiry: Inquiry; notes: InquiryNote[]; noteText: string; saving: boolean;
   agents: Agent[]; onAssign: (agentId: string) => void;
-  onClose: () => void; onStatus: (value: InquiryStatus, lostReason?: LostReason | '') => void;
+  onClose: () => void; onStatus: (value: InquiryStatus, lostReason?: LostReason | '', booking?: BookingChoice) => void;
   onNoteText: (value: string) => void; onSubmit: (event: FormEvent) => void;
   drawerTab: 'details' | 'timeline' | 'tasks' | 'tags'; onDrawerTab: (tab: 'details' | 'timeline' | 'tasks' | 'tags') => void;
   timeline: TimelineEntry[]; tasks: Task[]; tags: Tag[]; allTags: Tag[];
@@ -2015,6 +1990,10 @@ function InquiryDrawer({
     if (next === 'CLOSED' && !inquiry.converted_booking_reference) {
       setPendingStatus(next);
       setLostReason('');
+      return;
+    }
+    if (holdsSeats(next) && !holdsSeats(inquiry.status)) {
+      setPendingStatus(next);
       return;
     }
     setPendingStatus(null);
@@ -2062,6 +2041,14 @@ function InquiryDrawer({
                     <option key={value}>{value}</option>
                   ))}
                 </select>
+                {pendingStatus && holdsSeats(pendingStatus) && (
+                  <BookingPrompt
+                    inquiry={inquiry}
+                    saving={saving}
+                    onConfirm={booking => { onStatus(pendingStatus, '', booking); setPendingStatus(null); }}
+                    onCancel={() => setPendingStatus(null)}
+                  />
+                )}
                 {needsLostReason && (
                   <div className={styles.lostReasonPrompt}>
                     <small>Why is this lead closing without a booking?</small>
@@ -2254,13 +2241,83 @@ function InquiryDrawer({
   );
 }
 
-function PipelineView({summary, funnel, inquiries, loading, onOpen, onStatusChange}: {
+/** The CRM's landing page: every active trek, with its leads by stage and what it has earned. */
+function CrmTrekList({pipeline, summary, loading, onOpen}: {
+  pipeline: TrekPipeline | null;
+  summary: PipelineSummary | null;
+  loading: boolean;
+  onOpen: (slug: string) => void;
+}) {
+  const rows = pipeline?.results ?? [];
+  const openLeads = (row: TrekPipelineRow) => row.by_status.NEW + row.by_status.ASSIGNED + row.by_status.IN_CONTACT;
+
+  return (
+    <section className={styles.panel}>
+      <div className={styles.panelHead}>
+        <div>
+          <p style={{fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1.4px', color: '#74897d', fontWeight: 800, margin: '0 0 4px'}}>Sales & Leads</p>
+          <h2>CRM · Active Treks</h2>
+        </div>
+        <button type="button" className={styles.secondary} onClick={() => onOpen('ALL')}>All leads →</button>
+      </div>
+
+      <div className={styles.pipelineStats}>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Active treks</span>
+          <strong className={styles.statValue}>{pipeline ? rows.length : '—'}</strong>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Completed trek revenue</span>
+          <strong className={styles.statValue}>{pipeline ? formatCurrency(Number(pipeline.total_revenue_usd) || 0) : '—'}</strong>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>SLA breaches</span>
+          <strong className={styles.statValue}>{summary?.sla_breached_count ?? '—'}</strong>
+        </div>
+        <div className={styles.statCard}>
+          <span className={styles.statLabel}>Unassigned</span>
+          <strong className={styles.statValue}>{summary?.unassigned_open_leads ?? '—'}</strong>
+        </div>
+      </div>
+
+      {loading && !pipeline ? (
+        <p className={styles.empty}>Loading treks…</p>
+      ) : rows.length === 0 ? (
+        <p className={styles.empty}>No active treks yet.</p>
+      ) : (
+        <div className={styles.crmTrekGrid}>
+          {rows.map(row => (
+            <button key={row.slug} type="button" className={styles.crmTrekCard} onClick={() => onOpen(row.slug)}>
+              <strong>{row.title}</strong>
+              <small>{row.destination_name || '—'} · {row.total_leads} lead{row.total_leads === 1 ? '' : 's'}</small>
+              <div className={styles.crmTrekCounts}>
+                <span><b>{openLeads(row)}</b>Open</span>
+                <span><b>{row.by_status.BOOKED}</b>Booked</span>
+                <span><b>{row.by_status.TRAVELING}</b>Traveling</span>
+                <span><b>{row.by_status.COMPLETED}</b>Completed</span>
+              </div>
+              <div className={styles.crmTrekRevenue}>
+                <span>{row.travelers_completed} travelled</span>
+                <strong>{formatCurrency(Number(row.revenue_usd) || 0)}</strong>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function PipelineView({summary, funnel, trek, inquiries, loading, onBack, onOpen, onStatusChange}: {
   summary: PipelineSummary | null;
   funnel: FunnelData | null;
+  /** The trek this board is scoped to; null for the all-leads board. */
+  trek: TrekPipelineRow | null;
   inquiries: Inquiry[];
   loading: boolean;
+  onBack: () => void;
   onOpen: (reference: string) => void;
-  onStatusChange: (inquiry: Inquiry, next: InquiryStatus, lostReason?: LostReason | '') => void;
+  onStatusChange: (inquiry: Inquiry, next: InquiryStatus, lostReason?: LostReason | '', booking?: BookingChoice) => void;
 }) {
   const columns = statuses.map(value => ({
     value,
@@ -2271,32 +2328,59 @@ function PipelineView({summary, funnel, inquiries, loading, onOpen, onStatusChan
     <section className={styles.panel}>
       <div className={styles.panelHead}>
         <div>
-          <p style={{fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1.4px', color: '#74897d', fontWeight: 800, margin: '0 0 4px'}}>Sales & Leads</p>
-          <h2>CRM</h2>
+          <button type="button" className={styles.crmBackBtn} onClick={onBack}>← Active treks</button>
+          <h2>{trek ? trek.title : 'All leads'}</h2>
         </div>
       </div>
 
       <div className={styles.pipelineStats}>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>Total leads</span>
-          <strong className={styles.statValue}>{funnel?.total_leads ?? '—'}</strong>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>Conversion rate</span>
-          <strong className={styles.statValue}>{funnel ? `${funnel.conversion_rate_percent}%` : '—'}</strong>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>Avg days to close</span>
-          <strong className={styles.statValue}>{funnel?.avg_days_to_close ?? '—'}</strong>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>SLA breaches</span>
-          <strong className={styles.statValue}>{summary?.sla_breached_count ?? '—'}</strong>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>Unassigned</span>
-          <strong className={styles.statValue}>{summary?.unassigned_open_leads ?? '—'}</strong>
-        </div>
+        {trek ? (
+          <>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Leads</span>
+              <strong className={styles.statValue}>{trek.total_leads}</strong>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Booked</span>
+              <strong className={styles.statValue}>{trek.by_status.BOOKED}</strong>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Traveling now</span>
+              <strong className={styles.statValue}>{trek.by_status.TRAVELING}</strong>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>People travelled</span>
+              <strong className={styles.statValue}>{trek.travelers_completed}</strong>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Trek revenue</span>
+              <strong className={styles.statValue}>{formatCurrency(Number(trek.revenue_usd) || 0)}</strong>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Total leads</span>
+              <strong className={styles.statValue}>{funnel?.total_leads ?? '—'}</strong>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Conversion rate</span>
+              <strong className={styles.statValue}>{funnel ? `${funnel.conversion_rate_percent}%` : '—'}</strong>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Avg days to close</span>
+              <strong className={styles.statValue}>{funnel?.avg_days_to_close ?? '—'}</strong>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>SLA breaches</span>
+              <strong className={styles.statValue}>{summary?.sla_breached_count ?? '—'}</strong>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Unassigned</span>
+              <strong className={styles.statValue}>{summary?.unassigned_open_leads ?? '—'}</strong>
+            </div>
+          </>
+        )}
       </div>
 
       {loading ? (
@@ -2325,7 +2409,7 @@ function PipelineView({summary, funnel, inquiries, loading, onOpen, onStatusChan
 function KanbanCard({inquiry, onOpen, onStatusChange}: {
   inquiry: Inquiry;
   onOpen: (reference: string) => void;
-  onStatusChange: (inquiry: Inquiry, next: InquiryStatus, lostReason?: LostReason | '') => void;
+  onStatusChange: (inquiry: Inquiry, next: InquiryStatus, lostReason?: LostReason | '', booking?: BookingChoice) => void;
 }) {
   const [pendingStatus, setPendingStatus] = useState<InquiryStatus | null>(null);
   const [lostReason, setLostReason] = useState<LostReason | ''>('');
@@ -2336,6 +2420,11 @@ function KanbanCard({inquiry, onOpen, onStatusChange}: {
       setLostReason('');
       return;
     }
+    // Moving into Booked puts people on a departure, so ask which one first.
+    if (holdsSeats(next) && !holdsSeats(inquiry.status)) {
+      setPendingStatus(next);
+      return;
+    }
     onStatusChange(inquiry, next);
   }
 
@@ -2343,7 +2432,14 @@ function KanbanCard({inquiry, onOpen, onStatusChange}: {
     <div className={styles.kanbanCard}>
       <div onClick={() => onOpen(inquiry.inquiry_number)} role="button" tabIndex={0}>
         <strong>{inquiry.full_name}</strong>
-        <small>{inquiry.trip || inquiry.journey || inquiry.inquiry_type || 'General inquiry'}</small>
+        <small>{inquiry.trip_title || inquiry.journey || label(inquiry.inquiry_type) || 'General inquiry'}</small>
+        {inquiry.departure_label && <small>{inquiry.departure_label}</small>}
+        {holdsSeats(inquiry.status) && inquiry.travelers_count ? (
+          <small>
+            {inquiry.travelers_count} traveller{inquiry.travelers_count === 1 ? '' : 's'}
+            {inquiry.revenue_usd ? ` · ${formatCurrency(Number(inquiry.revenue_usd))}` : ''}
+          </small>
+        ) : null}
       </div>
       <div className={styles.kanbanCardMeta}>
         <span>{inquiry.sla_breached && <span className={styles.slaDot} title="SLA breached" />}{date(inquiry.created_at)}</span>
@@ -2369,6 +2465,87 @@ function KanbanCard({inquiry, onOpen, onStatusChange}: {
           </button>
         </div>
       )}
+      {pendingStatus && holdsSeats(pendingStatus) && (
+        <BookingPrompt
+          inquiry={inquiry}
+          onConfirm={booking => { onStatusChange(inquiry, pendingStatus, '', booking); setPendingStatus(null); }}
+          onCancel={() => setPendingStatus(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+/**
+ * Asks which departure a lead is booked on and how many people are going.
+ * Confirming adds them to that departure's booked seats on the capacity board.
+ */
+function BookingPrompt({inquiry, saving = false, onConfirm, onCancel}: {
+  inquiry: Inquiry;
+  saving?: boolean;
+  onConfirm: (booking: BookingChoice) => void;
+  onCancel: () => void;
+}) {
+  const [departures, setDepartures] = useState<AdminDeparture[] | null>(null);
+  const [error, setError] = useState('');
+  const [departureId, setDepartureId] = useState(inquiry.departure || '');
+  const [travelers, setTravelers] = useState(inquiry.group_size || 1);
+
+  useEffect(() => {
+    if (!inquiry.trip_slug) {
+      setError('This lead is not linked to a trek, so it cannot be booked on a departure.');
+      return;
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    api<Page<AdminDeparture>>(`/api/admin/treks/${inquiry.trip_slug}/departures`)
+      .then(page => setDepartures(page.results.filter(item => item.status !== 'CANCELLED' && item.end_date >= today)))
+      .catch(err => setError(err instanceof Error ? err.message : 'Unable to load departures.'));
+  }, [inquiry.trip_slug]);
+
+  const chosen = departures?.find(item => item.id === departureId);
+  const tooMany = chosen ? travelers > chosen.available_seats && departureId !== inquiry.departure : false;
+
+  return (
+    <div className={styles.lostReasonPrompt} onClick={event => event.stopPropagation()}>
+      <small>Book on which departure?</small>
+      {error ? (
+        <p className={styles.empty} style={{margin: '6px 0'}}>{error}</p>
+      ) : !departures ? (
+        <p className={styles.empty} style={{margin: '6px 0'}}>Loading departures…</p>
+      ) : (
+        <>
+          <select value={departureId} onChange={event => setDepartureId(event.target.value)}>
+            <option value="">Select a departure…</option>
+            {departures.map(item => (
+              <option key={item.id} value={item.id}>
+                {date(item.start_date)} – {date(item.end_date)} · {item.available_seats} left
+              </option>
+            ))}
+          </select>
+          <label style={{display: 'block', marginTop: '6px', fontSize: '11px'}}>
+            Travellers
+            <input
+              type="number"
+              min={1}
+              value={travelers}
+              onChange={event => setTravelers(Math.max(1, Number(event.target.value) || 1))}
+              style={{width: '100%', marginTop: '4px'}}
+            />
+          </label>
+          {tooMany && <small style={{color: '#b3261e'}}>Only {chosen?.available_seats} seat(s) left on this departure.</small>}
+        </>
+      )}
+      <div style={{display: 'flex', gap: '6px', marginTop: '6px'}}>
+        <button
+          type="button"
+          className={styles.primary}
+          disabled={!departureId || tooMany || saving}
+          onClick={() => onConfirm({departureId, travelersCount: travelers})}
+        >
+          Confirm booking
+        </button>
+        <button type="button" className={styles.secondary} onClick={onCancel}>Cancel</button>
+      </div>
     </div>
   );
 }
@@ -3147,7 +3324,7 @@ function TrekManagementView({
         <p className={styles.empty}>Loading treks catalog…</p>
       ) : filtered.length === 0 ? (
         <div style={{textAlign: 'center', padding: '48px 20px', color: '#6d8276'}}>
-          <p style={{fontSize: '15px', fontWeight: 600, marginBottom: '12px'}}>No treks found matching your filter.</p>
+          <p style={{fontSize: '15px', fontWeight: 600, marginBottom: '12px'}}>{treks.length ? 'No treks match these filters.' : 'No treks in the CMS yet.'}</p>
           <button type="button" className={styles.primary} onClick={() => onSelectTrek('new')}>
             + Create a new trek
           </button>
@@ -4146,14 +4323,7 @@ function RevenueAnalyticsView({
   refreshing: boolean;
 }) {
   const metrics = analytics?.metrics;
-  const trends = analytics?.monthly_trends && analytics.monthly_trends.length > 0 ? analytics.monthly_trends : [
-    {month_label: 'Apr', full_label: 'Apr 2026', revenue: 68000, bookings_count: 14, inquiries_count: 32},
-    {month_label: 'May', full_label: 'May 2026', revenue: 92000, bookings_count: 19, inquiries_count: 45},
-    {month_label: 'Jun', full_label: 'Jun 2026', revenue: 74000, bookings_count: 15, inquiries_count: 38},
-    {month_label: 'Jul', full_label: 'Jul 2026', revenue: 88000, bookings_count: 18, inquiries_count: 41},
-    {month_label: 'Aug', full_label: 'Aug 2026', revenue: 108000, bookings_count: 22, inquiries_count: 52},
-    {month_label: 'Sep', full_label: 'Sep 2026', revenue: 124000, bookings_count: 26, inquiries_count: 61},
-  ];
+  const trends = analytics?.monthly_trends ?? [];
 
   const maxRevenue = Math.max(...trends.map(t => t.revenue), 100000);
 
@@ -4164,30 +4334,30 @@ function RevenueAnalyticsView({
         <div className={`${styles.revenueCard} ${styles.revenueCardDark}`}>
           <div className={styles.revenueCardTitle}>MONTHLY REVENUE</div>
           <div className={styles.revenueCardAmount}>
-            {metrics ? (metrics.monthly_revenue > 0 ? formatCurrency(metrics.monthly_revenue) : (metrics.total_revenue > 0 ? formatCurrency(metrics.total_revenue) : '$124,000')) : '$124,000'}
+            {metrics ? formatCurrency(metrics.monthly_revenue) : '—'}
           </div>
           <div className={styles.revenueCardNote}>
             {metrics && metrics.mom_growth_percent !== 0
               ? `${metrics.mom_growth_percent > 0 ? '+' : ''}${metrics.mom_growth_percent}% vs last month`
-              : '+15.2% vs last month'}
+              : 'No comparison yet'}
           </div>
         </div>
 
         <div className={styles.revenueCard}>
-          <div className={styles.revenueCardTitle}>TOTAL PIPELINE VALUE</div>
+          <div className={styles.revenueCardTitle}>TOTAL REVENUE</div>
           <div className={styles.revenueCardAmount}>
-            {metrics && metrics.total_revenue > 0 ? formatCurrency(metrics.total_revenue) : '$482,500'}
+            {metrics ? formatCurrency(metrics.total_revenue) : '—'}
           </div>
           <div className={styles.revenueCardNote} style={{color: '#4b6657'}}>
-            All confirmed bookings &amp; deposits
+            Recorded booking revenue
           </div>
         </div>
 
         <div className={styles.revenueCard}>
           <div className={styles.revenueCardTitle}>AVG BOOKING VALUE</div>
-          <div className={styles.revenueCardAmount}>$2,850</div>
+          <div className={styles.revenueCardAmount}>—</div>
           <div className={styles.revenueCardNote} style={{color: '#4b6657'}}>
-            Per expedition traveler
+            Available when confirmed booking values are connected
           </div>
         </div>
 
@@ -4195,8 +4365,8 @@ function RevenueAnalyticsView({
           <div className={styles.revenueCardTitle}>CONVERSION RATE</div>
           <div className={styles.revenueCardAmount}>
             {analytics?.inquiries_by_status
-              ? `${Math.round(((analytics.inquiries_by_status.COMPLETED || 0) + (analytics.inquiries_by_status.TRAVELING || 0) + 1) / Math.max(metrics?.total_inquiries || 1, 1) * 100)}%`
-              : '24.8%'}
+              ? `${Math.round(((analytics.inquiries_by_status.COMPLETED || 0) + (analytics.inquiries_by_status.TRAVELING || 0)) / Math.max(metrics?.total_inquiries || 1, 1) * 100)}%`
+              : '—'}
           </div>
           <div className={styles.revenueCardNote} style={{color: '#16a34a', fontWeight: 600}}>
             Lead to confirmed trip
@@ -4218,7 +4388,9 @@ function RevenueAnalyticsView({
             </div>
           </div>
 
-          <svg className={styles.barChartSvg} viewBox="0 0 600 240" preserveAspectRatio="none">
+          {trends.length === 0 && <p className={styles.empty}>No revenue trend data yet.</p>}
+
+          {trends.length > 0 && <svg className={styles.barChartSvg} viewBox="0 0 600 240" preserveAspectRatio="none">
             <defs>
               <linearGradient id="revenueBarGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#103b2c" />
@@ -4269,7 +4441,7 @@ function RevenueAnalyticsView({
                 </g>
               );
             })}
-          </svg>
+          </svg>}
         </section>
 
         {/* Right: Revenue by Destination */}
@@ -4277,51 +4449,7 @@ function RevenueAnalyticsView({
           <div className={styles.chartHeader} style={{marginBottom: '10px'}}>
             <h2 className={styles.chartTitle}>Destination Revenue</h2>
           </div>
-          <p style={{fontSize: '12px', color: '#6e8477', margin: 0}}>
-            Market share and booking distribution across active trekking regions.
-          </p>
-
-          <div className={styles.breakdownList}>
-            <div className={styles.breakdownItem}>
-              <div className={styles.breakdownItemHead}>
-                <span>Everest / Khumbu Region</span>
-                <span className={styles.breakdownItemVal}>46% · $57.2k</span>
-              </div>
-              <div className={styles.progressBarBg}>
-                <div className={`${styles.progressBarFill}`} style={{width: '46%'}} />
-              </div>
-            </div>
-
-            <div className={styles.breakdownItem}>
-              <div className={styles.breakdownItemHead}>
-                <span>Annapurna Sanctuary</span>
-                <span className={styles.breakdownItemVal}>28% · $34.7k</span>
-              </div>
-              <div className={styles.progressBarBg}>
-                <div className={`${styles.progressBarFill} ${styles.progressBarFillEmerald}`} style={{width: '28%'}} />
-              </div>
-            </div>
-
-            <div className={styles.breakdownItem}>
-              <div className={styles.breakdownItemHead}>
-                <span>Manaslu &amp; Larkya Pass</span>
-                <span className={styles.breakdownItemVal}>16% · $19.8k</span>
-              </div>
-              <div className={styles.progressBarBg}>
-                <div className={`${styles.progressBarFill} ${styles.progressBarFillTeal}`} style={{width: '16%'}} />
-              </div>
-            </div>
-
-            <div className={styles.breakdownItem}>
-              <div className={styles.breakdownItemHead}>
-                <span>Upper Mustang &amp; Dolpo</span>
-                <span className={styles.breakdownItemVal}>10% · $12.4k</span>
-              </div>
-              <div className={styles.progressBarBg}>
-                <div className={`${styles.progressBarFill} ${styles.progressBarFillGold}`} style={{width: '10%'}} />
-              </div>
-            </div>
-          </div>
+          <p className={styles.empty}>Destination revenue will appear when booking totals by region are available.</p>
         </section>
       </div>
     </div>

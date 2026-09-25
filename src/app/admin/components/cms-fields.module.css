@@ -1,0 +1,27 @@
+.panel{background:#fff;border:1px solid #dce6df;border-radius:18px;padding:27px 30px;box-shadow:0 8px 26px rgba(19,62,47,.04);min-width:0}
+.panel+.panel{margin-top:18px}
+.eyebrow{margin:0 0 8px;color:#5d7968;text-transform:uppercase;letter-spacing:.16em;font-size:10px;font-weight:800}
+.panel h2{margin:0;color:#153e30;font-size:clamp(23px,3vw,29px);letter-spacing:-.045em;line-height:1.2}
+.intro{margin:9px 0 23px;color:#6a8072;font-size:13px;line-height:1.6;max-width:650px}
+.form fieldset{border:0;padding:0;margin:0;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px 20px}
+.field{display:grid;align-content:start;gap:7px;min-width:0;color:#335847;font-size:12px;font-weight:750}
+.fieldWide{grid-column:1/-1}
+.field input,.field select,.field textarea{box-sizing:border-box;width:100%;min-width:0;border:1px solid #d2dfd6;border-radius:10px;padding:11px 13px;background:#fbfcfa;color:#173d2d;font:inherit;font-size:13px;line-height:1.5}
+.field textarea{resize:vertical;min-height:110px}
+.field input:focus-visible,.field select:focus-visible,.field textarea:focus-visible,.button:focus-visible{outline:2px solid #ae8e4b;outline-offset:2px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:23px}
+.button{border:1px solid #143d2e;border-radius:11px;background:#143d2e;color:#fff;font:inherit;font-size:12px;font-weight:750;padding:11px 16px;min-height:42px;cursor:pointer}
+.button:hover{background:#205641}
+.button:disabled{opacity:.6;cursor:wait}
+.alert,.success,.empty{font-size:12px;line-height:1.55;padding:13px 15px;border-radius:10px;margin:15px 0}
+.alert{background:#fff2ed;color:#903f30;border:1px solid #efc8bc}
+.success{background:#edf7ee;color:#285e3e;border:1px solid #c9e2ce}
+.empty{background:#f5f8f5;border:1px dashed #cfddd2;color:#668071;text-align:center}
+.review{border:1px solid #e0e9e2;border-radius:13px;padding:18px;margin-top:13px;background:#fcfdfb}
+.review h3{font-size:17px;color:#163e30;margin:7px 0}
+.review p{color:#536d5c;font-size:12px;line-height:1.6;margin:0 0 8px}
+.reviewMeta{color:#6c8475!important;font-size:11px!important;font-weight:700}
+.pagination{display:flex;gap:9px;margin-top:17px}
+.pagination button{border:1px solid #d2dfd6;border-radius:9px;background:#fff;color:#173d2d;padding:9px 13px;font:inherit;font-size:12px;cursor:pointer}
+@media(max-width:700px){.panel{padding:20px 18px}.grid{grid-template-columns:1fr}.fieldWide{grid-column:auto}.actions .button{width:100%}}
