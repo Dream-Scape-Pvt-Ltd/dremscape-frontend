@@ -1755,3 +1755,19 @@
       padding: 14px 10px 8px
    }
 }
+
+/* Route photo gallery: CMS images stay tied to the selected trek. */
+.journey-gallery{padding-top:16px;padding-bottom:28px}
+.journey-gallery-heading{display:flex;justify-content:space-between;gap:16px;margin-bottom:10px;color:#788275;font-size:9px;font-weight:650;letter-spacing:1.7px}
+.journey-gallery-thumbnails{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;overflow-x:auto;scrollbar-width:thin;padding:2px 2px 8px}
+.journey-gallery-thumbnails button{height:104px;min-width:0;padding:0;border:2px solid transparent;border-radius:12px;background:#e7ebe4;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s}
+.journey-gallery-thumbnails button:hover{transform:translateY(-2px)}
+.journey-gallery-thumbnails button[aria-pressed=true]{border-color:#b4935b;box-shadow:0 0 0 3px #b4935b28}
+.journey-gallery-thumbnails img{display:block;width:100%;height:100%;object-fit:cover}
+.journey-gallery-thumbnails button:focus-visible{outline:3px solid #b4935b;outline-offset:3px}
+.reserve-price-preview{font-size:30px;letter-spacing:-.8px}
+@media(max-width:700px){.journey-gallery{padding-top:10px;padding-bottom:20px}.journey-gallery-thumbnails{grid-template-columns:repeat(5,150px);gap:9px}.journey-gallery-thumbnails button{height:88px}.trek-hero .container{padding-top:110px;padding-bottom:42px}}
+@media(prefers-reduced-motion:reduce){.journey-gallery-thumbnails button{transition:none}}
+.trek-hero .container{position:relative;z-index:1;color:#fff}
+.trek-hero .container .eyebrow,.trek-hero .container h1{color:#fff;text-shadow:0 2px 20px #061b18a6}
+.trek-hero .container>p:not(.eyebrow){color:#f0f4ef;text-shadow:0 1px 12px #061b18b3}

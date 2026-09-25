@@ -42,3 +42,4 @@ export default function RootLayout({
 }
 
 import './home-refresh.css';
+import './trek-detail.css';

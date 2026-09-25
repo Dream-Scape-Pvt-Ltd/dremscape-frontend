@@ -79,3 +79,51 @@ body .article-cover img{border-radius:22px;box-shadow:0 18px 42px #132d2015}
 @media(max-width:900px){body .catalog-filter{max-width:calc(100% - 48px);margin:-34px auto 0}body .catalog-filter .catalog-selects{grid-template-columns:1fr;gap:9px}}
 @media(max-width:600px){body .catalog-filter{max-width:calc(100% - 32px);padding:16px;border-radius:24px}body .catalog-filter .catalog-search{min-height:58px;padding:0 15px!important;border-radius:18px}body .catalog-filter .catalog-search input{font-size:16px!important;min-height:54px}body .catalog-filter .catalog-suggestions{flex-wrap:nowrap;overflow-x:auto;padding-bottom:3px}body .catalog-filter .catalog-selects>.journey-field{padding:7px 12px}body .journey-invitation{max-width:calc(100% - 32px);margin:46px auto 58px;padding:42px 22px;border-radius:26px}}
 @media(prefers-reduced-motion:reduce){body .catalog-filter,body .catalog-search,body .catalog-search>svg,body .catalog-suggestions button,body .journey-invitation,body .journey-invitation::before,body .journey-invitation>.button,body .memory-page .journal-card>div:first-child,body .memory-grid .memory-tile,body .gallery-grid .gallery-tile,body .memory-grid .memory-tile img,body .gallery-grid .gallery-tile>img{transition:none!important;animation:none!important}body .journey-invitation:hover,body .memory-grid .memory-tile:hover,body .gallery-grid .gallery-tile:hover{transform:none}}
+
+/* Give the hero headline a clear patch of sky and let the mountain ridge lead the frame. */
+body .home-hero{isolation:isolate}
+body .home-hero .home-slideshow{z-index:-2}
+body .home-hero .hero-shade{z-index:-1;background:linear-gradient(180deg,rgba(5,16,26,.2) 0%,rgba(5,16,26,.06) 24%,rgba(5,16,26,.02) 43%,rgba(5,16,26,.18) 67%,rgba(5,16,26,.76) 100%),linear-gradient(90deg,rgba(5,16,26,.12),transparent 35%,transparent 70%,rgba(5,16,26,.12))!important}
+.home-slide{object-position:center 58%;filter:contrast(1.07) saturate(1.055) brightness(1.025);transform:scale(1.035);transition:opacity 1.8s ease-in-out,transform 7s cubic-bezier(.2,.65,.25,1),filter 1.4s ease}
+.home-slide.is-active{transform:scale(1.09)}
+body .home-hero .hero-headline{position:absolute;z-index:2;top:clamp(148px,23vh,226px);left:50%;width:max-content;max-width:calc(100% - 40px);transform:translateX(-50%);text-align:center;animation:hero-headline-arrive .95s .15s both}
+body .home-hero .hero-headline .eyebrow{justify-content:center;margin:0 0 11px;color:rgba(255,255,255,.88);font-size:clamp(8px,.72vw,11px);letter-spacing:.2em;text-shadow:0 2px 16px rgba(5,16,26,.38)}
+body .home-hero .hero-headline .eyebrow>span{width:22px;height:1px;background:#efcf8f}
+body .home-hero .hero-headline h1{width:max-content;max-width:100%;margin:0;white-space:nowrap;font-size:clamp(25px,6.15vw,92px);font-weight:760;line-height:1.08;letter-spacing:-.075em;color:#fff;text-shadow:0 3px 18px rgba(4,14,24,.36),0 12px 42px rgba(4,14,24,.2);animation:none}
+body .home-hero .hero-headline h1 .hero-title-accent{color:#f0d7a4}
+body .home-hero .hero-content{position:absolute;z-index:2;left:max(5%,calc((100vw - 1280px)/2));right:auto;bottom:112px;width:min(570px,90%);margin:0;padding:0;text-align:left;transform:none}
+body .home-hero .hero-description{max-width:420px;margin:0;color:rgba(255,255,255,.92);font-size:15px;line-height:1.7;text-shadow:0 2px 16px rgba(2,12,20,.65)}
+body .home-hero .hero-description strong{color:#fff;font-weight:650}
+body .home-hero .hero-buttons{justify-content:flex-start;gap:25px;margin-top:20px}
+body .home-hero .hero-buttons .button{box-shadow:0 10px 30px rgba(5,15,18,.2)}
+body .home-hero .explore-link{color:#fff;text-shadow:0 2px 12px rgba(2,12,20,.75)}
+@keyframes hero-headline-arrive{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+@media(max-width:700px){
+  .home-slide{object-position:center 61%}
+  body .home-hero .hero-headline{top:clamp(142px,22vh,186px);max-width:calc(100% - 24px)}
+  body .home-hero .hero-headline .eyebrow{font-size:8px;letter-spacing:.12em;gap:7px}
+  body .home-hero .hero-headline .eyebrow>span{display:none}
+  body .home-hero .hero-headline h1{font-size:clamp(22px,7.45vw,50px);letter-spacing:-.075em}
+  body .home-hero .hero-content{left:22px;right:22px;top:clamp(296px,39vh,350px);bottom:auto;width:auto;padding:0;text-align:left;transform:none}
+  body .home-hero .hero-description{max-width:370px;font-size:13px;line-height:1.62}
+  body .home-hero .hero-buttons{justify-content:flex-start;gap:18px;margin-top:17px}
+  body .home-hero .hero-buttons .button{min-height:46px;padding:12px 18px;font-size:11px}
+  body .home-hero .play{width:42px;height:42px}
+  body .home-hero .hero-caption{bottom:67px}
+  .home-slide-controls{bottom:17px}
+}
+@media(prefers-reduced-motion:reduce){.home-slide{transform:none!important;transition:none!important}body .home-hero .hero-headline{animation:none!important}}
+
+/* Route ideas stay useful and bookable by conversation while the live catalog is empty. */
+body .home-route-idea .trip-image>img{transition:transform .65s cubic-bezier(.2,.7,.2,1),filter .5s}
+body .home-route-idea:hover .trip-image>img{transform:scale(1.045);filter:saturate(1.06)}
+body .home-route-idea .journey-location{margin:0 0 7px;color:#7b6a46;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+body .home-route-idea .trip-content h3{font-size:17px;line-height:1.35}
+body .home-route-idea .trip-tags{display:block;margin-top:10px;color:#66736a;line-height:1.6}
+body .home-route-idea .trip-bottom{align-items:center}
+body .home-route-idea .trip-bottom>span{display:grid;gap:3px}
+body .home-route-idea .trip-bottom small{color:#7c877e;font-size:9px;font-weight:700;letter-spacing:.1em}
+body .home-route-idea .trip-bottom strong{font-size:12px;font-weight:650;letter-spacing:0}
+body .home-route-idea .round-arrow{border:0;color:#153d2f;cursor:pointer;transition:transform .25s,background .25s}
+body .home-route-idea .round-arrow:hover{transform:translate(2px,-2px);background:#e9d8ad}
+@media(prefers-reduced-motion:reduce){body .home-route-idea .trip-image>img,body .home-route-idea .round-arrow{transition:none!important}}
