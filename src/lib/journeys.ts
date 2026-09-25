@@ -107,8 +107,9 @@ export async function getJourney(slug:string) {
     if(sample)return {journey:sample,demo:true};
     throw new BackendError('Journey not found.',404);
   }
-  let raw:Journey & RawTrip;
-  let departures:Departure[];
+  // The detail serializer caps nested departures at ten, so read the complete
+  // dated list too. Both only need the slug, so fetch them together.
+  let raw:Journey & RawTrip, departures:Departure[];
   try {
     [raw,departures]=await Promise.all([
       backend<Journey & RawTrip>(`trips/${encodeURIComponent(slug)}/`),

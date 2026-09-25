@@ -11,19 +11,17 @@ export default function SiteHeader({ page = 'home', activeSection = 'home', onPl
   const searchButton = useRef<HTMLButtonElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
   const menuButton = useRef<HTMLButtonElement>(null);
-  const [scrolled, setScrolled] = useState(false);
   useEffect(() => { if (!searchOpen) return; const timer = window.setTimeout(() => searchInput.current?.focus({ preventScroll: true }), matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 400); return () => window.clearTimeout(timer); }, [searchOpen]);
   useEffect(() => {
-    const scroll = () => setScrolled(window.scrollY > 40); scroll();
     const escape = (e: KeyboardEvent) => { if (e.key !== 'Escape') return; if (searchButton.current?.getAttribute('aria-expanded') === 'true') { setSearchOpen(false); searchButton.current.focus(); } else if (menuButton.current?.getAttribute('aria-expanded') === 'true') { setMenu(false); menuButton.current.focus(); } };
     const outside = (e: PointerEvent) => { if (e.target instanceof Element && !e.target.closest('.header')) { setMenu(false); setSearchOpen(false); } };
     const resize = () => { if (window.innerWidth > 900) setMenu(false); };
-    window.addEventListener('scroll', scroll, { passive: true }); document.addEventListener('keydown', escape); document.addEventListener('pointerdown', outside); window.addEventListener('resize', resize);
-    return () => { window.removeEventListener('scroll', scroll); document.removeEventListener('keydown', escape); document.removeEventListener('pointerdown', outside); window.removeEventListener('resize', resize); };
+    document.addEventListener('keydown', escape); document.addEventListener('pointerdown', outside); window.addEventListener('resize', resize);
+    return () => { document.removeEventListener('keydown', escape); document.removeEventListener('pointerdown', outside); window.removeEventListener('resize', resize); };
   }, []);
   const links = [{ label: 'Home', href: '/#home', id: 'home' }, { label: 'Destinations', href: '/destinations', id: 'destinations' }, { label: 'Treks', href: '/treks', id: 'treks' }, { label: 'Our story', href: '/about', id: 'about' }, { label: 'Journal', href: '/blog', id: 'journal' }, { label: 'Contact', href: '/contact', id: 'contact' }];
   const suggestions = ['Everest', 'Annapurna', 'Manaslu', 'Mustang'].filter(name => name.toLowerCase().includes(query.trim().toLowerCase()));
-  return <header data-page={page} className={`header site-navigation apple-nav ${scrolled ? 'scrolled' : ''} ${searchOpen ? 'search-open' : ''}`} onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget)) { setMenu(false); setSearchOpen(false); } }}><div className="container header-inner">
+  return <header data-page={page} className={`header site-navigation apple-nav ${searchOpen ? 'search-open' : ''}`} onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget)) { setMenu(false); setSearchOpen(false); } }}><div className="container header-inner">
     <Link href="/" aria-label="Dreamscape Treks home"><img className="brand" src={asset('222-694-imgLinkBrandLogoDreamscapeTreks')} alt="Dreamscape Treks" width="166" height="57" /></Link>
     <nav className={`nav ${menu ? 'open' : ''}`} id="main-navigation" aria-label="Main navigation">{links.map(link => <Link key={link.id} href={link.href} aria-current={page === 'home' ? (link.id === 'home' ? 'page' : undefined) : (link.id === page ? 'page' : undefined)} onClick={() => setMenu(false)}>{link.label}</Link>)}</nav>
     <div className="header-actions"><button ref={searchButton} type="button" className="search-link" aria-label={searchOpen ? 'Close journey search' : 'Search journeys'} aria-controls="journey-search" aria-expanded={searchOpen} onClick={() => { setMenu(false); setSearchOpen(!searchOpen); }}><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">{searchOpen ? <path d="m6 6 12 12M6 18 18 6" /> : <><circle cx="10.8" cy="10.8" r="6.7" /><path d="m16 16 4.5 4.5" /></>}</svg></button><button className="button header-cta" onClick={() => { setMenu(false); setSearchOpen(false); onPlan(); }}>Plan my journey <span aria-hidden="true">↗</span></button><button ref={menuButton} className="menu-toggle" aria-controls="main-navigation" aria-expanded={menu} onClick={() => { setSearchOpen(false); setMenu(!menu); }}><span className="menu-label">{menu ? 'Close' : 'Menu'}</span><span className="menu-lines" aria-hidden="true"><i /><i /></span></button></div>

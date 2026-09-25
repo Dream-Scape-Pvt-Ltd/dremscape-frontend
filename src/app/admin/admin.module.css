@@ -3377,3 +3377,73 @@
   .toolbar .primary{grid-column:1/-1}
   .capacityStats .statLabel{font-size:11px;line-height:1.35}
 }
+
+/* Revenue page — completion-based revenue, trend charts, manual entries */
+.revenueExplainer { margin: 0; padding: 12px 16px; border-radius: 12px; background: #eef5f0; border: 1px solid #dbe8df; color: #4b6657; font-size: 12.5px; line-height: 1.6; }
+.revenueExplainer strong { color: #133e2f; }
+.revenueError { display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 12px; background: #fdf2f2; border: 1px solid #f4d4d4; color: #8a2d2d; font-size: 13px; }
+.revenueEmpty { color: #6e8477; font-size: 12.5px; list-style: none; padding: 10px 0; margin: 0; }
+.revenueNote { font-size: 12px; color: #24583f; margin: 10px 0 0; }
+.revenueSideColumn { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.revenueMainGrid { align-items: start; }
+.revenueMainGrid > * { min-width: 0; }
+
+.chartHeader { gap: 16px; flex-wrap: wrap; }
+.chartSubtitle { font-size: 12px; color: #6e8477; margin: 4px 0 0; }
+.legendSwatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+.segmented { display: inline-flex; padding: 3px; border-radius: 10px; background: #eef3f0; border: 1px solid #dfe8e2; }
+.segmented button { border: 0; background: transparent; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; color: #5c7467; cursor: pointer; }
+.segmented button.segmentedActive { background: #ffffff; color: #133e2f; box-shadow: 0 1px 3px rgba(19, 62, 47, 0.12); }
+.segmented button:focus-visible { outline: 2px solid #0e7a50; outline-offset: 1px; }
+
+.chartWrap { position: relative; }
+.trendSvg, .activitySvg { display: block; width: 100%; height: auto; overflow: visible; }
+.chartGridLine { stroke: #edf2ee; stroke-width: 1; }
+.chartBaseline { stroke: #cbd8cf; stroke-width: 1; }
+.chartTickText { font-size: 10.5px; fill: #7b9185; font-weight: 600; }
+.chartAxisCurrent { fill: #133e2f; font-weight: 800; }
+.chartHoverBand { fill: #f1f6f3; }
+.chartEmptyText { font-size: 12.5px; fill: #7b9185; font-weight: 600; text-anchor: middle; }
+.chartWrap rect[tabindex]:focus { outline: none; }
+.chartWrap rect[tabindex]:focus-visible { outline: 2px solid #0e7a50; }
+
+.chartTooltip { position: absolute; top: 4px; transform: translateX(-50%); min-width: 180px; padding: 10px 12px; border-radius: 10px; background: #ffffff; border: 1px solid #dbe5de; box-shadow: 0 10px 28px rgba(16, 45, 34, 0.14); display: flex; flex-direction: column; gap: 4px; pointer-events: none; z-index: 2; font-size: 12px; color: #4b6657; white-space: nowrap; }
+.chartTooltip strong { color: #133e2f; font-size: 12px; }
+.chartTooltip span { display: flex; align-items: center; gap: 6px; }
+.chartTooltip i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+.chartTooltip small { color: #6e8477; font-size: 11px; }
+.tooltipTotal { font-size: 18px; font-weight: 800; color: #133e2f; letter-spacing: -0.4px; }
+
+.activityHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 26px 0 4px; padding-top: 18px; border-top: 1px solid #edf2ee; }
+.activityHeader h3 { margin: 0; font-size: 14px; color: #133e2f; }
+
+.topTrekList, .revenueEventList, .revenueEntryList { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; }
+.topTrekList li, .revenueEventList li, .revenueEntryList li { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid #eef2ef; }
+.topTrekList li:last-child, .revenueEventList li:last-child, .revenueEntryList li:last-child { border-bottom: 0; }
+.topTrekList div, .revenueEventList div, .revenueEntryList div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.topTrekList strong, .revenueEventList strong, .revenueEntryList strong { font-size: 13px; color: #133e2f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topTrekList small, .revenueEventList small, .revenueEntryList small { font-size: 11.5px; color: #6e8477; }
+.topTrekList li > span, .revenueEntryAmount { font-weight: 800; color: #133e2f; font-size: 13px; white-space: nowrap; }
+.revenueEventBadge { flex-shrink: 0; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 99px; background: #e4f3ea; color: #0b5e3e; }
+.revenueEventBadge[data-source="MANUAL"] { background: #fdf0de; color: #8a4b05; }
+.revenueEntryRemove { border: 0; background: transparent; color: #8a9c92; font-size: 18px; line-height: 1; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+.revenueEntryRemove:hover { color: #b42318; background: #fdf2f2; }
+
+.manualRevenueForm { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 4px; }
+.manualRevenueForm label { display: flex; flex-direction: column; gap: 5px; font-size: 11.5px; font-weight: 700; color: #5c7467; }
+.manualRevenueForm input, .manualRevenueForm select { border: 1px solid #d6e1da; border-radius: 9px; padding: 9px 11px; font: inherit; font-size: 13px; font-weight: 500; color: #133e2f; background: #fff; min-width: 0; }
+.manualRevenueWide { grid-column: 1 / -1; }
+.manualRevenueForm button { grid-column: 1 / -1; justify-self: start; }
+
+@media (max-width: 1100px) {
+  .revenueOverviewGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .revenueMainGrid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .revenueOverviewGrid { grid-template-columns: 1fr; gap: 12px; }
+  .revenueCardAmount { font-size: 26px; }
+  .chartCard, .destBreakdownCard { padding: 18px 16px; }
+  .manualRevenueForm { grid-template-columns: 1fr; }
+  .chartTooltip { min-width: 150px; }
+}

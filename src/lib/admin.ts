@@ -131,3 +131,7 @@ export function projectTimeline(value: unknown) {
     return {entry_type: row.entry_type, created_at: row.created_at, data};
   });
 }
+
+const revenueEntryFields = new Set(['id','amount_usd','earned_on','description','trip_id','trip_title','created_by_name','created_at']);
+export const projectRevenueEntry = (value: unknown) => projectRecord(value, revenueEntryFields);
+export const projectRevenueEntries = (value: unknown) => projectPage(value, revenueEntryFields);

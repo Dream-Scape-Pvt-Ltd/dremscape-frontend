@@ -27,6 +27,7 @@ import CapacityView from './capacity-view';
 import DeparturesEditor from './departures-editor';
 import SiteSettingsEditor from './site-settings-editor';
 import DestinationEditor from './destination-editor';
+import RevenueView from './revenue-view';
 import type {Agent, AdminDeparture} from './capacity-types';
 import styles from '@/app/admin/admin.module.css';
 import {fallbackTrekImage} from '@/lib/trek-images';
@@ -214,6 +215,11 @@ function date(value?: string | null) {
 
 function label(value?: string | null) {
   return value?.replaceAll('_', ' ') || '—';
+}
+
+// Django nests the note author as a user object; older payloads sent a plain name.
+function authorName(author?: InquiryNote['author']) {
+  return (typeof author === 'string' ? author : author?.full_name || author?.email) || 'Staff';
 }
 
 function formatCurrency(amount: number): string {
@@ -450,7 +456,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
 
   useEffect(() => {
     if (!adminUser) return;
-    if (tab === 'dashboard' || tab === 'revenue') void loadAnalytics();
+    if (tab === 'dashboard') void loadAnalytics();
     if (tab === 'inquiries') void loadInquiries();
     if (tab === 'capacity') void loadCapacityAlerts();
     if (tab === 'journal') void loadGuides();
@@ -1387,9 +1393,11 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
                   {analytics ? formatCurrency(analytics.metrics.monthly_revenue) : '—'}
                 </div>
                 <p className={styles.statSub}>
-                  {analytics && analytics.metrics.mom_growth_percent !== 0
-                    ? `${analytics.metrics.mom_growth_percent > 0 ? '+' : ''}${analytics.metrics.mom_growth_percent}% MoM`
-                    : 'No comparison yet'}
+                  {!analytics
+                    ? 'Loading…'
+                    : analytics.metrics.mom_growth_percent !== 0
+                      ? `${analytics.metrics.mom_growth_percent > 0 ? '+' : ''}${analytics.metrics.mom_growth_percent}% MoM`
+                      : `From completed treks · ${formatCurrency(analytics.metrics.total_revenue)} all time`}
                 </p>
               </div>
             </div>
@@ -1630,11 +1638,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
 
         {/* Tab: Full Revenue & Financial Analytics View */}
         {tab === 'revenue' && (
-          <RevenueAnalyticsView
-            analytics={analytics}
-            onRefresh={() => void handleManualRefresh()}
-            refreshing={refreshing}
-          />
+          <RevenueView api={api} isAdmin={adminUser.role === 'ADMIN'} treks={treks} />
         )}
 
         {/* Tab: Settings — CRM lead routing rules */}
@@ -2106,7 +2110,7 @@ function InquiryDrawer({
             <h3>Consultation notes</h3>
             {notes.map(note => (
               <article key={note.id}>
-                <strong>{note.author || 'Staff'}</strong>
+                <strong>{authorName(note.author)}</strong>
                 <small>{date(note.created_at)}</small>
                 <p>{note.note_text}</p>
               </article>
@@ -2139,7 +2143,7 @@ function InquiryDrawer({
                 <article key={`${entry.entry_type}-${entry.data.id}-${index}`} className={styles.timelineEntry} data-channel={activity?.channel || 'NOTE'}>
                   <div className={styles.timelineHead}>
                     <span className={styles.timelineChannel}>{isActivity ? label(activity!.channel) : 'Note'}</span>
-                    <span className={styles.timelineAuthor}>{(isActivity ? activity!.author?.full_name : note?.author) || 'Staff'}</span>
+                    <span className={styles.timelineAuthor}>{isActivity ? activity!.author?.full_name || 'Staff' : authorName(note?.author)}</span>
                     <span className={styles.timelineTime}>{date(entry.created_at)}</span>
                   </div>
                   <p className={styles.timelineBody}>{isActivity ? activity!.body : note!.note_text}</p>
@@ -4310,148 +4314,5 @@ function TrekFullDetailEditor({
         </div>
       </div>
     </form>
-  );
-}
-
-function RevenueAnalyticsView({
-  analytics,
-  onRefresh,
-  refreshing,
-}: {
-  analytics: DashboardAnalyticsData | null;
-  onRefresh: () => void;
-  refreshing: boolean;
-}) {
-  const metrics = analytics?.metrics;
-  const trends = analytics?.monthly_trends ?? [];
-
-  const maxRevenue = Math.max(...trends.map(t => t.revenue), 100000);
-
-  return (
-    <div className={styles.revenueContainer}>
-      {/* Top 4 Revenue Cards */}
-      <div className={styles.revenueOverviewGrid}>
-        <div className={`${styles.revenueCard} ${styles.revenueCardDark}`}>
-          <div className={styles.revenueCardTitle}>MONTHLY REVENUE</div>
-          <div className={styles.revenueCardAmount}>
-            {metrics ? formatCurrency(metrics.monthly_revenue) : '—'}
-          </div>
-          <div className={styles.revenueCardNote}>
-            {metrics && metrics.mom_growth_percent !== 0
-              ? `${metrics.mom_growth_percent > 0 ? '+' : ''}${metrics.mom_growth_percent}% vs last month`
-              : 'No comparison yet'}
-          </div>
-        </div>
-
-        <div className={styles.revenueCard}>
-          <div className={styles.revenueCardTitle}>TOTAL REVENUE</div>
-          <div className={styles.revenueCardAmount}>
-            {metrics ? formatCurrency(metrics.total_revenue) : '—'}
-          </div>
-          <div className={styles.revenueCardNote} style={{color: '#4b6657'}}>
-            Recorded booking revenue
-          </div>
-        </div>
-
-        <div className={styles.revenueCard}>
-          <div className={styles.revenueCardTitle}>AVG BOOKING VALUE</div>
-          <div className={styles.revenueCardAmount}>—</div>
-          <div className={styles.revenueCardNote} style={{color: '#4b6657'}}>
-            Available when confirmed booking values are connected
-          </div>
-        </div>
-
-        <div className={styles.revenueCard}>
-          <div className={styles.revenueCardTitle}>CONVERSION RATE</div>
-          <div className={styles.revenueCardAmount}>
-            {analytics?.inquiries_by_status
-              ? `${Math.round(((analytics.inquiries_by_status.COMPLETED || 0) + (analytics.inquiries_by_status.TRAVELING || 0)) / Math.max(metrics?.total_inquiries || 1, 1) * 100)}%`
-              : '—'}
-          </div>
-          <div className={styles.revenueCardNote} style={{color: '#16a34a', fontWeight: 600}}>
-            Lead to confirmed trip
-          </div>
-        </div>
-      </div>
-
-      {/* Main Grid: Chart & Breakdown */}
-      <div className={styles.revenueMainGrid}>
-        {/* Left: 6-Month SVG Revenue Trend Chart */}
-        <section className={styles.chartCard}>
-          <div className={styles.chartHeader}>
-            <h2 className={styles.chartTitle}>Revenue &amp; Booking Trends (6 Months)</h2>
-            <div className={styles.chartLegend}>
-              <div className={styles.legendItem}>
-                <span className={styles.legendDotGreen} />
-                <span>Gross Revenue ($)</span>
-              </div>
-            </div>
-          </div>
-
-          {trends.length === 0 && <p className={styles.empty}>No revenue trend data yet.</p>}
-
-          {trends.length > 0 && <svg className={styles.barChartSvg} viewBox="0 0 600 240" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="revenueBarGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#103b2c" />
-                <stop offset="100%" stopColor="#1c6b50" />
-              </linearGradient>
-            </defs>
-
-            {/* Grid horizontal lines */}
-            <line x1="40" y1="30" x2="580" y2="30" stroke="#e8efe9" strokeDasharray="4" />
-            <line x1="40" y1="90" x2="580" y2="90" stroke="#e8efe9" strokeDasharray="4" />
-            <line x1="40" y1="150" x2="580" y2="150" stroke="#e8efe9" strokeDasharray="4" />
-            <line x1="40" y1="200" x2="580" y2="200" stroke="#cedcd2" />
-
-            {trends.map((item, idx) => {
-              const x = 70 + idx * 85;
-              const barWidth = 44;
-              const barHeight = Math.max(20, Math.round((item.revenue / maxRevenue) * 150));
-              const y = 200 - barHeight;
-
-              return (
-                <g key={item.month_label}>
-                  {/* Background track */}
-                  <rect
-                    className={styles.chartBarBg}
-                    x={x}
-                    y={30}
-                    width={barWidth}
-                    height={170}
-                  />
-                  {/* Active Bar */}
-                  <rect
-                    className={styles.chartBarFill}
-                    x={x}
-                    y={y}
-                    width={barWidth}
-                    height={barHeight}
-                  >
-                    <title>{`${item.full_label}: ${formatCurrency(item.revenue)} (${item.bookings_count} bookings)`}</title>
-                  </rect>
-                  {/* Value Label */}
-                  <text className={styles.chartValueText} x={x + barWidth / 2} y={y - 8}>
-                    {formatCurrency(item.revenue)}
-                  </text>
-                  {/* Month Label */}
-                  <text className={styles.chartAxisText} x={x + barWidth / 2} y={222}>
-                    {item.month_label}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>}
-        </section>
-
-        {/* Right: Revenue by Destination */}
-        <section className={styles.destBreakdownCard}>
-          <div className={styles.chartHeader} style={{marginBottom: '10px'}}>
-            <h2 className={styles.chartTitle}>Destination Revenue</h2>
-          </div>
-          <p className={styles.empty}>Destination revenue will appear when booking totals by region are available.</p>
-        </section>
-      </div>
-    </div>
   );
 }

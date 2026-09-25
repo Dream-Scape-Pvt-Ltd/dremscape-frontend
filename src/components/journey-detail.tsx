@@ -91,6 +91,7 @@ export default function JourneyDetail({journey:t,demo,related}:{journey:Journey;
       </div>
       {related}
     </div>
+    {related}
     {inquiry&&<InquiryDialog journey={t.title} tripId={demo?undefined:t.id} onClose={()=>setInquiry(false)}/>}
   </JourneyShell>;
 }

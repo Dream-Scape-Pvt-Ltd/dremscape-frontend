@@ -85,7 +85,7 @@ export interface Inquiry extends InquiryPayload {
 
 export interface InquiryNote {
   id: string;
-  author?: string;
+  author?: string | {id?: string; email?: string; full_name?: string; role?: string} | null;
   note_text: string;
   created_at: string;
 }

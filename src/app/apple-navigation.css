@@ -6,7 +6,7 @@ body .header.site-navigation.apple-nav[data-page]{
 body:has(.hero,.trek-hero,.dest-page) .header.site-navigation.apple-nav[data-page],body .header.site-navigation.apple-nav[data-page="journal"]{
   --apple-ink:#f5f7f2;--apple-muted:#dce8df;--apple-glass:rgba(16,59,44,.90);--apple-solid:rgba(16,59,44,.98);--apple-edge:rgba(235,244,237,.12);--apple-hover:rgba(255,255,255,.09);--apple-button:rgba(255,255,255,.085);--apple-accent:#e1b77a;--apple-logo:brightness(0) invert(1);
 }
-body .header.site-navigation.apple-nav[data-page].scrolled{background:var(--apple-solid)!important;box-shadow:0 8px 24px #07181112!important}
+body .header.site-navigation.apple-nav[data-page].scrolled{background:var(--apple-glass)!important;box-shadow:0 8px 28px #0718110c!important}
 body .header.site-navigation.apple-nav[data-page] .header-inner{height:100%;padding-inline:20px;gap:24px}
 body .header.site-navigation.apple-nav[data-page] .brand{width:160px;height:50px;filter:var(--apple-logo)}
 body .header.site-navigation.apple-nav[data-page] .nav{gap:6px;font-size:12px}

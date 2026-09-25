@@ -242,15 +242,7 @@ body {
     inset 0 1px 0 rgba(255,255,255,0.2);
 }
 
-.header.scrolled {
-  background: 
-    linear-gradient(120deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)),
-    rgba(9,36,25,0.88) !important;
-  box-shadow: 
-    0 12px 40px rgba(4,20,13,0.24),
-    0 20px 72px rgba(4,20,13,0.16),
-    inset 0 1px 0 rgba(255,255,255,0.16);
-}
+
 
 /* ========================================
    BUTTON IMPROVEMENTS
@@ -324,8 +316,9 @@ body {
    ======================================== */
 
 footer {
-  background: linear-gradient(180deg, var(--forest) 0%, #082218 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: #09291e;
+  box-shadow: none !important;
+  border-top: 0 !important;
 }
 
 /* ========================================
@@ -512,12 +505,7 @@ body:has(.utility-page) .header.scrolled {
     rgba(9,36,25,0.75) !important;
 }
 
-body:has(.contact-intro) .header.scrolled,
-body:has(.utility-page) .header.scrolled {
-  background: 
-    linear-gradient(120deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)),
-    rgba(9,36,25,0.88) !important;
-}
+
 
 /* ========================================
    IMPROVED IMAGE CLARITY EVERYWHERE
