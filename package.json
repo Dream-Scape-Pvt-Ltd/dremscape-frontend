@@ -9,7 +9,7 @@
     "start": "next start --hostname 127.0.0.1",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "test": "node --experimental-transform-types --no-warnings --test tests/*.test.ts",
     "assets": "node scripts/download-assets.mjs"
   },
   "dependencies": {

@@ -1,0 +1,21 @@
+import {chromium} from '@playwright/test';
+const [out, pw, tag] = process.argv.slice(2);
+const b=await chromium.launch({channel:'chrome'});
+const ctx=await b.newContext({viewport:{width:1440,height:900}});
+const p=await ctx.newPage();
+const errors=[];p.on('pageerror',e=>errors.push(e.message));p.on('console',m=>{if(m.type()==='error')errors.push(m.text().slice(0,200))});
+await p.addInitScript(()=>document.addEventListener('DOMContentLoaded',()=>{const s=document.createElement('style');s.textContent='nextjs-portal{display:none!important}';document.head.append(s);}));
+await p.goto('http://127.0.0.1:3000/admin',{waitUntil:'networkidle',timeout:180000});
+await p.getByPlaceholder('Email address').fill('e2e-admin@dreamscape.test');
+await p.getByPlaceholder('Password').fill(pw);
+await p.getByRole('button',{name:'Login',exact:true}).click();
+await p.getByRole('navigation',{name:'Admin navigation'}).getByRole('button',{name:'Revenue'}).click();
+await p.getByText('Revenue by month').waitFor({timeout:120000});
+await p.waitForTimeout(800);
+await p.screenshot({path:`${out}/rev-${tag}-desktop.png`,fullPage:true});
+const bars=p.locator('svg[aria-label^="Revenue by month"] rect[tabindex]');
+if(await bars.count()){await bars.last().hover();await p.waitForTimeout(300);const svg=p.locator('svg[aria-label^="Revenue by month"]');const bb=await svg.boundingBox();await p.screenshot({path:`${out}/rev-${tag}-hover.png`,clip:{x:bb.x-30,y:bb.y-20,width:bb.width+60,height:bb.height+60}});}
+await p.setViewportSize({width:390,height:844});await p.waitForTimeout(600);
+await p.screenshot({path:`${out}/rev-${tag}-mobile.png`,fullPage:true});
+console.log('errors:',JSON.stringify(errors));
+await b.close();

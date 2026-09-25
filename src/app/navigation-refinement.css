@@ -2,7 +2,7 @@
    replace older global important overrides without changing content sections. */
 body .header.site-navigation[data-page]{--nav-ink:#163d2e;--nav-surface:rgba(249,252,250,.9);--nav-hover:#103b2c0d;--nav-active:#103b2c12;--nav-active-ink:#103b2c;--nav-filter:brightness(0) saturate(100%) invert(19%) sepia(20%) saturate(1080%) hue-rotate(104deg) brightness(92%);background:linear-gradient(115deg,#ffffff30,#ffffff08),var(--nav-surface)!important;color:var(--nav-ink);border:1px solid #b5c8bd70;box-shadow:0 8px 28px #09241913,inset 0 1px 0 #ffffff66!important;backdrop-filter:blur(24px) saturate(115%)!important;-webkit-backdrop-filter:blur(24px) saturate(115%)!important}
 body:has(.hero,.trek-hero,.dest-page) .header.site-navigation[data-page],body .header.site-navigation[data-page="journal"]{--nav-ink:#f7faf8;--nav-surface:rgba(9,36,25,.8);--nav-hover:#ffffff12;--nav-active:#ffffff18;--nav-active-ink:#f4d39e;--nav-filter:none;border-color:#ffffff38}
-body .header.site-navigation[data-page].scrolled{box-shadow:0 8px 24px #09241924,inset 0 1px 0 #ffffff24!important}
+body .header.site-navigation[data-page].scrolled{box-shadow:0 8px 28px #09241913,inset 0 1px 0 #ffffff66!important}
 body .header.site-navigation[data-page] .nav a{color:var(--nav-ink);font-weight:600}
 body .header.site-navigation[data-page] .nav a:hover{background:var(--nav-hover)}
 body .header.site-navigation[data-page] .nav a[aria-current]{background:var(--nav-active);color:var(--nav-active-ink);box-shadow:inset 0 -1px 0 #af8b5138}

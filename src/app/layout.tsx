@@ -9,6 +9,7 @@ import './memories.css';
 import './refinements.css';
 import './refined-ui.css';
 import './ui-polish.css';
+import './content-experience.css';
 import './destination-navigation.css';
 import './navigation-refinement.css';
 import './experience.css';
@@ -19,6 +20,7 @@ import './photo-experience.css';
 import './final-polish.css';
 import './brand-correction.css';
 import PageMotion from '@/components/page-motion';
+import {AuthProvider} from '@/context/AuthContext';
 
 export const metadata: Metadata = {
   title: 'Dreamscape Treks — Beyond the Horizon',
@@ -32,7 +34,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <body>{children}<PageMotion/></body>
+      <body>
+        <AuthProvider>{children}<PageMotion/></AuthProvider>
+      </body>
     </html>
   );
 }

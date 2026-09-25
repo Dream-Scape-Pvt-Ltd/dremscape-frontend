@@ -1,15 +1,11 @@
 /* Shared glass takes its color from the landscape instead of a silver surface. */
-.header {
+.header,
+.header.scrolled {
   border-color:rgba(205,224,191,.15);
   background:linear-gradient(110deg,rgba(34,65,48,.28),rgba(12,39,29,.2));
   box-shadow:0 7px 24px rgba(5,23,14,.1),inset 0 1px 0 rgba(227,226,190,.045);
   backdrop-filter:blur(18px) saturate(115%);
   -webkit-backdrop-filter:blur(18px) saturate(115%);
-}
-.header.scrolled {
-  background:linear-gradient(110deg,rgba(24,51,35,.93),rgba(9,34,25,.9));
-  border-color:rgba(218,209,163,.13);
-  box-shadow:0 8px 26px rgba(4,23,14,.16);
 }
 .nav a[aria-current="location"],.nav a[aria-current="page"] {
   background:rgba(211,195,137,.09);
