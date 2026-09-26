@@ -6,6 +6,7 @@ export const activities=[
 ] as const;
 export const journalPosts=[
   {
+    "id": "66e6d473-860f-4d9a-9780-d2c3696b18cf",
     "slug": "finding-your-own-pace",
     "title": "The climb. The flags. The people.",
     "category": "SHARED TRAILS",
@@ -38,6 +39,7 @@ export const journalPosts=[
     ]
   },
   {
+    "id": "76a78a4d-e49d-4acc-9162-3f6f94037f30",
     "slug": "the-spaces-between-the-peaks",
     "title": "The quieter half of the journey.",
     "category": "ALONG THE WAY",
@@ -70,6 +72,7 @@ export const journalPosts=[
     ]
   },
   {
+    "id": "24db9f8a-5348-4fb5-b07a-b0d72aa0f639",
     "slug": "a-mountain-photo-journal",
     "title": "When the mountains catch the light.",
     "category": "MOUNTAIN LIGHT",

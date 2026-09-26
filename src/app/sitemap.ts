@@ -1,6 +1,14 @@
 import { MetadataRoute } from 'next';
+import { listJourneys } from '@/lib/journeys';
+import { listDestinationContent } from '@/lib/destination-content';
+import { listTrekGuides } from '@/lib/trek-guides';
+import { listGuides } from '@/lib/guides';
+import { destinationHref, guideHref, storyHref, trekHref } from '@/lib/links';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+/** A backend outage leaves the detail entries out rather than failing the sitemap. */
+const safely = async <T,>(load: () => Promise<T[]>): Promise<T[]> => { try { return await load(); } catch { return []; } };
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://dreamscapetrek.com';
   const currentDate = new Date();
 
@@ -17,6 +25,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: currentDate,
       changeFrequency: 'monthly',
       priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/guides`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.7,
     },
     {
       url: `${baseUrl}/contact`,
@@ -84,8 +98,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Destination pages
-  const destinations = ['everest', 'annapurna', 'manaslu', 'dolpo'];
+  // Detail pages open by id (/treks?id=<uuid>).
+  const [trips, destinations, trekGuides, stories] = await Promise.all([
+    safely(async () => (await listJourneys()).trips),
+    safely(listDestinationContent),
+    safely(listTrekGuides),
+    safely(listGuides),
+  ]);
+  const detail = (path: string, priority: number) => ({url: `${baseUrl}${path}`, lastModified: currentDate, changeFrequency: 'monthly' as const, priority});
+  const detailPages: MetadataRoute.Sitemap = [
+    ...trips.map(t => detail(trekHref(t.id), 0.8)),
+    ...trekGuides.map(g => detail(guideHref(g.id), 0.6)),
+    ...stories.map(g => detail(storyHref(g.id), 0.6)),
+  ];
+
   const destinationPages: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}/destinations`,
@@ -93,12 +119,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.9,
     },
-    ...destinations.map((slug) => ({
-      url: `${baseUrl}/destinations/${slug}`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    })),
+    ...destinations.filter(d => d.slug !== 'nepal').map(d => detail(destinationHref(d.id, d.slug), 0.8)),
   ];
 
   // Activity pages
@@ -135,5 +156,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...destinationPages,
     ...activityPages,
     ...trekPages,
+    ...detailPages,
   ];
 }

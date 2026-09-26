@@ -68,8 +68,10 @@ test('API endpoints and Routes constants match expectations', () => {
   assert.equal(API_ENDPOINTS.BACKEND.TRIPS.DETAIL('annapurna-circuit'), 'trips/annapurna-circuit/');
 
   assert.equal(ROUTES.HOME, '/');
-  assert.equal(ROUTES.TREK_DETAIL('everest'), '/treks/everest');
-  assert.equal(ROUTES.BOOKING('everest', 'dep-123'), '/treks/everest?departure=dep-123#departures');
+  const trekId = '4632d7df-d603-4675-a801-dfdc71983122';
+  assert.equal(ROUTES.TREK_DETAIL(trekId), `/treks?id=${trekId}`);
+  assert.equal(ROUTES.BOOKING(trekId, 'dep-123'), `/treks?id=${trekId}&departure=dep-123#book`);
+  assert.equal(ROUTES.BOOKING('everest', 'dep-123'), '/treks/everest?departure=dep-123#book');
 });
 
 test('ApiClient normalizes trailing slashes and unrolls Django envelopes', async () => {

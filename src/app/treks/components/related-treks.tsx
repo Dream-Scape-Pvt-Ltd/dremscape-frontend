@@ -11,13 +11,12 @@ export default async function RelatedTreks({current}:{current:Trip}) {
   const related=await listRelatedJourneys(current).catch(()=>[] as Trip[]);
   if(!related.length) return null;
   return (
-    <section className="related-treks">
+    <section className="container related-treks">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">MORE JOURNEYS</p>
-          <h2>Treks.</h2>
+          <h2>More treks like this</h2>
         </div>
-        <Link href="/treks" className="text-link">Show all ↗</Link>
+        <Link href="/treks" className="text-link">See all treks</Link>
       </div>
       <div className="trip-grid catalogue-grid">
         {related.map(trip=><JourneyCard key={trip.slug} trip={trip}/>)}

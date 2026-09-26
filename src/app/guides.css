@@ -1,0 +1,70 @@
+/*
+ * Guides pages. People first: large portraits, plain facts, no card chrome.
+ * Same palette as the trek page (forest, glacier, moraine, brass). Selectors
+ * start with `body .journey-page .guides-page` to sit above the legacy
+ * `:is(body .journey-page p, …)` rules; this file loads last.
+ */
+body .journey-page .guides-page{--forest:#153d2f;--glacier:#eef3f1;--moraine:#6f7f78;--brass:#b8964f;--rule:#153d2f1c;background:var(--glacier);color:var(--forest);padding-bottom:72px;min-height:70vh}
+body .journey-page .guides-page .container{max-width:1200px}
+
+/* ---- List ---- */
+body .journey-page .guides-page .guides-head{padding-top:124px;padding-bottom:12px}
+body .journey-page .guides-page .guides-head h1{font-family:'Plus Jakarta Sans Variable',sans-serif;font-size:clamp(40px,6vw,76px);font-weight:800;letter-spacing:-.055em;line-height:1;margin:0;color:var(--forest)}
+body .journey-page .guides-page .guides-head p{margin:16px 0 0;max-width:56ch;font-size:17px;line-height:1.6;color:#3d5448}
+body .journey-page .guides-page .guides-list{padding-top:40px}
+body .journey-page .guides-page .guide-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:44px 32px}
+body .journey-page .guides-page .guide-card{display:grid;gap:6px;align-content:start}
+body .journey-page .guides-page .guide-card-link{display:grid;gap:14px;color:var(--forest);text-decoration:none}
+body .journey-page .guides-page .guide-card-link:hover h2{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
+body .journey-page .guides-page .guide-card-link:focus-visible{outline:3px solid var(--brass);outline-offset:4px;border-radius:20px}
+body .journey-page .guides-page .guide-card h2{font-size:22px;font-weight:750;letter-spacing:-.03em;line-height:1.2;margin:0;color:var(--forest)}
+body .journey-page .guides-page p.guide-role{margin:0;font-size:15px;color:#3d5448}
+body .journey-page .guides-page dl.guide-facts{display:grid;gap:4px;margin:8px 0 0;font-size:14px}
+body .journey-page .guides-page dl.guide-facts div{display:flex;gap:8px;flex-wrap:wrap}
+body .journey-page .guides-page dl.guide-facts dt{color:var(--moraine);font-weight:500;text-transform:none;letter-spacing:0}
+body .journey-page .guides-page dl.guide-facts dd{margin:0;font-weight:600;color:var(--forest)}
+body .journey-page .guides-page p.guide-regions{margin:6px 0 0;font-size:14px;color:var(--moraine)}
+body .journey-page .guides-page p.guide-regions a,body .journey-page .guides-page dl.guide-facts a{color:var(--forest);font-weight:600;text-decoration:underline;text-decoration-color:#153d2f55;text-underline-offset:3px}
+body .journey-page .guides-page .guides-empty{max-width:620px}
+
+/* ---- Portrait (also used on the trek page) ---- */
+.guide-portrait{display:block;overflow:hidden;background:linear-gradient(160deg,#d7e3dd,#b9cdc4);color:#153d2f}
+.guide-portrait img{display:block;width:100%;height:100%;object-fit:cover}
+.guide-initials{display:grid;place-items:center;width:100%;height:100%;font-weight:800;letter-spacing:-.04em}
+.guide-portrait-card{aspect-ratio:4/5;border-radius:20px}
+.guide-portrait-card .guide-initials{font-size:56px}
+.guide-portrait-profile{aspect-ratio:4/5;border-radius:24px;width:100%}
+.guide-portrait-profile .guide-initials{font-size:84px}
+.guide-portrait-small{width:34px;height:34px;border-radius:50%;flex:none}
+.guide-portrait-small .guide-initials{font-size:12px}
+
+/* ---- Profile ---- */
+body .journey-page .guides-page .guide-profile{padding-top:124px}
+body .journey-page .guides-page .guide-profile-grid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:40px 64px;align-items:start;margin-top:10px}
+body .journey-page .guides-page .guide-profile h1{font-family:'Plus Jakarta Sans Variable',sans-serif;font-size:clamp(38px,5vw,64px);font-weight:800;letter-spacing:-.05em;line-height:1;margin:0;color:var(--forest)}
+body .journey-page .guides-page .guide-profile p.guide-role{margin-top:12px;font-size:18px}
+body .journey-page .guides-page dl.guide-facts-wide{gap:0;margin:26px 0 0;border-top:1px solid var(--rule)}
+body .journey-page .guides-page dl.guide-facts-wide div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;padding:12px 0;border-bottom:1px solid var(--rule);font-size:15px}
+body .journey-page .guides-page dl.guide-facts-wide ul{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+body .journey-page .guides-page .guide-bio{margin-top:26px;max-width:62ch}
+body .journey-page .guides-page .guide-bio p{margin:0 0 16px;font-size:17px;line-height:1.75;color:#2b4a3d}
+body .journey-page .guides-page .guide-treks{padding-top:64px}
+body .journey-page .guides-page .guide-treks h2{font-size:clamp(26px,3vw,36px);font-weight:800;letter-spacing:-.045em;margin:0 0 22px;color:var(--forest)}
+
+@media(max-width:760px){
+  body .journey-page .guides-page .guides-head,body .journey-page .guides-page .guide-profile{padding-top:104px}
+  body .journey-page .guides-page .guide-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 16px}
+  body .journey-page .guides-page .guide-card h2{font-size:18px}
+  .guide-portrait-card .guide-initials{font-size:40px}
+  body .journey-page .guides-page .guide-profile-grid{grid-template-columns:1fr;gap:26px}
+  body .journey-page .guides-page .guide-portrait-profile{max-width:320px}
+  body .journey-page .guides-page dl.guide-facts-wide div{grid-template-columns:1fr;gap:2px}
+}
+@media(max-width:420px){body .journey-page .guides-page .guide-grid{grid-template-columns:1fr}}
+
+/* ---- Trek page: who leads this trek ---- */
+body .journey-page .trek-v2 .trek-led-by{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:18px 0 0;font-size:14px;color:#6f7f78}
+body .journey-page .trek-v2 .trek-led-by a{display:inline-flex;align-items:center;gap:10px;color:#153d2f;font-weight:650;text-decoration:none}
+body .journey-page .trek-v2 .trek-led-by a:hover{text-decoration:underline;text-underline-offset:3px}
+body .journey-page .trek-v2 .trek-led-by small{font-weight:500;color:#6f7f78;margin-left:-4px}
+body .journey-page .trek-v2 .trek-led-by small::before{content:', '}

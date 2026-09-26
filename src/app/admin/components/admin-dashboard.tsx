@@ -1,6 +1,8 @@
 'use client';
 
 import React, {FormEvent, useEffect, useMemo, useState} from 'react';
+import {trekHref} from '@/lib/links';
+import {difficultyLevels} from '@/lib/format';
 import Link from 'next/link';
 import type {
   Inquiry,
@@ -20,12 +22,13 @@ import DeparturesEditor from './departures-editor';
 import ScheduleBoard from './schedule-board';
 import SiteSettingsEditor from './site-settings-editor';
 import DestinationEditor from './destination-editor';
+import TrekGuideEditor from './trek-guide-editor';
 import RevenueView from './revenue-view';
 import type {AdminDeparture} from './capacity-types';
 import styles from '@/app/admin/admin.module.css';
 import {fallbackTrekImage} from '@/lib/trek-images';
 
-type Tab = 'dashboard' | 'treks' | 'revenue' | 'journal' | 'inquiries' | 'pipeline' | 'reviews' | 'settings' | 'destinations';
+type Tab = 'dashboard' | 'treks' | 'revenue' | 'journal' | 'inquiries' | 'pipeline' | 'reviews' | 'settings' | 'destinations' | 'trek-guides';
 type Page<T> = {count: number; next: string | null; previous: string | null; results: T[]};
 interface AdminProfile {full_name: string; role: string; email?: string;}
 const statuses: InquiryStatus[] = ['NEW','IN_CONTACT','BOOKED','TRAVELING','COMPLETED','CLOSED'];
@@ -201,14 +204,7 @@ export interface CategoryOption {
   slug: string;
 }
 
-const difficultyGrades = [
-  {value: 'GRADE_1', label: 'Grade 1 - Easy'},
-  {value: 'GRADE_2', label: 'Grade 2 - Moderate'},
-  {value: 'GRADE_3', label: 'Grade 3 - Demanding'},
-  {value: 'GRADE_4', label: 'Grade 4 - Strenuous'},
-  {value: 'GRADE_5', label: 'Grade 5 - Challenging'},
-  {value: 'ALPINE', label: 'Alpine / Technical'},
-];
+const difficultyGrades = difficultyLevels;
 
 async function api<T>(path: string, options?: RequestInit): Promise<T> {
   const headers = new Headers(options?.headers);
@@ -560,7 +556,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
           category: categories[0]?.id || '',
           duration_days: 12,
           altitude_max_meters: 5000,
-          difficulty_grade: 'GRADE_3',
+          difficulty_grade: 'NORMAL',
           starting_price_usd: 1800,
           single_supplement_usd: 350,
           min_group_size: 1,
@@ -644,7 +640,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
           category_slug: catObj?.slug || raw.category_slug || 'trekking',
           duration_days: raw.duration_days || 1,
           altitude_max_meters: raw.altitude_max_meters ?? '',
-          difficulty_grade: raw.difficulty_grade || 'GRADE_3',
+          difficulty_grade: raw.difficulty_grade || 'NORMAL',
           starting_price_usd: Number(raw.starting_price_usd) || '',
           single_supplement_usd: raw.single_supplement_usd ? Number(raw.single_supplement_usd) : '',
           min_group_size: raw.min_group_size ?? 1,
@@ -1008,6 +1004,16 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="m3 17 5-8 4 5 3-4 6 7H3Z"/>
           <circle cx="17" cy="5" r="2"/>
+        </svg>
+      )
+    },
+    {
+      id: 'trek-guides',
+      label: 'Guides',
+      icon: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="7" r="3.5"/>
+          <path d="M5 21v-1.5A5.5 5.5 0 0 1 10.5 14h3a5.5 5.5 0 0 1 5.5 5.5V21"/>
         </svg>
       )
     },
@@ -1518,6 +1524,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
 
         {tab === 'reviews' && <ReviewEditor/>}
         {tab === 'destinations' && <DestinationEditor/>}
+        {tab === 'trek-guides' && <TrekGuideEditor/>}
       </section>
 
       {/* Inquiry Drawer */}
@@ -3393,7 +3400,7 @@ function TrekFullDetailEditor({
         <div className={styles.detailTopActions}>
           {trek.slug && trek.id && (
             <Link
-              href={`/treks/${trek.slug}`}
+              href={trekHref(trek.id)}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.previewPublicBtn}

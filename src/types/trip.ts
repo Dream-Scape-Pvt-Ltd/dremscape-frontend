@@ -5,9 +5,8 @@ import type {QueryParams} from './api.ts';
 
 export type TripDifficulty =
   | 'EASY'
-  | 'MODERATE'
-  | 'DEMANDING'
-  | 'STRENUOUS'
+  | 'NORMAL'
+  | 'DIFFICULT'
   | 'EXTREME';
 
 /** Mirrors the backend DepartureStatus enum exactly. */

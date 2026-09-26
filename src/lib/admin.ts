@@ -27,6 +27,15 @@ const guideFields = new Set([
 export const GUIDE_INPUT_LIMIT = 700_000;
 const guideReadOnlyKeys = new Set(['slug','body_markdown','comments','comment_count','view_count','author_name','destination_name','updated_at','published_at','meta_title','meta_description']);
 
+const trekGuideWriteKeys = ['slug','name','role','photo_url','bio','years_experience','languages','certifications','regions','treks_led','is_published','display_order'] as const;
+/** Admin guide-profile editor payload → backend write payload: only the fields a guide profile has. */
+export function trekGuideWritePayload(input: Record<string, unknown>) {
+  for (const key of ['languages','certifications','regions','treks_led'] as const) {
+    if (key in input && !Array.isArray(input[key])) throw new BackendError('Please check the guide’s lists.', 400);
+  }
+  return Object.fromEntries(trekGuideWriteKeys.filter(key => key in input).map(key => [key, input[key]]));
+}
+
 /** Staff editor payload → backend write payload. Sections go through as-is; the backend validates them and rebuilds the Markdown mirror. */
 export function guideWritePayload(input: Record<string, unknown>) {
   if ('sections' in input && !Array.isArray(input.sections)) throw new BackendError('Please check the article sections.', 400);

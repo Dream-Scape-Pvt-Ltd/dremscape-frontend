@@ -1,36 +1,55 @@
 'use client';
-import {useEffect,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
+import {trekHref} from '@/lib/links';
 import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
 import JourneyShell from './journey-shell';
 import JourneySelect from './journey-select';
 import JourneyCard from './journey-card';
+import SearchBackdrop from './search-backdrop';
 import {asset} from '@/lib/assets';
-import {filterTrips,trips as sampleTrips,type Trip} from '@/lib/catalog';
-import {difficulty} from '@/lib/format';
+import {filterTrips,isExpedition,trips as sampleTrips,type Trip} from '@/lib/catalog';
+import {difficulty,difficultyLevels} from '@/lib/format';
+import {matchTrips} from '@/lib/search';
 
+type Kind=''|'treks'|'expeditions';
+/** The trek collection: search first, then filters. Everything updates as you type or choose, and the address keeps the filters for sharing. */
 export default function TrekCatalog() {
   const params=useSearchParams();
-  const [region,setRegion]=useState(params.get('region')||''),[duration,setDuration]=useState(''),[grade,setGrade]=useState(''),[search,setSearch]=useState(params.get('q')||''),[sort,setSort]=useState('recommended');
+  const [search,setSearch]=useState(params.get('q')||''),[kind,setKind]=useState<Kind>((params.get('kind') as Kind)||'');
+  const [duration,setDuration]=useState(params.get('duration')||''),[grade,setGrade]=useState(params.get('grade')||''),[sort,setSort]=useState('recommended'),[filtersOpen,setFiltersOpen]=useState(false);
   const [items,setItems]=useState<Trip[]>([]),[demo,setDemo]=useState(false),[loading,setLoading]=useState(true),[error,setError]=useState('');
   async function load(){setLoading(true);setError('');try{const r=await fetch('/api/trips');const data=await r.json();if(!r.ok)throw new Error(data.error);setItems(data.trips.length?data.trips:sampleTrips);setDemo(data.demo||!data.trips.length);}catch(e){setError(e instanceof Error?e.message:'Unable to load journeys.');}finally{setLoading(false);}}
   useEffect(()=>{void load();},[]);
-  const regions=Array.from(new Map(items.map(t=>[t.destination_slug,t.destination_name])).entries());
-  const grades=Array.from(new Set(items.map(t=>t.difficulty_grade)));
-  const visible=filterTrips(items,region,'',duration).filter(t=>(!grade||t.difficulty_grade===grade)&&`${t.title} ${t.destination_name}`.toLowerCase().includes(search.trim().toLowerCase())).sort((a,b)=>sort==='price'?Number(a.starting_price_usd)-Number(b.starting_price_usd):sort==='duration'?a.duration_days-b.duration_days:0);
-  function clear(){setRegion('');setDuration('');setGrade('');setSearch('');setSort('recommended');}
+  useEffect(()=>{
+    const query=new URLSearchParams(Object.entries({q:search.trim(),kind,duration,grade}).filter(([,value])=>value));
+    const url=`${location.pathname}${query.size?`?${query}`:''}`;
+    const timer=setTimeout(()=>{if(url!==location.pathname+location.search)history.replaceState(history.state,'',url);},300);
+    return()=>clearTimeout(timer);
+  },[search,kind,duration,grade]);
+
+  const counts={all:items.length,treks:items.filter(t=>!isExpedition(t)).length,expeditions:items.filter(isExpedition).length};
+  const visible=useMemo(()=>matchTrips(filterTrips(items,'','',duration).filter(t=>(!grade||t.difficulty_grade===grade)&&(!kind||(kind==='expeditions')===isExpedition(t))),search).sort((a,b)=>sort==='price'?Number(a.starting_price_usd)-Number(b.starting_price_usd):sort==='duration'?a.duration_days-b.duration_days:0),[items,duration,grade,kind,search,sort]);
+  const filtered=Boolean(duration||grade||search||kind);
+  function clear(){setDuration('');setGrade('');setSearch('');setKind('');setSort('recommended');}
   return <JourneyShell>
-    <section className="catalog-hero"><img src="/images/trek-memories/mountain-amphitheatre.jpg" alt="Snow-covered mountains beneath a clear Himalayan sky" fetchPriority="high"/><div className="container"><p className="eyebrow">NEPAL, ONE FOOTSTEP AT A TIME</p><h1>Your trail.<br/><em>Your kind of extraordinary.</em></h1><p>High passes or quiet valleys. A familiar dream or a new direction.<br/>Find a journey that feels like you.</p><span className="hero-coordinate">BEYOND THE HORIZON / THE JOURNEY COLLECTION</span></div></section>
-    <div className="container">
-      <section className="catalog-filter" aria-label="Filter treks"><label className="catalog-search"><span className="sr-only">Find your next journey</span><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input type="search" aria-label="Search treks" placeholder="Try Everest, Mustang or Manaslu…" value={search} onChange={e=>setSearch(e.target.value)}/></label>
-        <div className="catalog-suggestions" aria-label="Suggested regions">{['Everest','Annapurna','Mustang','Manaslu'].map(place=><button key={place} aria-pressed={search===place} onClick={()=>setSearch(search===place?'':place)}>{place}<span aria-hidden="true"> ↗</span></button>)}</div>
-        <div className="catalog-selects"><JourneySelect label="Region" value={region} onChange={setRegion} options={[{value:'',label:'All Himalayan regions'},...regions.map(([value,label])=>({value,label}))]}/><JourneySelect label="Time on the trail" value={duration} onChange={setDuration} options={[{value:'',label:'Any duration'},{value:'short',label:'Up to 10 days'},{value:'medium',label:'11–16 days'},{value:'long',label:'17+ days'}]}/><JourneySelect label="Trail difficulty" value={grade} onChange={setGrade} options={[{value:'',label:'All levels'},...grades.map(value=>({value,label:difficulty(value)}))]}/></div>
+    <SearchBackdrop/>
+    <div className="container catalog-page">
+      <h1 className="sr-only">Find your trek</h1>
+      <section className="catalog-filter catalog-filter-first" aria-label="Search and filter treks">
+        <label className="catalog-search"><span className="sr-only">Search treks and expeditions</span><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input type="search" aria-label="Search treks" placeholder="Search Everest, peak climbing, 12 days under $2000…" value={search} onChange={e=>setSearch(e.target.value)} autoComplete="off" autoFocus/>{search&&<button type="button" className="catalog-search-clear" aria-label="Clear search" onClick={()=>setSearch('')}>×</button>}</label>
+        <div className="catalog-quick">
+          <div className="catalog-kind" role="group" aria-label="Category">{([['','All',counts.all],['treks','Treks',counts.treks],['expeditions','Expeditions',counts.expeditions]] as [Kind,string,number][]).map(([value,label,count])=><button type="button" key={label} aria-pressed={kind===value} onClick={()=>setKind(value)}>{value==='treks'?<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 16 L7 9 L10 12 L13 7 L18 16Z"/></svg>:value==='expeditions'?<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 17 L10 3 L18 17Z"/><path d="M10 3 V0.5 M10 0.5 L14 1.8 L10 3" className="flag"/></svg>:null}{label}{!loading&&<span className="catalog-kind-count">{count}</span>}</button>)}</div>
+          
+        </div>
+        <button type="button" className="catalog-filters-toggle" aria-expanded={filtersOpen} aria-controls="catalog-selects" onClick={()=>setFiltersOpen(!filtersOpen)}>Filters &amp; sort{[duration,grade].filter(Boolean).length>0&&<span>{[duration,grade].filter(Boolean).length}</span>}<span aria-hidden="true" className="catalog-filters-caret">{filtersOpen?'−':'+'}</span></button>
+        <div id="catalog-selects" className={`catalog-selects ${filtersOpen?'is-open':''}`}><JourneySelect label="Time on the trail" value={duration} onChange={setDuration} options={[{value:'',label:'Any duration'},{value:'short',label:'Up to 10 days'},{value:'medium',label:'11–16 days'},{value:'long',label:'17+ days'}]}/><JourneySelect label="Difficulty" value={grade} onChange={setGrade} options={[{value:'',label:'All levels'},...difficultyLevels]}/><JourneySelect label="Sort" value={sort} onChange={setSort} options={[{value:'recommended',label:search.trim()?'Best match':'Featured first'},{value:'price',label:'Price: low to high'},{value:'duration',label:'Shortest first'}]}/></div>
       </section>
-      <section className="section catalog-results"><div className="section-heading"><div><p className="eyebrow">MAKE ROOM FOR ADVENTURE</p><h2>Journeys to remember.</h2><p aria-live="polite">{loading?'Loading journeys…':`${visible.length} ${visible.length===1?'journey':'journeys'} to explore`}</p></div><div className="catalog-sort"><JourneySelect label="Sort journeys" value={sort} onChange={setSort} options={[{value:'recommended',label:'Featured first'},{value:'price',label:'Price: low to high'},{value:'duration',label:'Shortest first'}]}/></div></div>
-        {demo&&<p className="sample-notice">Sample routes for exploring the filters · Dates and availability are not confirmed. Ask our team to plan your journey.</p>}{(region||duration||grade||search)&&<button className="text-link clear-filters" onClick={clear}>Clear all filters ×</button>}
-        {loading?<p className="status" role="status">Finding your horizon…</p>:error?<div className="status" role="alert"><p>{error}</p><button className="button green" onClick={()=>void load()}>Try again</button></div>:visible.length?<div className="trip-grid catalogue-grid">{visible.map(trip=>demo?<Link className="sample-trek-card" href={`/treks/${trip.slug}`} key={trip.slug}><img src={asset(trip.image||'/images/trek-memories/mountain-amphitheatre.jpg')} alt={trip.title} loading="lazy" width="640" height="420"/><div className="sample-trek-copy"><span>SAMPLE ROUTE · {trip.destination_name}</span><h3>{trip.title}</h3><p>{trip.duration_days} days · {trip.difficulty_grade}</p><span className="text-link">View route details ↗</span></div></Link>:<JourneyCard trip={trip} key={trip.slug}/>)}</div>:<div className="status"><h3>No trails match just yet.</h3><p>Give yourself a little more room to explore.</p><button className="button green" onClick={clear}>Reset filters</button></div>}
+      <section className="catalog-results catalog-results-live" aria-label="Treks">
+        <div className="catalog-results-bar"><p aria-live="polite">{loading?'Loading journeys…':<><strong>{visible.length}</strong> {visible.length===1?'journey':'journeys'}{search.trim()?<> for “{search.trim()}”</>:filtered?' match your filters':' to explore'}</>}</p>{filtered&&<button type="button" className="text-link clear-filters" onClick={clear}>Clear all ×</button>}</div>
+        {demo&&<p className="sample-notice">Sample routes for exploring the filters · Dates and availability are not confirmed. Ask our team to plan your journey.</p>}
+        {loading?<div className="trip-grid catalogue-grid catalog-skeleton" aria-hidden="true">{[0,1,2].map(i=><div key={i}/>)}</div>:error?<div className="status" role="alert"><p>{error}</p><button className="button green" onClick={()=>void load()}>Try again</button></div>:visible.length?<div className="trip-grid catalogue-grid">{visible.map(trip=>demo?<Link className="sample-trek-card" href={trekHref(trip.id)} key={trip.slug}><img src={asset(trip.image||'/images/trek-memories/mountain-amphitheatre.jpg')} alt={trip.title} loading="lazy" width="640" height="420"/><div className="sample-trek-copy"><span>SAMPLE ROUTE · {trip.destination_name}</span><h3>{trip.title}</h3><p>{trip.duration_days} days · {difficulty(trip.difficulty_grade)}</p><span className="text-link">View route details ↗</span></div></Link>:<JourneyCard trip={trip} key={trip.slug}/>)}</div>:<div className="status">{kind==='expeditions'&&!counts.expeditions?<><h3>No expeditions are listed yet.</h3><p>Peak climbing trips will appear here once they are published. Tell the team which summit you have in mind and we’ll plan it with you.</p></>:<><h3>No journeys match{search.trim()?` “${search.trim()}”`:''} yet.</h3><p>Try a shorter search or fewer filters. The team can also plan a route just for you.</p></>}<div className="button-row"><button className="button green" onClick={clear}>Show all journeys</button><Link className="button gold" href="/contact">Ask the team ↗</Link></div></div>}
       </section>
     </div>
-    <section className="journey-invitation container"><span className="eyebrow">A JOURNEY MADE FOR YOU</span><h2>Some trails start<br/><em>with a conversation.</em></h2><p>Share your time, your interests, and the places you keep dreaming about.</p><a href="/contact" className="button gold">Let’s plan your journey ↗</a></section>
   </JourneyShell>;
 }

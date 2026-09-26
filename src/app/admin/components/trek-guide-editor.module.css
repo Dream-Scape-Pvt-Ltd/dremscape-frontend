@@ -1,0 +1,20 @@
+/* Extras for the guide editor; the layout comes from destination-editor.module.css. */
+.portrait{height:220px}
+.portraitPreview{aspect-ratio:4/5!important;max-width:260px}
+.tags{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:46px;padding:6px 8px;background:#fbfcfa;border:1px solid #d4e0d7;border-radius:10px}
+.tags:focus-within{border-color:#8cab9b;box-shadow:0 0 0 3px rgba(28,94,72,.08)}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:4px 6px 4px 10px;border-radius:99px;background:#e6f0ea;color:#1a4a39;font-size:12px;font-weight:650}
+.tag button{border:0;background:none;color:inherit;font-size:15px;line-height:1;cursor:pointer;padding:0 3px;border-radius:50%}
+.tag button:hover,.tag button:focus-visible{background:#c9ddd1;outline:none}
+.tags input{flex:1;min-width:120px;border:0!important;background:transparent!important;box-shadow:none!important;padding:6px 4px!important;outline:0}
+.checklist{border:0;margin:0 0 18px;padding:0;min-width:0;display:grid;gap:4px;max-height:280px;overflow:auto}
+.checklist legend{color:#315847;font-size:12px;font-weight:750;margin-bottom:8px;padding:0}
+.checklist label{display:flex!important;align-items:center;gap:9px!important;margin:0!important;padding:7px 9px;border-radius:9px;font-weight:500!important;font-size:13px!important;color:#183e30!important;cursor:pointer}
+.checklist label:hover{background:#f2f7f3}
+.checklist input{width:17px;height:17px;accent-color:#1a5b43;flex:none}
+.checklist p{font-size:12px;color:#778a7c;margin:0}
+.danger{display:grid;gap:10px}
+.danger p{margin:0;font-size:13px;color:#893e2d;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.dangerLink{border:0;background:none;color:#893e2d;font:inherit;font-size:12px;font-weight:700;cursor:pointer;justify-self:start;padding:4px 0;text-decoration:underline;text-underline-offset:3px}
+.dangerButton{border:1px solid #b44a33;background:#b44a33;color:#fff;border-radius:11px;padding:9px 14px;font:inherit;font-size:12px;font-weight:750;cursor:pointer}
+.dangerButton:hover{background:#963b28}

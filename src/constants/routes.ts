@@ -1,3 +1,4 @@
+import {destinationHref, isUuid, storyHref, trekHref} from '../lib/links.ts';
 /**
  * Application frontend client routes.
  */
@@ -6,17 +7,19 @@ export const ROUTES = {
   HOME: '/',
   ABOUT: '/about',
   DESTINATIONS: '/destinations',
-  DESTINATION_DETAIL: (slug: string) => `/destinations/${slug}`,
+  DESTINATION_DETAIL: (id: string) => destinationHref(id),
   TREKS: '/treks',
-  TREK_DETAIL: (slug: string) => `/treks/${slug}`,
+  TREK_DETAIL: (id: string) => trekHref(id),
   ACTIVITIES: '/activities',
   ACTIVITY_DETAIL: (slug: string) => `/activities/${slug}`,
-  /** A departure's booking request: the trek page opens the request popup for it. */
-  BOOKING: (trekSlug?: string, departureId?: string) => {
-    if (trekSlug && departureId) {
-      return `/treks/${encodeURIComponent(trekSlug)}?departure=${encodeURIComponent(departureId)}#departures`;
-    }
-    return '/treks';
+  /**
+   * A departure's booking request: the trek page opens the request popup for it.
+   * Takes the trek's id; an old slug goes through /treks/<slug>, which redirects to the id address.
+   */
+  BOOKING: (trek?: string, departureId?: string) => {
+    if (!trek || !departureId) return '/treks';
+    if (isUuid(trek)) return `${trekHref(trek, {departure: departureId})}#book`;
+    return `/treks/${encodeURIComponent(trek)}?departure=${encodeURIComponent(departureId)}#book`;
   },
   BOOKING_CONFIRMATION: (reference: string) => `/booking/confirmation/${encodeURIComponent(reference)}`,
   PAYMENT: '/payment',
@@ -27,7 +30,7 @@ export const ROUTES = {
   RESET_PASSWORD: '/reset-password',
   CONTACT: '/contact',
   BLOG: '/blog',
-  BLOG_DETAIL: (slug: string) => `/blog/${slug}`,
+  BLOG_DETAIL: (id: string) => storyHref(id),
   GALLERY: '/gallery',
   REVIEWS: '/reviews',
   ADMIN: '/admin',

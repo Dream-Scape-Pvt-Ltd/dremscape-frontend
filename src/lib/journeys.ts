@@ -1,11 +1,13 @@
 import {trips as sampleTrips,type Trip} from './catalog';
 import {backend, backendConfigured, BackendError} from './backend';
+import {isUuid} from './links';
 
 export type AvailabilityState='AVAILABLE'|'FEW_SEATS_LEFT'|'SOLD_OUT'|'WAITLIST'|'CANCELLED';
 export type Departure={id:string; start_date:string; end_date:string; price_usd:string; max_seats:number; available_seats:number; availability_state:AvailabilityState; status:string; is_guaranteed:boolean; waitlist_enabled:boolean};
 export type ItineraryDay={day_number:number; title:string; description:string; overnight_stay:string; elevation_meters:number|null; is_acclimatization_day:boolean};
-export type Journey=Trip & {overview:string; min_group_size:number; max_group_size:number; best_seasons:string[]; inclusions:string[]; exclusions:string[]; packing_list:string[]; gallery_images:string[]; itinerary_days:ItineraryDay[]; departures:Departure[]};
-type RawTrip=Trip & {hero_image_url?:string;gallery_images?:string[];destination?:{name:string;slug:string};category?:{name:string;slug:string}};
+export type JourneyGuide={id:string;slug:string;name:string;role:string;photo?:string};
+export type Journey=Trip & {guides?:JourneyGuide[];overview:string; min_group_size:number; max_group_size:number; best_seasons:string[]; inclusions:string[]; exclusions:string[]; packing_list:string[]; gallery_images:string[]; itinerary_days:ItineraryDay[]; departures:Departure[]};
+type RawTrip=Trip & {hero_image_url?:string;gallery_images?:string[];destination?:{id?:string;name:string;slug:string};category?:{name:string;slug:string}};
 function publicImage(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
   const image = value.trim();
@@ -13,7 +15,7 @@ function publicImage(value: unknown): string | undefined {
 }
 export function normalizeTrip(raw:RawTrip):Trip {
   if (!raw || typeof raw.slug!=='string' || !/^[\w-]+$/.test(raw.slug) || typeof raw.title!=='string' || !Number.isFinite(raw.duration_days) || !Number.isFinite(Number(raw.starting_price_usd))) throw new BackendError('The journey data is incomplete. Please contact the team.');
-  const trip={...raw, destination_name:raw.destination?.name??raw.destination_name, destination_slug:raw.destination?.slug??raw.destination_slug, category_name:raw.category?.name??raw.category_name, category_slug:raw.category?.slug??raw.category_slug, hero_image_url:publicImage(raw.hero_image_url), gallery_images:Array.isArray(raw.gallery_images)?raw.gallery_images.map(publicImage).filter((image):image is string=>Boolean(image)):[], image:publicImage(raw.hero_image_url)};
+  const trip={...raw, destination_name:raw.destination?.name??raw.destination_name, destination_slug:raw.destination?.slug??raw.destination_slug, destination_id:raw.destination?.id??raw.destination_id, category_name:raw.category?.name??raw.category_name, category_slug:raw.category?.slug??raw.category_slug, hero_image_url:publicImage(raw.hero_image_url), gallery_images:Array.isArray(raw.gallery_images)?raw.gallery_images.map(publicImage).filter((image):image is string=>Boolean(image)):[], image:publicImage(raw.hero_image_url)};
   if(![trip.destination_name,trip.destination_slug,trip.category_name,trip.category_slug,trip.difficulty_grade].every(v=>typeof v==='string')||raw.starting_price_usd==null||Number(raw.starting_price_usd)<0)throw new BackendError('The journey data is incomplete. Please contact the team.');
   return trip;
 }
@@ -32,9 +34,10 @@ export async function listJourneys() {
   // Follow numbered pages, never an arbitrary URL supplied by an upstream response.
   return {trips:(await allPages<RawTrip>('trips/')).map(normalizeTrip),demo:false};
 }
-function sampleJourney(slug:string): Journey | undefined {
-  const trip=sampleTrips.find(item=>item.slug===slug);
+function sampleJourney(ref:string): Journey | undefined {
+  const trip=sampleTrips.find(item=>item.id===ref||item.slug===ref);
   if(!trip)return undefined;
+  const slug=trip.slug;
   const gallery:Record<string,string[]>={
     'everest-base-camp-cho-la':['222-78-imgNepalEverestBaseCampAndAmaDablamPeak','222-370-imgHimalayanMountainPassTrekkerReflection'],
     'annapurna-circuit-tilicho':['222-78-imgAnnapurnaRangeAndHighGlacialLakesNepal','222-520-imgHimalayanAlpineLakeAndPeaks'],
@@ -98,28 +101,38 @@ function sampleJourney(slug:string): Journey | undefined {
   };
   const content=routeCopy[slug];
   const itinerary_days=(content?.days||[]).map(([title,overnight_stay,description],index)=>({day_number:index+1,title,description,overnight_stay,elevation_meters:null,is_acclimatization_day:/acclimatization/i.test(title)}));
-  return {id:`sample-${trip.slug}`,...trip,image:slug==='upper-mustang'?'/images/treks/lo-manthang.jpg':trip.image,overview:content?.overview||`A sample outline for ${trip.title}. Ask our team for the latest route plan.`,min_group_size:0,max_group_size:0,best_seasons:[],inclusions:['Local trekking guide','Accommodation along the route','Required local permits','Travel between the planned trail stages'],exclusions:['International flights','Travel insurance','Personal gear and purchases','Tips and extra drinks'],packing_list:['Comfortable, broken-in walking boots','Warm layers and waterproof outerwear','Sun protection','Reusable water bottle'],gallery_images:gallery[slug]||[],itinerary_days,departures:[]};
+  return {...trip,image:slug==='upper-mustang'?'/images/treks/lo-manthang.jpg':trip.image,overview:content?.overview||`A sample outline for ${trip.title}. Ask our team for the latest route plan.`,min_group_size:0,max_group_size:0,best_seasons:[],inclusions:['Local trekking guide','Accommodation along the route','Required local permits','Travel between the planned trail stages'],exclusions:['International flights','Travel insurance','Personal gear and purchases','Tips and extra drinks'],packing_list:['Comfortable, broken-in walking boots','Warm layers and waterproof outerwear','Sun protection','Reusable water bottle'],gallery_images:gallery[slug]||[],itinerary_days,departures:[]};
 }
-export async function getJourney(slug:string) {
-  if(!/^[\w-]+$/.test(slug)) throw new BackendError('Journey not found.',404);
+/** The published guides who lead a trek, as the trip detail returns them. Malformed rows are dropped. */
+function journeyGuides(value:unknown):JourneyGuide[] {
+  if(!Array.isArray(value))return [];
+  return value.flatMap(item=>{
+    const g=item as Record<string,unknown>;
+    if(!isUuid(g?.id)||typeof g.slug!=='string'||typeof g.name!=='string'||!g.name.trim())return [];
+    return [{id:g.id,slug:g.slug,name:g.name.trim(),role:typeof g.role==='string'?g.role.trim():'',photo:publicImage(g.photo_url)}];
+  });
+}
+/** A trek by id (current addresses) or slug (old links being redirected); the backend accepts both. */
+export async function getJourney(ref:string) {
+  if(!/^[\w-]+$/.test(ref)) throw new BackendError('Journey not found.',404);
   if(!backendConfigured()) {
-    const sample=sampleJourney(slug);
+    const sample=sampleJourney(ref);
     if(sample)return {journey:sample,demo:true};
     throw new BackendError('Journey not found.',404);
   }
   // The detail serializer caps nested departures at ten, so read the complete
-  // dated list too. Both only need the slug, so fetch them together.
+  // dated list too. Both accept the id or slug, so fetch them together.
   let raw:Journey & RawTrip, departures:Departure[];
   try {
     [raw,departures]=await Promise.all([
-      backend<Journey & RawTrip>(`trips/${encodeURIComponent(slug)}/`),
-      allPages<Departure>(`trips/${encodeURIComponent(slug)}/departures/`),
+      backend<Journey & RawTrip>(`trips/${encodeURIComponent(ref)}/`),
+      allPages<Departure>(`trips/${encodeURIComponent(ref)}/departures/`),
     ]);
   }
   catch(error) {
     // Keep known preview routes open while the CMS has no matching record yet.
     if(error instanceof BackendError && error.status===404) {
-      const sample=sampleJourney(slug);
+      const sample=sampleJourney(ref);
       if(sample)return {journey:sample,demo:true};
     }
     throw error;
@@ -128,7 +141,7 @@ export async function getJourney(slug:string) {
   if(!Array.isArray(raw.itinerary_days)||!Array.isArray(raw.departures)) throw new BackendError('The itinerary response is incomplete.');
   for(const key of ['inclusions','exclusions','best_seasons','packing_list'] as const)if(!Array.isArray(raw[key])||!raw[key].every(v=>typeof v==='string'))throw new BackendError('The itinerary response is incomplete.');
   if(typeof raw.overview!=='string')throw new BackendError('The itinerary response is incomplete.');
-  return {journey:{...raw,...normalizeTrip(raw),departures} as Journey,demo:false};
+  return {journey:{...raw,...normalizeTrip(raw),departures,guides:journeyGuides((raw as {trek_guides?:unknown}).trek_guides)} as Journey,demo:false};
 }
 /**
  * A few other treks to suggest from a trek's page, same region first. Reads

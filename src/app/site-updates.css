@@ -1,0 +1,225 @@
+/* Loaded last. Search, destination journey lists, and mobile layout fixes. */
+
+/* ---- Header search: instant results ---- */
+.apple-nav .nav-search-results{margin-top:18px}
+.apple-nav .nav-search-results ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.apple-nav .nav-search-results a{display:flex;align-items:center;gap:14px;padding:8px 10px;border-radius:12px;color:var(--apple-ink);transition:background .2s}
+.apple-nav .nav-search-results a:hover,.apple-nav .nav-search-results a:focus-visible{background:var(--apple-hover)}
+.apple-nav .nav-search-results img,.apple-nav .nav-search-thumb{flex:none;width:56px;height:42px;border-radius:8px;object-fit:cover;background:var(--apple-button)}
+.apple-nav .nav-search-hit{display:grid;min-width:0;line-height:1.35}
+.apple-nav .nav-search-hit small{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--apple-accent)}
+.apple-nav .nav-search-hit strong{font-size:14px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apple-nav .nav-search-hit span{font-size:11px;color:var(--apple-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apple-nav .nav-search-results .nav-search-hint{margin:6px 2px}
+
+/* ---- Search page ---- */
+.site-search h1{margin-bottom:24px}
+.site-search-form{display:flex;align-items:center;gap:12px;max-width:760px;padding:8px 8px 8px 18px;background:#fff;border:1px solid #153d2f1f;border-radius:18px;box-shadow:0 12px 34px #173c2b0d}
+.site-search-form>svg{flex:none;color:#527e6c}
+.site-search-form input{flex:1;min-width:0;border:0!important;box-shadow:none!important;border-radius:0;background:transparent;font:inherit;font-size:16px;padding:10px 0;color:#153d2f;outline:none}
+.site-search-form .button{flex:none}
+.site-search-examples{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 8px}
+.site-search-examples a{padding:8px 14px;border-radius:999px;background:#e8efeb;color:#153d2f;font-size:12px;transition:background .2s}
+.site-search-examples a:hover,.site-search-examples a[aria-current]{background:#153d2f;color:#fff}
+.site-search-status{margin-top:28px;color:#4b5f55}
+.site-search-note{margin-top:6px;font-size:13px;color:#64716a}
+.site-search-group{margin-top:40px}
+.site-search-group>h2{display:flex;align-items:center;gap:10px;font-size:22px;margin-bottom:18px}
+.site-search-group>h2 span{font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;background:#e8efeb;color:#153d2f}
+.site-search-places{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.site-search-place{display:grid;grid-template-columns:120px 1fr;overflow:hidden;border-radius:18px;background:#fff;border:1px solid #153d2f14;box-shadow:0 8px 24px #173c2b0a;color:#153d2f}
+.site-search-place img{width:100%;height:100%;min-height:140px;object-fit:cover}
+.site-search-place>div{display:grid;gap:6px;align-content:center;padding:18px}
+.site-search-place strong{font-size:18px}
+.site-search-place p{font-size:13px;color:#64716a;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.site-search-place:not(:has(img)){grid-template-columns:1fr}
+.site-search-stories{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.site-search-stories>a{display:grid;gap:8px;color:#153d2f}
+.site-search-stories p{font-size:13px;color:#64716a;margin:0}
+.site-search-empty{margin-top:28px}.site-search-empty .button-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+
+/* ---- Destination pages: treks and expeditions ---- */
+.destination-journeys-jump{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 8px}
+.destination-journeys-jump a{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;background:#fff;border:1px solid #153d2f1f;color:#153d2f;font-size:13px;font-weight:600}
+.destination-journeys-jump a span{min-width:22px;padding:1px 7px;border-radius:999px;background:#153d2f;color:#fff;font-size:11px;text-align:center}
+.destination-journey-group{padding-top:36px;scroll-margin-top:110px}
+.destination-journey-group .section-heading{margin-bottom:22px}
+.destination-journey-count{color:#64716a;font-size:13px;margin:0}
+.destination-journey-none{padding:22px 24px;border:1px dashed #153d2f33;border-radius:16px;color:#4b5f55;margin:0}
+.destination-journeys-section>.section-heading h2 em{font-style:normal;color:#668b7b}
+
+/* The generic ".section" background rule was painting this dark band white, hiding its text. */
+body .destination-story.section{background:#0c271c!important}
+body .destination-story-copy h2{color:#fff}
+
+a.destination-card{display:block}
+
+/* ---- Mobile ---- */
+@media(max-width:700px){
+  /* Home hero: one left-aligned column at the foot of the photo, clear of the controls. */
+  html body .home-hero{height:100svh;min-height:600px;max-height:880px;flex-direction:column;justify-content:flex-end;align-items:stretch;padding:100px 20px 84px;touch-action:pan-y}
+  html body .home-hero .hero-shade{background:linear-gradient(180deg,#07121d55 0%,#07121d10 30%,#07121d40 55%,#07121dd0 100%)!important}
+  html body .home-hero .hero-headline{position:relative;z-index:3;top:auto;left:auto;right:auto;transform:none;max-width:none;width:auto;text-align:left;animation:hero-mobile-arrive .7s both cubic-bezier(.22,1,.36,1)}
+  html body .home-hero .hero-headline .eyebrow{justify-content:flex-start;font-size:10px;letter-spacing:.14em;margin-bottom:10px}
+  html body .home-hero .hero-headline h1{font-size:clamp(40px,12vw,56px);line-height:1;letter-spacing:-.06em;margin:0;white-space:normal}
+  html body .home-hero .hero-title-accent{display:block}
+  html body .home-hero .hero-content{position:relative;z-index:3;top:auto;left:auto;right:auto;bottom:auto;width:auto;margin:14px 0 0;padding:0;transform:none;text-align:left}
+  html body .home-hero .hero-description{max-width:none;margin:0;font-size:14px;line-height:1.6}
+  html body .home-hero .hero-description br{display:none}
+  html body .home-hero .hero-description strong{display:block;margin-top:6px}
+  html body .home-hero .hero-buttons{justify-content:flex-start;flex-wrap:nowrap;gap:14px;margin-top:20px}
+  html body .home-hero .hero-buttons .button{flex:none}
+  html body .home-hero .hero-caption{display:none}
+  html body .home-hero .home-slide-controls{bottom:22px}
+  .home-slide{transition-duration:.9s}
+
+  /* Content that ran edge to edge: give it the page gutter. */
+  body .destinations.container{padding-left:20px;padding-right:20px}
+  body .destinations .destination-intro{padding:0}
+  .catalog-suggestions{flex-wrap:wrap}
+  body .related-treks{padding-left:20px;padding-right:20px}
+
+  .site-search-form{padding-left:14px}.site-search-form>svg{display:none}
+  .site-search-place{grid-template-columns:96px 1fr}
+  .destination-journey-group .section-heading{align-items:flex-start}
+}
+@media(max-width:420px){
+  html body .home-hero .hero-buttons{gap:10px}
+  html body .home-hero .hero-buttons .button{padding:12px 16px}
+  html body .home-hero .explore-link small{display:none}
+}
+@keyframes hero-mobile-arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){html body .home-hero .hero-headline{animation:none!important}.home-slide{transition:none}}
+
+/* ---- Trek page: departure picker ---- */
+
+.departure-picker{width:min(640px,calc(100vw - 24px));max-height:min(88vh,860px);padding:0;border:0;border-radius:26px;background:#fff;color:#153d2f}
+.departure-picker::backdrop{background:#07140fcc;backdrop-filter:blur(4px)}
+.departure-picker .dialog-inner{padding:34px 32px 26px;position:relative}
+.departure-picker h2{font-size:28px;letter-spacing:-.04em;margin:6px 0 8px}
+.departure-picker-intro{color:#4b5f55;font-size:14px;margin:0 0 20px}
+.departure-picker-list section+section{margin-top:18px}
+.departure-picker-list h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7a8a80;margin:0 0 8px}
+.departure-picker-list ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.departure-picker-list li>button{width:100%;display:grid;grid-template-columns:1.3fr 1fr 1fr auto;align-items:center;gap:12px;padding:14px 16px;border:1px solid #153d2f1f;border-radius:16px;background:#fbfcfa;color:inherit;font:inherit;text-align:left;cursor:pointer;transition:border-color .2s,background .2s,transform .2s}
+.departure-picker-list li>button:hover,.departure-picker-list li>button:focus-visible{border-color:#b7a16b;background:#fffdf6;transform:translateY(-1px)}
+.departure-picker-list span{display:grid;gap:2px}
+.departure-picker-list strong{font-size:15px}
+.departure-picker-list small{font-size:12px;color:#64716a}
+.departure-picker-list .departure-few{color:#a35a1f;font-weight:600}
+.departure-guaranteed{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#2f6b4c}
+.departure-select{font-size:12px;font-weight:650;color:#153d2f;white-space:nowrap}
+.departure-picker-empty{margin:0}
+.departure-picker-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:22px;padding-top:18px;border-top:1px solid #153d2f14;font-size:13px;color:#4b5f55}
+
+/* ---- Treks page: search first ---- */
+body .catalog-filter.catalog-filter-first{margin:118px auto 0}
+.catalog-filter .catalog-search{position:relative}
+.catalog-search-clear,.site-search-clear{flex:none;width:30px;height:30px;border:0;border-radius:50%;background:#153d2f12;color:#153d2f;font-size:18px;line-height:1;cursor:pointer}
+.catalog-quick{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin-top:16px}
+.catalog-kind{display:inline-flex;padding:4px;border-radius:999px;background:#153d2f0d}
+.catalog-kind button{border:0;background:transparent;padding:8px 16px;border-radius:999px;font:inherit;font-size:13px;font-weight:600;color:#3d5448;cursor:pointer}
+.catalog-kind button[aria-pressed=true]{background:#153d2f;color:#fff}
+body .catalog-quick .catalog-suggestions{margin:0}
+body .catalog-quick .catalog-suggestions button[aria-pressed=true]{background:#153d2f;color:#fff;border-color:#153d2f}
+.catalog-results-live{padding-top:34px;padding-bottom:40px}
+.catalog-results-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;color:#4b5f55}
+.catalog-results-bar p{margin:0}.catalog-results-bar strong{color:#153d2f}
+.catalog-results-bar .clear-filters{margin:0}
+.catalog-skeleton>div{height:380px;border-radius:22px;background:linear-gradient(100deg,#eef2ef 30%,#f7f9f7 50%,#eef2ef 70%) 0 0/200% 100%;animation:catalog-shimmer 1.2s linear infinite}
+@keyframes catalog-shimmer{to{background-position:-200% 0}}
+.status .button-row{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:14px}
+
+/* ---- Search page: live results ---- */
+.site-search-examples button{padding:8px 14px;border:0;border-radius:999px;background:#e8efeb;color:#153d2f;font:inherit;font-size:12px;cursor:pointer;transition:background .2s}
+.site-search-examples button:hover,.site-search-examples button[aria-pressed=true]{background:#153d2f;color:#fff}
+.site-search-bar{display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;margin-top:24px}
+.site-search-bar .site-search-status{margin:0}
+.site-search-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.site-search-tabs button{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid #153d2f1f;border-radius:999px;background:#fff;color:#153d2f;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.site-search-tabs button span{font-size:11px;color:#64716a}
+.site-search-tabs button[aria-pressed=true]{background:#153d2f;border-color:#153d2f;color:#fff}
+.site-search-tabs button[aria-pressed=true] span{color:#cfe0d6}
+
+@media(max-width:700px){
+  .departure-picker .dialog-inner{padding:28px 18px 20px}
+  .departure-picker h2{font-size:23px}
+  .departure-picker-list li>button{grid-template-columns:1fr auto;gap:6px 12px}
+  .departure-status{grid-column:1;grid-row:2}
+  .departure-price{grid-column:2;grid-row:1/3;text-align:right}
+  .departure-select{display:none}
+  body .catalog-filter.catalog-filter-first{margin-top:96px}
+  .catalog-quick{gap:10px}
+  .catalog-kind{width:100%}.catalog-kind button{flex:1;padding:8px 6px}
+}
+@media(prefers-reduced-motion:reduce){.catalog-skeleton>div{animation:none}}
+
+/* Custom clear buttons replace the browser's own; the field's frame shows focus instead of the bare input. */
+.site-search-form input::-webkit-search-cancel-button,.catalog-search input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
+.site-search-form input:focus,.site-search-form input:focus-visible,body .catalog-filter .catalog-search input:focus,body .catalog-filter .catalog-search input:focus-visible{outline:none!important;box-shadow:none!important;border:0!important;background:transparent!important}
+.site-search-form:focus-within{border-color:#b7a16b;box-shadow:0 0 0 4px #c6ad701c,0 12px 34px #173c2b0d}
+.catalog-filters-toggle{display:none}
+@media(max-width:700px){
+  .catalog-filters-toggle{display:flex;align-items:center;gap:8px;width:100%;margin-top:14px;padding:13px 16px;border:1px solid #153d2f1f;border-radius:14px;background:#fff;color:#153d2f;font:inherit;font-size:13px;font-weight:650;cursor:pointer}
+  .catalog-filters-toggle>span:not(.catalog-filters-caret){min-width:20px;padding:1px 7px;border-radius:999px;background:#153d2f;color:#fff;font-size:11px;text-align:center}
+  .catalog-filters-caret{margin-left:auto;font-size:18px;line-height:1}
+  body .catalog-filter .catalog-selects:not(.is-open){display:none}
+  body .catalog-filter .catalog-selects.is-open{margin-top:12px}
+}
+
+/* ---- Search areas: ridgeline backdrop and categories ---- */
+.journey-page:has(>.search-backdrop),.site-search-page{position:relative;isolation:isolate}
+.search-backdrop{position:absolute;inset:0 0 auto;height:420px;z-index:-1;pointer-events:none;overflow:hidden}
+.search-backdrop svg{display:block;width:100%;height:100%}
+.search-backdrop{-webkit-mask-image:linear-gradient(#000 55%,transparent);mask-image:linear-gradient(#000 55%,transparent)}
+body .site-search .site-search-form input,body .site-search .site-search-form input:focus{border:0!important;box-shadow:none!important;outline:none!important;background:transparent!important;border-radius:0!important;padding-left:0!important}
+body .catalog-filter.catalog-filter-first{position:relative}
+
+.catalog-kind button,.site-search-tabs button{display:inline-flex;align-items:center;gap:7px}
+.catalog-kind svg,.site-search-tabs svg{width:15px;height:15px;flex:none;fill:currentColor;overflow:visible}
+.catalog-kind svg .flag,.site-search-tabs svg .flag{fill:none;stroke:currentColor;stroke-width:1.4;stroke-linejoin:round}
+.catalog-kind-count{min-width:20px;padding:1px 7px;border-radius:999px;background:#153d2f14;font-size:11px;font-weight:700;text-align:center}
+.catalog-kind button[aria-pressed=true] .catalog-kind-count{background:#ffffff2e}
+
+.site-search h1{font-size:clamp(32px,4.4vw,52px);letter-spacing:-.05em;margin:0 0 22px}
+.site-search .site-search-tabs{margin-top:16px}
+.site-search-examples{align-items:center}
+.site-search-examples>span{font-size:13px;color:#64716a;margin-right:4px}
+.site-search .site-search-status{margin-top:26px}
+.site-search-kicker{font-size:12px;font-weight:600;color:#527e6c;text-transform:capitalize}
+@media(max-width:700px){
+  .search-backdrop{height:300px}
+  body .catalog-kind button{gap:5px;padding:8px 4px;font-size:12.5px}
+  body .catalog-kind svg{display:none}
+  .site-search .site-search-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:-20px;margin-right:-20px;padding:0 20px}
+  .site-search .site-search-tabs button{flex:none}
+}
+
+/* ---- Breadcrumbs ---- */
+.crumbs ol{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;list-style:none;margin:0 0 18px;padding:0;font-size:13px;line-height:1.4}
+.crumbs li{display:inline-flex;align-items:center}
+.crumbs li+li::before{content:'/';margin:0 9px;opacity:.5}
+.crumbs a{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.crumbs [aria-current=page]{font-weight:600}
+.crumbs-dark{color:#5b6c64}.crumbs-dark a{color:#3d5448;text-decoration-color:#3d544855}.crumbs-dark a:hover{color:#153d2f}.crumbs-dark [aria-current=page]{color:#153d2f}
+.crumbs-light{color:#ffffffc7}.crumbs-light a{color:#fff;text-decoration-color:#ffffff80}.crumbs-light [aria-current=page]{color:#fff}
+.crumbs a:focus-visible{outline:2px solid currentColor;outline-offset:2px;border-radius:3px}
+.editorial-hero.has-photo .crumbs-dark{color:#5b6c64}
+.dest-hero-copy .crumbs{display:flex;justify-content:center}
+.beyond-nepal .crumbs{margin-top:8px}
+
+/* ---- Loading: keep the footer out of view while a page loads ---- */
+.page-loading.utility-page{min-height:calc(100svh - 60px)}
+
+/* ---- Destination page sections now shown only with real content ---- */
+.region-introduction h2,.region-photos h2,.other-regions h2{margin:0 0 22px}
+.region-introduction .region-fact-sheet{max-width:760px}
+.region-photos{padding-top:40px}
+
+/* ---- Menu button: icon only ---- */
+body .header.site-navigation .menu-toggle{min-width:44px;min-height:44px;justify-content:center;padding:10px}
+
+@media(max-width:700px){
+  /* Hero: the tagline sits in the middle of the photo; description and buttons stay at the foot. */
+  html body .home-hero .hero-headline{margin-top:auto;margin-bottom:auto;padding-bottom:24px}
+}
