@@ -22,6 +22,11 @@ const nextConfig: NextConfig = {
         port: "8000",
         pathname: "/media/**",
       },
+      {
+        protocol: "https",
+        hostname: "*.onrender.com",
+        pathname: "/media/**",
+      },
     ],
   },
   async rewrites() {
