@@ -63,8 +63,8 @@ body .journey-page .guides-page .guide-treks h2{font-size:clamp(26px,3vw,36px);f
 @media(max-width:420px){body .journey-page .guides-page .guide-grid{grid-template-columns:1fr}}
 
 /* ---- Trek page: who leads this trek ---- */
-body .journey-page .trek-v2 .trek-led-by{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:18px 0 0;font-size:14px;color:#6f7f78}
-body .journey-page .trek-v2 .trek-led-by a{display:inline-flex;align-items:center;gap:10px;color:#153d2f;font-weight:650;text-decoration:none}
-body .journey-page .trek-v2 .trek-led-by a:hover{text-decoration:underline;text-underline-offset:3px}
-body .journey-page .trek-v2 .trek-led-by small{font-weight:500;color:#6f7f78;margin-left:-4px}
-body .journey-page .trek-v2 .trek-led-by small::before{content:', '}
+body .journey-page .trek-led-by{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:18px 0 0;font-size:14px;color:#6f7f78}
+body .journey-page .trek-led-by a{display:inline-flex;align-items:center;gap:10px;color:#153d2f;font-weight:650;text-decoration:none}
+body .journey-page .trek-led-by a:hover{text-decoration:underline;text-underline-offset:3px}
+body .journey-page .trek-led-by small{font-weight:500;color:#6f7f78;margin-left:-4px}
+body .journey-page .trek-led-by small::before{content:', '}

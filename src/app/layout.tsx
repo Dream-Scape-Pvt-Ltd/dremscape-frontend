@@ -47,5 +47,4 @@ import './home-refresh.css';
 import './trek-detail.css';
 import './destination-gallery.css';
 import './site-updates.css';
-import './trek-page.css';
 import './guides.css';

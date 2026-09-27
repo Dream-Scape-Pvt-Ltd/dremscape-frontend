@@ -91,6 +91,17 @@ a.destination-card{display:block}
 @keyframes hero-mobile-arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){html body .home-hero .hero-headline{animation:none!important}.home-slide{transition:none}}
 
+/* ---- Trek page: book or plan, no sticky side card ---- */
+body .journey-detail-layout.trek-layout{grid-template-columns:minmax(0,1fr)}
+.journey-actions{display:flex;align-items:center;justify-content:space-between;gap:18px 28px;flex-wrap:wrap;margin-top:26px;padding:20px 24px;border-radius:22px;background:#fff;border:1px solid #153d2f17;box-shadow:0 14px 40px #173c2b0d}
+.journey-actions-price{margin:0;color:#153d2f;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.journey-actions-price strong{font-size:28px;font-weight:750;letter-spacing:-.04em}
+.journey-actions-price small{font-size:12px;color:#64716a}
+.journey-actions-buttons{display:flex;gap:12px;flex-wrap:wrap}
+.journey-actions-buttons .button{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;column-gap:8px;row-gap:1px;min-width:190px;padding:12px 22px;line-height:1.25}
+.journey-actions-buttons .button small{flex-basis:100%;text-align:center;font-size:11px;font-weight:500;opacity:.78}
+.journey-actions-bottom{margin-top:18px}
+.journey-book-section{scroll-margin-top:110px}
 /* ---- Trek page: departure picker ---- */
 
 .departure-picker{width:min(640px,calc(100vw - 24px));max-height:min(88vh,860px);padding:0;border:0;border-radius:26px;background:#fff;color:#153d2f}
@@ -142,6 +153,9 @@ body .catalog-quick .catalog-suggestions button[aria-pressed=true]{background:#1
 .site-search-tabs button[aria-pressed=true] span{color:#cfe0d6}
 
 @media(max-width:700px){
+  .journey-actions{padding:18px;flex-direction:column;align-items:stretch}
+  .journey-actions-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .journey-actions-buttons .button{min-width:0;padding:12px 10px}
   .departure-picker .dialog-inner{padding:28px 18px 20px}
   .departure-picker h2{font-size:23px}
   .departure-picker-list li>button{grid-template-columns:1fr auto;gap:6px 12px}

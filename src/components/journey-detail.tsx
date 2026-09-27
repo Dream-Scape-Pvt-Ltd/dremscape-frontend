@@ -1,18 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import {destinationHref,guideHref} from '@/lib/links';
 import type {ReactNode} from 'react';
 import {useEffect,useMemo,useState} from 'react';
 import {AnimatePresence,motion,useReducedMotion} from 'motion/react';
 import type {Journey} from '@/lib/journeys';
 import {asset} from '@/lib/assets';
+import {destinationHref,guideHref} from '@/lib/links';
 import {difficulty,money} from '@/lib/format';
 import JourneyShell from './journey-shell';
 import InquiryDialog from './inquiry-dialog';
 import BookingInquiryDialog from './booking-inquiry-dialog';
 import DeparturePicker from './departure-picker';
-import RouteProfile,{metres,profilePoints} from './route-profile';
 import Breadcrumbs from './breadcrumbs';
 import TrekGuidePortrait from './trek-guide-portrait';
 
@@ -63,86 +62,55 @@ export default function JourneyDetail({journey:t,demo,related}:{journey:Journey;
   useEffect(()=>{if(!playing)return;const timer=window.setTimeout(()=>setActivePhoto(index=>(index+1)%photos.length),PHOTO_INTERVAL);return()=>window.clearTimeout(timer);},[activePhoto,playing,photos.length]);
   function movePhoto(step:number){setActivePhoto(index=>(index+step+photos.length)%photos.length);}
 
-  const profile=useMemo(()=>profilePoints(t.itinerary_days),[t.itinerary_days]);
-  const highest=Math.max(t.altitude_max_meters||0,...profile.map(p=>p.elevation));
-  const days=[...t.itinerary_days].sort((a,b)=>a.day_number-b.day_number);
-  // Only routes with written highlights get that section; placeholder copy says nothing.
-  const writtenHighlights=highlights.filter(item=>highlightDescriptions[item]);
-  const openDates=departures.length?`${departures.length} open ${departures.length===1?'date':'dates'}`:'See dates';
-  const facts:[string,string][]=[
-    ['Duration',`${t.duration_days} days`],
-    ['Difficulty',difficulty(t.difficulty_grade)],
-    ['Highest point',highest?metres(highest):'Ask the team'],
-    ['Group size',demo?'Flexible':t.min_group_size&&t.max_group_size?`${t.min_group_size}–${t.max_group_size} travellers`:'Ask the team'],
-    ['Region',t.destination_name],
-    ...(t.best_seasons?.length?[['Best seasons',t.best_seasons.map(season=>season.replace(/\s*\(.*\)/,'')).join(' and ')] as [string,string]]:[]),
+  const facts=[
+    ['DURATION',`${t.duration_days} days`],
+    ['REGION',t.destination_name],
+    ['HIGHEST POINT',t.altitude_max_meters?`${t.altitude_max_meters.toLocaleString()} m`:'Ask the team'],
+    ['DIFFICULTY',difficulty(t.difficulty_grade)],
+    ['GROUP SIZE',demo?'Flexible · ask us':t.min_group_size&&t.max_group_size?`${t.min_group_size}–${t.max_group_size} travellers`:'Ask the team'],
+    ['ACCOMMODATION',demo?'Local lodges · draft':'See itinerary'],
   ];
-  const bookButtons=<div className="trek-cta">
-    <button type="button" className="button gold" onClick={()=>setPicking(true)}>Book my trip<small>{openDates}</small></button>
-    <button type="button" className="button outline-dark" onClick={()=>setInquiry(true)}>Plan my trip<small>Your dates, your pace</small></button>
+
+  // The two ways forward, shown under the trek facts and again after the itinerary.
+  const actions=(place:'top'|'bottom')=><div className={`journey-actions journey-actions-${place}`}>
+    <p className="journey-actions-price">{demo&&<small>Illustrative </small>}<small>From</small> <strong>{money(t.starting_price_usd)}</strong> <small>per person · {t.duration_days} days</small></p>
+    <div className="journey-actions-buttons">
+      <button type="button" className="button gold" onClick={()=>setPicking(true)}>Book my trip <span aria-hidden="true">↗</span><small>{departures.length?`${departures.length} open ${departures.length===1?'date':'dates'}`:'See dates'}</small></button>
+      <button type="button" className="button outline-dark" onClick={()=>setInquiry(true)}>Plan my trip <span aria-hidden="true">↗</span><small>Your dates, your pace</small></button>
+    </div>
   </div>;
 
   return <JourneyShell>
-    <div className="journey-detail-page trek-v2">
-      <header className="container trek-head">
-        <Breadcrumbs items={[{label:'Destinations',href:'/destinations'},{label:t.destination_name,href:t.destination_id?destinationHref(t.destination_id,t.destination_slug):undefined},{label:t.title}]}/>
-        <div className="trek-head-grid">
-          <div><h1>{t.title}</h1>{t.tags&&<p className="trek-tagline">{t.tags.split('·').map(v=>v.trim()).filter(Boolean).join(', ')}</p>}{!!t.guides?.length&&<p className="trek-led-by"><span>Led by</span>{t.guides.map(g=><Link key={g.slug} href={guideHref(g.id)}><TrekGuidePortrait name={g.name} photo={g.photo} size="small"/>{g.name}{g.role&&<small>{g.role}</small>}</Link>)}</p>}</div>
-          <div className="trek-head-book"><p className="trek-price"><span>{demo?'Illustrative price from':'From'}</span><strong>{money(t.starting_price_usd)}</strong><span>per person</span></p>{bookButtons}</div>
-        </div>
-      </header>
+    <div className="journey-detail-page">
+      <div className="container journey-topline"><Breadcrumbs items={[{label:'Destinations',href:'/destinations'},{label:t.destination_name,href:t.destination_id?destinationHref(t.destination_id,t.destination_slug):undefined},{label:t.title}]}/><span>{t.destination_name} · Nepal</span></div>
 
-      {profile.length>1&&<section className="container trek-climb" aria-label="The climb">
-        <RouteProfile points={profile}/>
-      </section>}
-
-      {photos.length>0&&<div className="container journey-media-shell trek-photos" onMouseEnter={()=>setHovering(true)} onMouseLeave={()=>setHovering(false)}>
-        <section className="trek-hero journey-stage" aria-label={`${t.title} photographs`}>
+      <div className="container journey-media-shell" onMouseEnter={()=>setHovering(true)} onMouseLeave={()=>setHovering(false)}>
+        <section className={`trek-hero journey-stage ${!selectedPhoto?'trek-hero-plain':''}`} aria-label={`${t.title} photographs`}>
           <AnimatePresence initial={false}>
             {selectedPhoto&&<motion.img key={selectedPhoto} src={asset(selectedPhoto)} alt={`${t.title}, photograph ${activePhoto+1} of ${photos.length}`} initial={reducedMotion?false:{opacity:0,scale:1.035}} animate={{opacity:1,scale:1}} exit={reducedMotion?undefined:{opacity:0}} transition={{duration:reducedMotion?0:.85,ease:[.2,.75,.2,1]}} fetchPriority={activePhoto===0?'high':undefined}/>}
           </AnimatePresence>
-          <div className="journey-stage-content"><span/><div className="journey-stage-foot"><div><strong>{credit?.caption||t.title}</strong></div>{photos.length>1&&<div className="journey-stage-controls"><button type="button" onClick={()=>movePhoto(-1)} aria-label="Previous trek photo">←</button><span>{activePhoto+1} of {photos.length}</span><button type="button" onClick={()=>movePhoto(1)} aria-label="Next trek photo">→</button></div>}</div></div>
+          <div className="journey-stage-content"><span className="journey-stage-badge">DREAMSCAPE · {t.destination_name.toUpperCase()}</span><div className="journey-stage-foot"><div><small>THE TRAIL IN PICTURES</small><strong>{credit?.caption||t.title}</strong></div>{photos.length>1&&<div className="journey-stage-controls"><button type="button" onClick={()=>movePhoto(-1)} aria-label="Previous trek photo">←</button><span>{String(activePhoto+1).padStart(2,'0')} / {String(photos.length).padStart(2,'0')}</span><button type="button" onClick={()=>movePhoto(1)} aria-label="Next trek photo">→</button></div>}</div></div>
           {playing&&<div key={selectedPhoto} className="journey-stage-progress" aria-hidden="true"/>}
         </section>
-        {photos.length>1&&<div className="journey-gallery-rail"><div className="journey-gallery-thumbnails" role="group" aria-label="Choose a trek photograph">{photos.map((photo,index)=><button type="button" key={photo} aria-label={`Show trek photo ${index+1}`} aria-pressed={activePhoto===index} onClick={()=>setActivePhoto(index)}><img src={asset(photo)} alt="" loading="lazy"/></button>)}</div>{!reducedMotion&&<button type="button" className="journey-gallery-play" onClick={()=>setPaused(value=>!value)} aria-label={paused?'Play slideshow':'Pause slideshow'}>{paused?'Play':'Pause'}</button>}</div>}
-        {credit&&<p className="journey-photo-credit">Photo: <a href={credit.source} target="_blank" rel="noopener noreferrer">{credit.author}</a>, <a href={credit.licenseUrl} target="_blank" rel="noopener noreferrer">{credit.license}</a></p>}
-      </div>}
+        {photos.length>1&&<div className="journey-gallery-rail"><div className="journey-gallery-thumbnails" role="group" aria-label="Choose a trek photograph">{photos.map((photo,index)=><button type="button" key={photo} aria-label={`Show trek photo ${index+1}`} aria-pressed={activePhoto===index} onClick={()=>setActivePhoto(index)}><img src={asset(photo)} alt="" loading="lazy"/></button>)}</div>{!reducedMotion&&<button type="button" className="journey-gallery-play" onClick={()=>setPaused(value=>!value)} aria-label={paused?'Play slideshow':'Pause slideshow'}>{paused?'Play':'Pause'} <span aria-hidden="true">{paused?'▶':'Ⅱ'}</span></button>}</div>}
+        {credit&&<p className="journey-photo-credit">Photo: <a href={credit.source} target="_blank" rel="noopener noreferrer">{credit.author}</a> · <a href={credit.licenseUrl} target="_blank" rel="noopener noreferrer">{credit.license}</a></p>}
+      </div>
 
-      <div className="container trek-body">
-        <dl className="trek-facts-row">{facts.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
-        {demo&&<p className="trek-note"><strong>This is a sample journey.</strong> The day plan, services and price are illustrations; the team confirms the final route and quote before you book.</p>}
+      <nav className="journey-quicknav" aria-label="Trek page sections"><div className="container">{!compactRoute&&<><a href="#overview">Overview</a><a href="#highlights">Highlights</a></>}<a href="#itinerary">Day-by-day itinerary</a>{!compactRoute&&<a href="#included">Included &amp; excluded</a>}<a href="#book">Book or plan</a></div></nav>
 
-        <nav className="trek-jump" aria-label="On this page">{!compactRoute&&<a href="#overview">Overview</a>}<a href="#itinerary">Day by day</a>{!compactRoute&&<a href="#included">What’s included</a>}<a href="#book">Book or plan</a></nav>
+      <div className="container journey-title-block"><div><p className="journey-kicker">{demo?'ROUTE PREVIEW':'EXPLORE WITH DREAMSCAPE'} <span aria-hidden="true">/</span> {t.destination_name.toUpperCase()}</p><h1>{t.title}</h1><p className="journey-subtitle">{t.tags||'A journey beyond the familiar.'}</p>{!!t.guides?.length&&<p className="trek-led-by"><span>Led by</span>{t.guides.map(g=><Link key={g.slug} href={guideHref(g.id)}><TrekGuidePortrait name={g.name} photo={g.photo} size="small"/>{g.name}{g.role&&<small>{g.role}</small>}</Link>)}</p>}</div></div>
 
-        {!compactRoute&&<section id="overview" className="trek-section trek-overview">
-          <h2>About this trek</h2>
-          <div><p className="preserve-lines">{t.overview}</p>
-          {writtenHighlights.length>0&&<ul className="trek-highlights">{writtenHighlights.map(item=><li key={item}><strong>{item}</strong> {highlightDescriptions[item]}</li>)}</ul>}</div>
-        </section>}
-
-        <section id="itinerary" className="trek-section">
-          <div className="trek-section-head"><h2>Day by day</h2><p>{demo?'A draft outline. Your guide adjusts walking stages and rest days to the conditions.':'Each night is listed with its altitude. Rest days let your body adjust before you climb higher.'}</p></div>
-          {days.length?<ol className="ascent-log">{days.map(day=>{const e=day.elevation_meters;return <li key={day.day_number} id={`day-${day.day_number}`} className={`${day.is_acclimatization_day?'is-rest':''} ${e&&e>=5000?'is-high':''}`}>
-            <span className="ascent-day"><span className="sr-only">Day </span>{day.day_number}</span>
-            {e?<span className="ascent-meter" aria-hidden="true"><i style={{width:`${Math.max(6,Math.round(e/highest*100))}%`}}/></span>:<span className="ascent-meter is-empty" aria-hidden="true"/>}
-            <div className="ascent-copy">
-              <h3>{day.title}</h3>
-              <p className="ascent-meta">{day.overnight_stay&&<span>Overnight in {day.overnight_stay}</span>}{e?<span className="ascent-alt">{metres(e)}</span>:null}{day.is_acclimatization_day&&<span className="ascent-rest">Rest day to acclimatise</span>}</p>
-              {day.description&&<p className="preserve-lines">{day.description}</p>}
-            </div>
-          </li>;})}</ol>:<div className="quiet-panel"><p>The detailed itinerary is being prepared. Ask the team for the current route and daily walking plan.</p><button className="text-link" onClick={()=>setInquiry(true)}>Ask for the itinerary</button></div>}
-        </section>
-
-        {!compactRoute&&<section id="included" className="trek-section">
-          <div className="trek-section-head"><h2>What’s included</h2>{demo&&<p>Example arrangements. Your confirmed proposal lists the exact services.</p>}</div>
-          <div className="trek-included">{([[demo?'Usually included':'Included',t.inclusions,'is-in'],[demo?'Usually arranged separately':'Not included',t.exclusions,'is-out']] as [string,string[],string][]).map(([title,list,tone])=><div key={title} className={tone}><h3>{title}</h3>{list?.length?<ul>{list.map((item,i)=><li key={i}>{item}</li>)}</ul>:<p>Confirmed with your itinerary.</p>}</div>)}</div>
-          {t.packing_list?.length>0&&<details className="packing-list"><summary>What to pack <span aria-hidden="true">+</span></summary><ul>{t.packing_list.map((item,i)=><li key={i}>{item}</li>)}</ul></details>}
-        </section>}
-
-        <section id="book" className="trek-section trek-book">
-          <div><h2>Book or plan your trip</h2><p>Take a seat on a set departure, or plan a private trip on your own dates with our team. Nothing is charged until your trip is confirmed.</p></div>
-          <div className="trek-book-side"><p className="trek-price"><span>From</span><strong>{money(t.starting_price_usd)}</strong><span>per person, {t.duration_days} days</span></p>{bookButtons}</div>
-        </section>
+      <div className="container journey-detail-body">
+        {demo&&<p className="journey-preview-note"><strong>Sample journey.</strong> The day plan, services and price below are illustrations. Our team will confirm the final route and quote before you book.</p>}
+        <dl className="trek-facts journey-facts">{facts.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+        {actions('top')}
+        <div className="trek-layout journey-detail-layout"><article className="trek-story">
+          {!compactRoute&&<section id="overview" className="journey-copy-section"><p className="eyebrow">THE EXPERIENCE</p><h2>A trail to remember.</h2><p className="preserve-lines journey-overview">{t.overview}</p>{t.best_seasons?.length>0&&<p className="season-note">Suggested seasons: {t.best_seasons.join(' · ')}</p>}</section>}
+          {!compactRoute&&<section id="highlights" className="journey-copy-section"><p className="eyebrow">WHY THIS ROUTE</p><h2>Moments along the way.</h2><div className="journey-highlight-grid">{highlights.map((item,index)=><div key={item}><span>0{index+1}</span><h3>{item}</h3><p>{highlightDescriptions[item]||`A closer look at ${item.toLowerCase()} along the route.`}</p></div>)}</div></section>}
+          <section id="itinerary" className="journey-copy-section"><p className="eyebrow">DAY BY DAY {demo&&<span className="journey-draft-label">· SAMPLE PLAN</span>}</p><h2>The path ahead.</h2>{!compactRoute&&<p className="journey-section-intro">{demo?'This draft gives you a feel for the route. Your guide will adjust travel, walking stages and rest days to current conditions.':'Follow the route day by day, with room for the mountain conditions to guide the journey.'}</p>}{t.itinerary_days.length?<div className="itinerary-grid">{[...t.itinerary_days].sort((a,b)=>a.day_number-b.day_number).map(day=><article className="itinerary-day-card" key={day.day_number}><span className="day-number">DAY {String(day.day_number).padStart(2,'0')}</span><h3>{day.title}</h3>{day.overnight_stay&&<p className="itinerary-overnight">Overnight · {day.overnight_stay}</p>}<p className="preserve-lines">{day.description}</p>{day.elevation_meters&&<p className="day-meta">Approx. {day.elevation_meters.toLocaleString()} m</p>}{day.is_acclimatization_day&&<span className="itinerary-acclimatization">Acclimatization day</span>}</article>)}</div>:<div className="quiet-panel"><p>The detailed itinerary is being prepared. Ask the team for the current route and daily walking plan.</p><button className="text-link" onClick={()=>setInquiry(true)}>Ask for the itinerary ↗</button></div>}</section>
+          {!compactRoute&&<section id="included" className="journey-copy-section"><p className="eyebrow">BEFORE YOU GO</p><h2>What to expect.</h2>{demo&&<p className="journey-section-intro">These are example arrangements. The exact inclusions will appear in your confirmed proposal.</p>}<div className="inclusion-grid">{[[demo?'Possible inclusions':'Included',t.inclusions],[demo?'Usually arranged separately':'Not included',t.exclusions]].map(([title,list])=><div key={String(title)}><h3>{String(title)}</h3>{Array.isArray(list)&&list.length?<ul>{list.map((item,i)=><li key={i}>{item}</li>)}</ul>:<p>To be confirmed with your itinerary.</p>}</div>)}</div>{t.packing_list?.length>0&&<details className="packing-list"><summary>Suggested packing essentials <span aria-hidden="true">+</span></summary><ul>{t.packing_list.map((item,i)=><li key={i}>{item}</li>)}</ul></details>}</section>}
+          <section id="book" className="journey-copy-section journey-book-section"><p className="eyebrow">READY WHEN YOU ARE</p><h2>Book or plan your trip.</h2><p className="journey-section-intro">Book a seat on a set departure, or plan a private trip on your own dates with our team.</p>{actions('bottom')}</section>
+        </article></div>
       </div>
       {related}
     </div>
