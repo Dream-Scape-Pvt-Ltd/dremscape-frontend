@@ -17,10 +17,13 @@
 .letter { display:grid; grid-template-columns:1fr 1.1fr; gap:64px; padding:56px; border-radius:28px; background:linear-gradient(125deg,#eaf0ec,#f6f8f5); border:1px solid #24453b12; box-shadow:0 20px 55px #173f3206; }
 .signature { margin-top:32px; font-weight:650; font-size:15px; }
 .signature span { display:block; font-size:11px; font-weight:400; margin-top:4px; }
-.profiles { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; align-items:start; margin-top:48px; }
-.profiles article { padding:30px; background:#fff; border:1px solid #24453b14; border-radius:20px; box-shadow:0 12px 35px #173f3205; }
-.profiles h3 { font-size:23px; letter-spacing:-.6px; line-height:1.25; margin:16px 0; }
+.profiles { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:26px; align-items:start; margin-top:42px; }
+.profile { overflow:hidden; background:#fff; border:1px solid #24453b18; border-radius:22px; box-shadow:0 18px 42px #173f3210; }
+.portrait { aspect-ratio:1.1; display:flex; align-items:center; justify-content:center; overflow:hidden; background:linear-gradient(145deg,#eef2ed,#dce8e0); color:#305647; font-size:64px; font-weight:600; }
+.portrait img { display:block; width:100%; height:100%; object-fit:cover; object-position:center top; }
+.profileContent { padding:28px 32px 30px; }
+.profiles h3 { font-size:25px; letter-spacing:-.7px; line-height:1.2; margin:10px 0 17px; color:#173f32; }
 .profiles p { font-size:14px; color:#526c62; }
-.profiles .eyebrow { font-size:10px; line-height:1.7; }
-@media(max-width:900px) { .letter { gap:32px; padding:32px; } .profiles { grid-template-columns:1fr; } }
-@media(max-width:640px) { .letter { grid-template-columns:1fr; padding:28px 24px; width:calc(100% - 40px); } .index { gap:6px 20px; } .index a { font-size:11px; } .beyond > img { position:static; } .profiles article { padding:24px; } }
+.profiles .eyebrow { font-size:10px; line-height:1.7; color:#3a7659; }
+@media(max-width:900px) { .letter { gap:32px; padding:32px; } .profiles { gap:18px; } }
+@media(max-width:640px) { .letter { grid-template-columns:1fr; padding:28px 24px; width:calc(100% - 40px); } .index { gap:6px 20px; } .index a { font-size:11px; } .beyond > img { position:static; } .profiles { grid-template-columns:1fr; } .profileContent { padding:24px; } }
