@@ -100,7 +100,10 @@ function sampleJourney(ref:string): Journey | undefined {
     },
   };
   const content=routeCopy[slug];
-  const itinerary_days=(content?.days||[]).map(([title,overnight_stay,description],index)=>({day_number:index+1,title,description,overnight_stay,elevation_meters:null,is_acclimatization_day:/acclimatization/i.test(title)}));
+  // Approximate sleeping elevations for the labelled Everest preview only.
+  // Reference: https://lovehimalayajourney.com/treks/everest-base-camp-gokyo-cho-la-trek
+  const previewElevations:Record<string,number>={Kathmandu:1400,Phakding:2652,'Namche Bazaar':3440,Tengboche:3860,Dingboche:4410,Lobuche:4910,'Gorak Shep':5164,Dzongla:4835,Thagnak:4700,Gokyo:4790,Dole:4200,Lukla:2860};
+  const itinerary_days=(content?.days||[]).map(([title,overnight_stay,description],index)=>({day_number:index+1,title,description,overnight_stay,elevation_meters:slug==='everest-base-camp-cho-la'?(previewElevations[overnight_stay]??null):null,is_acclimatization_day:/acclimatization/i.test(title)}));
   return {...trip,image:slug==='upper-mustang'?'/images/treks/lo-manthang.jpg':trip.image,overview:content?.overview||`A sample outline for ${trip.title}. Ask our team for the latest route plan.`,min_group_size:0,max_group_size:0,best_seasons:[],inclusions:['Local trekking guide','Accommodation along the route','Required local permits','Travel between the planned trail stages'],exclusions:['International flights','Travel insurance','Personal gear and purchases','Tips and extra drinks'],packing_list:['Comfortable, broken-in walking boots','Warm layers and waterproof outerwear','Sun protection','Reusable water bottle'],gallery_images:gallery[slug]||[],itinerary_days,departures:[]};
 }
 /** The published guides who lead a trek, as the trip detail returns them. Malformed rows are dropped. */

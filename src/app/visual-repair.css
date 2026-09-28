@@ -1,0 +1,95 @@
+/* Restore the established forest / ivory palette and explicit surface contrast. */
+html body{--forest:#153d2f;--gold:#153d2f;--muted:#5b6963}
+html body .button.gold{background:#153d2f;color:#fff;border-color:#153d2f;box-shadow:0 6px 18px #153d2f24}
+html body .button.gold:hover{background:#245541}
+html body .home-discovery .home-hero{height:100svh;min-height:660px;max-height:none;border-radius:0;padding:120px 0 92px;justify-content:center;align-items:center}
+html body .home-discovery .home-hero .hero-content{text-align:center;max-width:980px}
+html body .home-discovery .home-hero .hero-headline{max-width:none;text-align:center;margin:0 auto}
+html body .home-discovery .home-hero .hero-headline .eyebrow{justify-content:center;color:#fff;text-shadow:0 2px 12px #0008}
+html body .home-discovery .home-hero h1{max-width:none;margin:0 auto;color:#fff;font-size:clamp(48px,6.4vw,84px);text-shadow:0 3px 24px #09291e70}
+html body .home-discovery .home-hero .hero-title-accent{display:inline;color:#fff}
+html body .home-discovery .home-hero .hero-description{max-width:540px;margin:22px auto 0;color:#fff;text-shadow:0 2px 12px #0009}
+html body .home-discovery .home-hero .hero-buttons{justify-content:center;margin:26px auto 0}
+html body .home-discovery .home-hero .hero-shade{background:linear-gradient(180deg,#081a2330 0%,#081a2350 40%,#081a2350 65%,#081a2340 100%)!important}
+html body .home-discovery .home-hero .button.gold{background:#fff;color:#153d2f;border-color:#fff;box-shadow:0 6px 24px #071c2530}
+html body .home-discovery .eyebrow,html body .journey-page .eyebrow{color:#50695c}
+html body .home-discovery .story h2,html body .home-discovery .story h2 em,html body .home-discovery .story .eyebrow{color:#fff}
+html body .home-discovery .story .button.gold{background:#fff;color:#153d2f;border-color:#fff}
+html body .journey-page .trek-v2{--forest:#153d2f;--moraine:#58695f;--glacier:#f3f6f3;--brass:#153d2f;background:#fafaf8;color:#25372d}
+html body .journey-page .trek-v2 h1,html body .journey-page .trek-v2 h2,html body .journey-page .trek-v2 h3{color:#153d2f}
+html body .journey-page .trek-v2 .trek-head-book{background:#fff;border-color:#dce5de;box-shadow:0 12px 34px #153d2f12}
+html body .journey-page .trek-v2 .trek-price strong{color:#153d2f}
+html body .journey-page .trek-v2 .trek-cta .button.gold{background:#153d2f;color:#fff;border-color:#153d2f;box-shadow:0 6px 18px #153d2f20}
+html body .journey-page .trek-v2 .trek-section.trek-book{background:#eff4ef;color:#153d2f;border-color:#d4dfd5;box-shadow:0 12px 32px #153d2f12}
+html body .journey-page .trek-v2 .trek-section.trek-book h2,html body .journey-page .trek-v2 .trek-section.trek-book .trek-price strong{color:#153d2f}
+html body .journey-page .trek-v2 .trek-section.trek-book p,html body .journey-page .trek-v2 .trek-section.trek-book .trek-price span{color:#44584b}
+html body .journey-page .trek-v2 .trek-book .trek-cta .button.outline-dark{color:#153d2f;border-color:#153d2f}
+html body .journey-page .trek-v2 .trek-book .trek-cta .button.outline-dark:hover{background:#153d2f;color:#fff}
+html body .journey-page .trek-v2 .trek-book .trek-cta .button:focus-visible{outline-color:#153d2f}
+html body .journey-page .editorial-hero:not(.has-photo){background:#f3f6f2;color:#153d2f}
+html body .journey-page .editorial-hero:not(.has-photo) h1,html body .journey-page .editorial-hero:not(.has-photo) h1 em{color:#153d2f}
+/* Editorial photos sit beside the copy; the text remains on an ivory surface. */
+html body .journey-page .editorial-hero.has-photo h1,html body .journey-page .editorial-hero.has-photo h1 em{color:#153d2f;text-shadow:none}
+html body .journey-page .editorial-hero.has-photo p{color:#465d4e;text-shadow:none}
+html body .journey-page .partner-index .partner-index-cta{box-shadow:none;text-shadow:none;filter:none}
+html body .journey-page .editorial-hero:not(.has-photo) p{color:#465d4e}
+html body .memory-page h1,html body .memory-page h1 em,html body .memory-page h2,html body .memory-page h2 em{color:#153d2f;font-style:normal}
+html body .memory-page .journal-hero-copy{background:#f3f6f2;color:#153d2f}
+html body .memory-page .journal-hero-copy p{color:#465d4e}
+html body .complete-footer .footer-signature{color:#fff;font-style:normal;font-size:15px}
+html body .complete-footer h3,html body .complete-footer a{color:#f3f7f3}
+html body .complete-footer p{color:#d6e1da}
+.gallery-carousel{margin-bottom:44px}.gallery-carousel-stage{position:relative;overflow:hidden;border-radius:22px;background:#153d2f;box-shadow:0 16px 42px #153d2f20}
+.gallery-carousel-photo{display:block;border:0;padding:0;background:none;width:100%;cursor:zoom-in}.gallery-carousel-photo img{display:block;width:100%;height:clamp(300px,48vw,580px);object-fit:cover}
+.gallery-carousel-caption{position:absolute;bottom:0;left:0;right:0;padding:60px 28px 26px;background:linear-gradient(transparent,#061d16d9);display:flex;align-items:end;justify-content:space-between;gap:20px;pointer-events:none}
+html body .journey-page .gallery-carousel-caption h2{color:#fff;font-size:clamp(23px,3vw,38px);margin:8px 0 0}.gallery-carousel-caption small{color:#e0eade}
+.gallery-carousel-controls{display:flex;align-items:center;gap:16px;color:#fff;pointer-events:auto}.gallery-carousel-controls button{width:44px;height:44px;border:1px solid #ffffff90;border-radius:50%;background:#fff;color:#153d2f;cursor:pointer}
+.gallery-carousel-thumbnails{display:flex;gap:12px;overflow-x:auto;padding:18px 3px;scroll-snap-type:x proximity}.gallery-carousel-thumbnails button{flex:0 0 110px;padding:0;border:3px solid transparent;border-radius:12px;overflow:hidden;cursor:pointer;scroll-snap-align:start;background:#fff}.gallery-carousel-thumbnails button[aria-pressed=true]{border-color:#153d2f}.gallery-carousel-thumbnails img{width:100%;height:72px;object-fit:cover;display:block}
+html body .gallery-tile,html body .journal-card,html body .journey-card{box-shadow:0 8px 24px #153d2f10}
+@media(max-width:600px){html body .home-discovery .home-hero{min-height:640px;padding:112px 0 100px}html body .home-discovery .home-hero .hero-content{padding-left:24px;padding-right:24px}html body .home-discovery .home-hero .hero-description{font-size:15px;max-width:310px}html body .home-discovery .home-hero h1{font-size:48px;max-width:360px}html body .home-discovery .home-hero .hero-title-accent{display:block}.gallery-carousel-caption{padding:45px 18px 20px;flex-wrap:wrap}.gallery-carousel-controls{gap:12px}.gallery-carousel-photo img{height:390px}}
+html body .journey-page .trek-v2 .trek-section.trek-book p.trek-price{color:#44584b}
+html body .memory-page .journal-cover-copy h2,html body .memory-page .journal-cover-copy p,html body .memory-page .journal-cover-copy span{color:#fff;text-shadow:0 2px 12px #0009}
+html body .journey-page .gallery-dialog p{color:#fff}
+html body .journey-page .trek-altitude .altitude-readout{color:#153d2f}
+html body .journey-page .trek-altitude .altitude-readout small{background:#e8f1eb;color:#275940}
+html body .journey-page .trek-altitude .route-profile-stop.is-peak,html body .journey-page .trek-altitude .route-profile-stop.is-rest{fill:#153d2f}
+html body .journey-page .trek-altitude .altitude-days button[aria-pressed=true]{border-color:#153d2f;background:#ecf3ee}
+html body .journey-page .trek-altitude .altitude-days button:focus-visible{outline-color:#153d2f}
+.altitude-preview-note{font-size:12px;line-height:1.7}.altitude-preview-note a{text-decoration:underline}
+html body .journey-page .memory-page .memory-hero h1 em,html body .journey-page .memory-page .memory-hero h1{color:#153d2f;font-style:normal}
+html body .header .nav>a[aria-current=page]{border-color:#e6eee7}
+html body .journey-page h1 em,html body .journey-page h2 em{color:#153d2f;font-style:normal}
+html body .journey-page .payment-experience h1,html body .journey-page .payment-experience h2{color:#153d2f}
+html body .journey-page .payment-experience .button.green{background:#153d2f;color:#fff}
+/* Public surfaces use one palette; photography captions retain white text. */
+html body{--brass:#153d2f;--sand:#edf3ee;--reading-ink:#354c40;--cream:#fafaf8}
+html body .journey-page{background:#fafaf8;color:#25372d}
+html body .button.green{background:#153d2f;border-color:#153d2f;color:#fff;box-shadow:0 5px 15px #153d2f14}
+html body .button.green:hover{background:#245541}
+html body .button.outline-dark{border-color:#153d2f;color:#153d2f;background:#fff}
+html body .button.outline-dark:hover{background:#153d2f;color:#fff}
+html body .button:focus-visible,html body a:focus-visible,html body button:focus-visible{outline:2px solid #397758;outline-offset:4px}
+html body .journey-page .partner-card-numbered>span,html body .journey-page .partner-steps span,html body .journey-page .editorial-three article>span,html body .chapter-number,html body .review-stars{color:#397758}
+html body .journey-page .partner-steps li{border-color:#397758;background:linear-gradient(#edf3ee,transparent 80%)}
+html body .partner-index a:hover{border-color:#397758;background:#edf3ee}
+html body .partner-index .partner-index-cta:hover{background:#245541;color:#fff}
+html body .filter-chips button[aria-pressed=true]{background:#153d2f;border-color:#153d2f;color:#fff}
+html body .journey-page .partner-section,html body .journey-page .partner-enquire{padding-block:56px}
+html body .journey-page .about-values{background:#edf3ee}
+html body .complete-footer a:hover{color:#c6dfcf}
+html body .journey-card-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+html body .journey-card-facts dt{font-size:10px;color:#5b6963}
+html body .journey-card-facts dd{font-size:12px;color:#153d2f}
+.catalog-card-item{display:flex;flex-direction:column;min-width:0}.catalog-card-item .journey-card{flex:1}
+.compare-trip{border:1px solid #d6e2d8;border-radius:10px;background:#fff;color:#153d2f;padding:12px;margin-top:10px;font:inherit;font-size:12px;cursor:pointer;min-height:44px}
+.compare-trip[aria-pressed=true]{background:#e8f2eb;border-color:#397758}.compare-trip:disabled{opacity:.5;cursor:default}
+.trip-comparison{padding:28px;margin:38px 0;border:1px solid #d6e2d8;border-radius:18px;background:#fff;box-shadow:0 8px 26px #153d2f0a}
+.comparison-scroll{overflow-x:auto}.trip-comparison table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}.trip-comparison th,.trip-comparison td{padding:16px 12px;border-bottom:1px solid #e3eae4;min-width:150px}.trip-comparison th{color:#153d2f}
+.partner-portal-summary{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:24px;background:#edf3ee;border-radius:16px}.partner-portal-section{margin:46px 0}.partner-download-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.partner-download-grid article{padding:24px;border:1px solid #d6e2d8;background:#fff;border-radius:16px;box-shadow:0 8px 25px #153d2f0b}.partner-download-grid h3{font-size:20px;margin:12px 0}.partner-download-grid p{font-size:14px;color:#506456}.partner-download-grid .button{margin-top:15px}
+.website-content-editors{margin-top:28px}.website-content-editors details{padding:20px;border:1px solid #d6e2d8;border-radius:12px;margin:15px 0}.website-content-editors summary{font-weight:750;cursor:pointer;color:#153d2f}.website-content-fields{display:grid;gap:18px}.website-content-group{padding:16px!important;border:1px solid #d6e2d8!important;margin:18px 0!important}.website-content-group legend{color:#153d2f;font-weight:700}.website-content-item{padding:16px;background:#f3f6f3;border-radius:12px;margin:12px 0}.website-content-item .text-link{font-size:12px;margin-top:8px}.website-content-editors p{font-size:13px;color:#506456}
+@media(max-width:700px){.partner-download-grid{grid-template-columns:1fr}.trip-comparison{padding:18px}.trip-comparison .section-heading{display:block}.partner-portal .section-heading{display:block}.partner-portal h1{font-size:38px;overflow-wrap:anywhere}.journey-card-facts{gap:6px}}
+.publication-readiness{margin:24px 0;padding:24px;border:1px solid #d6e2d8;background:#f3f6f3;border-radius:14px;color:#153d2f}.publication-readiness h3{margin:0 0 12px}.publication-readiness p,.publication-readiness li{font-size:13px;line-height:1.8;color:#465d4e}.publication-readiness ul{list-style:none;padding:0}
+html body .journey-page .utility-page h1,html body .journey-page .utility-page h2,html body .journey-page .policy-heading h1,html body .journey-page .policy-layout h2,html body .journey-page .departure-page h1,html body .journey-page .collection-context h1{color:#153d2f}
+html body .policy-status{background:#edf3ee;color:#365b45;border-color:#d3e2d6}
+html body .complete-footer .footer-contact-link{color:#f3f7f3}html body .complete-footer .footer-contact-link:hover{color:#c6dfcf}
+.cms-altitude-preview{padding:24px;margin:20px 0;border:1px solid #dce8df;border-radius:18px;background:#fff;color:#153d2f}.cms-altitude-preview>h3{margin:0 0 8px}.cms-altitude-preview>p{font-size:12px;line-height:1.7;color:#5a7063;margin-bottom:18px}

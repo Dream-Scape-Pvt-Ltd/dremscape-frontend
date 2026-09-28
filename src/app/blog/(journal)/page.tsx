@@ -1,3 +1,5 @@
+import {getSiteSettings} from '@/lib/site-settings';
+import {storyHref} from '@/lib/links';
 import TrailDrawing from '@/components/trail-drawing';
 import JourneyShell from '@/components/journey-shell';
 import {PlanInvitation} from '@/components/editorial';
@@ -28,4 +30,4 @@ export default async function Page({searchParams}:Props){
   return <Journal/>;
 }
 
-async function Journal(){let guides:Awaited<ReturnType<typeof listGuides>>|null=null;try{guides=await listGuides();}catch{}return <JourneyShell page="journal"><div className="memory-page"><JournalHero/><TrailDrawing/><section className="container memory-stories" id="journal-stories"><MemoryReveal><div className="memory-section-heading"><div><p className="eyebrow">BEHIND EVERY PHOTOGRAPH</p><h2>There’s a story.</h2></div><p>Three ways of remembering a journey.<br/>The people. The in-between. The light.</p></div></MemoryReveal>{guides?<JournalIndex guides={guides}/>:<div className="status" role="alert"><h2>The journal will be back soon.</h2><p>We couldn’t load the stories. Please try again shortly.</p><a href="/blog" className="button green">Try again</a></div>}</section><TrekMemories/><PlanInvitation/></div></JourneyShell>;}
+async function Journal(){const settings=await getSiteSettings();let guides:Awaited<ReturnType<typeof listGuides>>|null=null;try{guides=await listGuides();}catch{}return <JourneyShell page="journal"><div className="memory-page"><JournalHero title={settings.journal_title} description={settings.journal_description} featuredHref={guides?.find(g=>g.slug===settings.featured_story_slug)?storyHref(guides.find(g=>g.slug===settings.featured_story_slug)!.id):undefined}/><TrailDrawing/><section className="container memory-stories" id="journal-stories"><MemoryReveal><div className="memory-section-heading"><div><p className="eyebrow">BEHIND EVERY PHOTOGRAPH</p><h2>There’s a story.</h2></div><p>Three ways of remembering a journey.<br/>The people. The in-between. The light.</p></div></MemoryReveal>{guides?<JournalIndex guides={guides}/>:<div className="status" role="alert"><h2>The journal will be back soon.</h2><p>We couldn’t load the stories. Please try again shortly.</p><a href="/blog" className="button green">Try again</a></div>}</section><TrekMemories/><PlanInvitation/></div></JourneyShell>;}

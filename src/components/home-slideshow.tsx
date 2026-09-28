@@ -9,7 +9,7 @@ const photos=[
 ];
 const SWIPE_PX=45;
 const next=(delta:number)=>(index:number)=>(index+delta+photos.length)%photos.length;
-export default function HomeSlideshow(){
+export default function HomeSlideshow({image,imageAlt}:{image?:string;imageAlt?:string}){
   const [active,setActive]=useState(0),[paused,setPaused]=useState(false),[reduced,setReduced]=useState(false);
   const slideshow=useRef<HTMLDivElement>(null);
   useEffect(()=>{const media=matchMedia('(prefers-reduced-motion: reduce)');const update=()=>setReduced(media.matches);update();media.addEventListener('change',update);return()=>media.removeEventListener('change',update);},[]);
@@ -31,5 +31,5 @@ export default function HomeSlideshow(){
     hero.addEventListener('touchstart',down,{passive:true});hero.addEventListener('touchend',up,{passive:true});hero.addEventListener('touchcancel',cancel,{passive:true});
     return()=>{hero.removeEventListener('touchstart',down);hero.removeEventListener('touchend',up);hero.removeEventListener('touchcancel',cancel);};
   },[]);
-  return <><div ref={slideshow} className="home-slideshow">{photos.map((alt,index)=><img key={alt} className={`home-slide ${index===active?'is-active':''}`} src={`/images/trek-memories/home-slide-${index+1}.jpg`} alt={alt} aria-hidden={index!==active} width="2048" height="1536" fetchPriority={index===0?'high':'low'} draggable={false}/>)}</div><div className="home-slide-controls" aria-label="Mountain photographs">{photos.map((alt,index)=><button key={alt} type="button" aria-label={`Show photo ${index+1}: ${alt}`} aria-pressed={active===index} onClick={()=>{setActive(index);setPaused(true);}}><span/></button>)}{!reduced&&<button className="home-slide-pause" type="button" aria-label={paused?'Play slideshow':'Pause slideshow'} onClick={()=>setPaused(!paused)}>{paused?'▶':'Ⅱ'}</button>}</div></>;
+  return <><div ref={slideshow} className="home-slideshow">{photos.map((alt,index)=><img key={alt} className={`home-slide ${index===active?'is-active':''}`} src={index===0&&image?image:`/images/trek-memories/home-slide-${index+1}.jpg`} alt={index===0&&image?imageAlt||alt:alt} aria-hidden={index!==active} width="2048" height="1536" fetchPriority={index===0?'high':'low'} draggable={false}/>)}</div><div className="home-slide-controls" aria-label="Mountain photographs">{photos.map((alt,index)=><button key={alt} type="button" aria-label={`Show photo ${index+1}: ${alt}`} aria-pressed={active===index} onClick={()=>{setActive(index);setPaused(true);}}><span/></button>)}{!reduced&&<button className="home-slide-pause" type="button" aria-label={paused?'Play slideshow':'Pause slideshow'} onClick={()=>setPaused(!paused)}>{paused?'▶':'Ⅱ'}</button>}</div></>;
 }

@@ -10,7 +10,7 @@ export async function GET() {
   if (!base) return NextResponse.json({backend: 'unconfigured'}, {headers: noStore});
   const started = Date.now();
   try {
-    const response = await fetch(`${base}/trips/?page_size=1`, {cache: 'no-store', signal: AbortSignal.timeout(5000), redirect: 'error'});
+    const response = await fetch(`${base}/trips/?page_size=1`, {cache:'force-cache',next:{revalidate:30}, signal: AbortSignal.timeout(5000), redirect: 'error'});
     // Any non-5xx answer means the service is up; a 5xx means it is running but broken.
     const up = response.status < 500;
     return NextResponse.json({backend: up ? 'up' : 'down', latency_ms: Date.now() - started}, {status: up ? 200 : 503, headers: noStore});

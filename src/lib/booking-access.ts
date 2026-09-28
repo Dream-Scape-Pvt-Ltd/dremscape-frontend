@@ -6,5 +6,6 @@ export function bookingCookie(reference:string){
 }
 export function publicReceipt(data:BookingReceipt):BookingReceipt{
   const {booking_reference,trip_title,trip_start_date,num_travelers,currency,total_amount_usd,deposit_amount_usd,amount_paid_usd,status}=data;
-  return {booking_reference,trip_title,trip_start_date,num_travelers,currency,total_amount_usd,deposit_amount_usd,amount_paid_usd,status};
+  const trip_slug=typeof data.trip_slug==='string'&&/^[\w-]{1,200}$/.test(data.trip_slug)?data.trip_slug:undefined;
+  return {booking_reference,trip_title,trip_slug,trip_start_date,num_travelers,currency,total_amount_usd,deposit_amount_usd,amount_paid_usd,status};
 }

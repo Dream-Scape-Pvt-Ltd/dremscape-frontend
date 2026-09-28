@@ -1,3 +1,6 @@
+import StructuredData from '@/components/structured-data';
+import {absolutePublicUrl} from '@/lib/structured-data';
+import {asset} from '@/lib/assets';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
 import {cache,Suspense} from 'react';
@@ -13,7 +16,7 @@ import RelatedTreks from './components/related-treks';
 export const loadJourney=cache(getJourney);
 
 export async function trekMetadata(id:string):Promise<Metadata>{
-  try{const {journey}=await loadJourney(id);return {title:`${journey.title} | Dreamscape Treks`,description:journey.overview.slice(0,155),alternates:{canonical:trekHref(journey.id)}};}
+  try{const {journey,demo}=await loadJourney(id);return {title:`${journey.title} | Dreamscape Treks`,description:journey.overview.slice(0,155),alternates:{canonical:trekHref(journey.id)},robots:demo?{index:false,follow:true}:undefined};}
   catch{return {title:'Journey | Dreamscape Treks'};}
 }
 
@@ -25,5 +28,7 @@ export default async function TrekDetailPage({id}:{id:string}){
     if(error instanceof BackendError&&error.status===404)notFound();
     return <JourneyShell><div className="container utility-page status" role="alert"><h1>This trail will be back soon.</h1><p>We couldn’t load the itinerary. Please try again shortly.</p><Link href="/treks" className="button green">Back to journeys</Link></div></JourneyShell>;
   }
-  return <JourneyDetail {...data} related={<Suspense key="related-treks" fallback={null}><RelatedTreks current={data.journey}/></Suspense>}/>;
+  const t=data.journey;
+  const schema={"@context":"https://schema.org","@type":"TouristTrip",name:t.title,description:t.overview,url:absolutePublicUrl(trekHref(t.id)),image:t.image?absolutePublicUrl(asset(t.image)):undefined,provider:{"@type":"TravelAgency",name:"Dreamscape Treks"},itinerary:{"@type":"ItemList",itemListElement:t.itinerary_days.map(day=>({"@type":"ListItem",position:day.day_number,name:day.title,item:{"@type":"Place",name:day.overnight_stay||day.title}}))}};
+  return <>{!data.demo&&<StructuredData data={schema}/>}<JourneyDetail {...data} related={<Suspense key="related-treks" fallback={null}><RelatedTreks current={data.journey}/></Suspense>}/></>;
 }

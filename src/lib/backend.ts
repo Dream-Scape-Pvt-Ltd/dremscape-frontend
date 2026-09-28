@@ -4,7 +4,7 @@ export class BackendError extends Error {
   constructor(message: string, public status = 502, public fields?: unknown) { super(message); }
 }
 export function backendConfigured() { return Boolean(process.env.BACKEND_API_URL); }
-export async function backend<T>(path: string, options: RequestInit = {}): Promise<T> {
+export async function backend<T>(path: string, options: RequestInit & {next?:{revalidate:number;tags?:string[]}} = {}): Promise<T> {
   const base = process.env.BACKEND_API_URL?.replace(/\/$/, '');
   if (!base) throw new BackendError('Backend service is not configured. Please contact the team.', 503);
   const headers = new Headers(options.headers);
@@ -13,7 +13,7 @@ export async function backend<T>(path: string, options: RequestInit = {}): Promi
   }
   let response: Response;
   try {
-    response = await fetch(`${base}/${path}`, {...options, headers, cache:'no-store', signal:AbortSignal.timeout(30000), redirect:'error'});
+    response = await fetch(`${base}/${path}`, {...options, headers, cache:path==='content/site-settings/'&&!headers.has('Authorization')&&(options.method||'GET')==='GET'?options.cache||'no-store':'no-store', signal:AbortSignal.timeout(30000), redirect:'error'});
   } catch { throw new BackendError(options.method === 'POST' ? 'We could not confirm whether your request was saved. Please contact the team before trying again.' : 'The service is temporarily unavailable. Please try again.'); }
   if (response.ok && response.status === 204) return {} as T;
   const body = await response.json().catch(() => null);

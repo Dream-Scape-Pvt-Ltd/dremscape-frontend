@@ -1,6 +1,7 @@
 'use client';
 
 import React, {FormEvent, useEffect, useMemo, useState} from 'react';
+import RouteProfile,{profilePoints} from '@/components/route-profile';
 import {trekHref} from '@/lib/links';
 import {difficultyLevels} from '@/lib/format';
 import Link from 'next/link';
@@ -555,10 +556,10 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
           destination: destinations[0]?.id || '',
           category: categories[0]?.id || '',
           duration_days: 12,
-          altitude_max_meters: 5000,
+          altitude_max_meters: null,
           difficulty_grade: 'NORMAL',
-          starting_price_usd: 1800,
-          single_supplement_usd: 350,
+          starting_price_usd: 0,
+          single_supplement_usd: 0,
           min_group_size: 1,
           max_group_size: 14,
           best_seasons: [],
@@ -568,19 +569,9 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
           overview: '',
           hero_image_url: '',
           gallery_images: [],
-          is_active: true,
+          is_active: false,
           is_featured: false,
-          itinerary_days: [
-            {
-              day_number: 1,
-              title: 'Arrival in Kathmandu & Expedition Briefing',
-              description: 'Land at Tribhuvan International Airport (KTM). Meet your expedition leader for hotel transfer and gear check.',
-              overnight_stay: 'Kathmandu',
-              elevation_meters: 1400,
-              accommodation_type: 'HOTEL',
-              is_acclimatization_day: false,
-            }
-          ]
+          itinerary_days: []
         });
       } else {
         const raw = await api<{
@@ -666,17 +657,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
                 is_acclimatization_day: Boolean(d.is_acclimatization_day),
                 meals_included: d.meals_included || []
               }))
-            : [
-                {
-                  day_number: 1,
-                  title: 'Arrival & Welcome',
-                  description: 'Welcome to Nepal. Transfer to hotel and journey briefing.',
-                  overnight_stay: 'Kathmandu',
-                  elevation_meters: 1400,
-                  accommodation_type: 'HOTEL',
-                  is_acclimatization_day: false
-                }
-              ]
+            : []
         });
       }
     } catch (error) {
@@ -2612,333 +2593,11 @@ function TagListManager({
   );
 }
 
-function AltitudeProfileGraph({
-  days,
-}: {
-  days: AdminItineraryDay[];
-}) {
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
-
-  const pointsData = useMemo(() => {
-    return days.map((d, idx) => {
-      const elev = typeof d.elevation_meters === 'number'
-        ? d.elevation_meters
-        : (d.elevation_meters && !isNaN(Number(d.elevation_meters)) ? Number(d.elevation_meters) : null);
-      return {
-        idx,
-        dayNumber: d.day_number || idx + 1,
-        title: d.title || `Day ${d.day_number || idx + 1}`,
-        stay: d.overnight_stay || '',
-        elevation: elev,
-        isAcclimatization: Boolean(d.is_acclimatization_day),
-      };
-    });
-  }, [days]);
-
-  const validElevations = useMemo(() => {
-    return pointsData
-      .map(p => p.elevation)
-      .filter((e): e is number => typeof e === 'number' && e > 0);
-  }, [pointsData]);
-
-  const maxElev = validElevations.length > 0 ? Math.max(...validElevations) : 0;
-  const minElev = validElevations.length > 0 ? Math.min(...validElevations) : 0;
-  const firstElev = pointsData[0]?.elevation || minElev || 0;
-  const acclimatizationCount = pointsData.filter(p => p.isAcclimatization).length;
-
-  if (pointsData.length === 0) return null;
-
-  // Graph canvas coordinate parameters
-  const width = 800;
-  const height = 210;
-  const padLeft = 60;
-  const padRight = 40;
-  const padTop = 38;
-  const padBottom = 38;
-  const plotWidth = width - padLeft - padRight;
-  const plotHeight = height - padTop - padBottom;
-
-  // Y-axis scaling
-  const effectiveMin = Math.max(0, Math.floor((minElev > 0 ? minElev - 400 : 0) / 500) * 500);
-  const effectiveMax = Math.max(effectiveMin + 1500, Math.ceil((maxElev + 500) / 500) * 500);
-  const yRange = effectiveMax - effectiveMin || 1;
-
-  const getX = (i: number) => padLeft + (pointsData.length === 1 ? plotWidth / 2 : (i / (pointsData.length - 1)) * plotWidth);
-  const getY = (elev: number | null) => {
-    const val = elev ?? effectiveMin;
-    return padTop + plotHeight - ((val - effectiveMin) / yRange) * plotHeight;
-  };
-
-  // Interpolate missing elevations for SVG path continuity
-  const resolvedElevs = pointsData.map((p, i) => {
-    if (p.elevation !== null && p.elevation > 0) return p.elevation;
-    const prevValid = [...pointsData.slice(0, i)].reverse().find(x => x.elevation && x.elevation > 0)?.elevation;
-    const nextValid = pointsData.slice(i + 1).find(x => x.elevation && x.elevation > 0)?.elevation;
-    if (prevValid && nextValid) return (prevValid + nextValid) / 2;
-    return prevValid || nextValid || effectiveMin;
-  });
-
-  const coords = resolvedElevs.map((elev, i) => ({
-    x: getX(i),
-    y: getY(elev),
-    rawElevation: pointsData[i].elevation,
-    ...pointsData[i]
-  }));
-
-  // Build smooth cubic bezier curve
-  let pathD = '';
-  if (coords.length > 0) {
-    pathD = `M ${coords[0].x} ${coords[0].y}`;
-    for (let i = 0; i < coords.length - 1; i++) {
-      const p0 = coords[i === 0 ? i : i - 1];
-      const p1 = coords[i];
-      const p2 = coords[i + 1];
-      const p3 = coords[i + 2 < coords.length ? i + 2 : i + 1];
-
-      const cp1x = p1.x + (p2.x - p0.x) / 6;
-      const cp1y = p1.y + (p2.y - p0.y) / 6;
-      const cp2x = p2.x - (p3.x - p1.x) / 6;
-      const cp2y = p2.y - (p3.y - p1.y) / 6;
-
-      pathD += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
-    }
-  }
-
-  const baselineY = padTop + plotHeight;
-  const areaD = pathD
-    ? `${pathD} L ${coords[coords.length - 1].x} ${baselineY} L ${coords[0].x} ${baselineY} Z`
-    : '';
-
-  // Horizontal Grid Lines
-  const gridSteps: number[] = [];
-  const step = yRange > 4000 ? 1000 : 500;
-  for (let val = effectiveMin; val <= effectiveMax; val += step) {
-    gridSteps.push(val);
-  }
-
-  return (
-    <div className={styles.altitudeGraphCard}>
-      {/* Metric Summary Bar */}
-      <div className={styles.altitudeGraphHeader}>
-        <div className={styles.altitudeGraphTitle}>
-          <span className={styles.altitudeGraphIcon}>🏔️</span>
-          <div>
-            <strong>Interactive Elevation Profile</strong>
-            <p>Visual slope & daily altitude curve (updates dynamically as you edit)</p>
-          </div>
-        </div>
-
-        <div className={styles.altitudePillRow}>
-          <div className={styles.altitudeMetricPill}>
-            <span className={styles.altitudePillLabel}>Max Peak</span>
-            <span className={styles.altitudePillVal}>{maxElev > 0 ? `${maxElev.toLocaleString()} m` : '—'}</span>
-          </div>
-          <div className={styles.altitudeMetricPill}>
-            <span className={styles.altitudePillLabel}>Start Alt</span>
-            <span className={styles.altitudePillVal}>{firstElev > 0 ? `${firstElev.toLocaleString()} m` : '—'}</span>
-          </div>
-          <div className={styles.altitudeMetricPill}>
-            <span className={styles.altitudePillLabel}>Acclimatization</span>
-            <span className={styles.altitudePillVal}>{acclimatizationCount} {acclimatizationCount === 1 ? 'day' : 'days'}</span>
-          </div>
-        </div>
-      </div>
-
-      {validElevations.length === 0 ? (
-        <div className={styles.altitudeEmptyState}>
-          <span>⛰</span>
-          <p><strong>No altitudes recorded yet</strong></p>
-          <small>Enter elevation values (in meters) into the day fields below to render the altitude curve.</small>
-        </div>
-      ) : (
-        <div className={styles.altitudeSvgWrap}>
-          <svg
-            viewBox={`0 0 ${width} ${height}`}
-            className={styles.altitudeSvg}
-            preserveAspectRatio="xMidYMid meet"
-          >
-            <defs>
-              <linearGradient id="altitudeGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2d6a4f" stopOpacity="0.45" />
-                <stop offset="40%" stopColor="#52b788" stopOpacity="0.25" />
-                <stop offset="100%" stopColor="#d8f3dc" stopOpacity="0.03" />
-              </linearGradient>
-            </defs>
-
-            {/* Horizontal Grid lines */}
-            {gridSteps.map(stepVal => {
-              const y = getY(stepVal);
-              return (
-                <g key={stepVal}>
-                  <line
-                    x1={padLeft}
-                    y1={y}
-                    x2={width - padRight}
-                    y2={y}
-                    stroke="#e2ebe6"
-                    strokeDasharray="4 4"
-                    strokeWidth="1"
-                  />
-                  <text
-                    x={padLeft - 10}
-                    y={y + 4}
-                    textAnchor="end"
-                    fontSize="10"
-                    fill="#6c8c7d"
-                    fontWeight="600"
-                  >
-                    {stepVal.toLocaleString()}m
-                  </text>
-                </g>
-              );
-            })}
-
-            {/* Mountain Gradient Area */}
-            {areaD && <path d={areaD} fill="url(#altitudeGradient)" />}
-
-            {/* Mountain Curve Line */}
-            {pathD && (
-              <path
-                d={pathD}
-                fill="none"
-                stroke="#103b2c"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            )}
-
-            {/* Baseline */}
-            <line
-              x1={padLeft}
-              y1={baselineY}
-              x2={width - padRight}
-              y2={baselineY}
-              stroke="#97ab9f"
-              strokeWidth="1.5"
-            />
-
-            {/* Day Points */}
-            {coords.map((pt, i) => {
-              const isMax = pt.rawElevation === maxElev && maxElev > 0;
-              const isHovered = hoveredIdx === i;
-              const hasVal = pt.rawElevation !== null && pt.rawElevation > 0;
-
-              return (
-                <g
-                  key={i}
-                  style={{cursor: 'pointer'}}
-                  onMouseEnter={() => setHoveredIdx(i)}
-                  onMouseLeave={() => setHoveredIdx(null)}
-                >
-                  {/* Vertical Guide when hovered */}
-                  {isHovered && (
-                    <line
-                      x1={pt.x}
-                      y1={padTop}
-                      x2={pt.x}
-                      y2={baselineY}
-                      stroke="#103b2c"
-                      strokeWidth="1.5"
-                      strokeDasharray="3 3"
-                    />
-                  )}
-
-                  {/* Day Label on X-axis */}
-                  <text
-                    x={pt.x}
-                    y={baselineY + 18}
-                    textAnchor="middle"
-                    fontSize="11"
-                    fontWeight={isHovered ? '800' : '650'}
-                    fill={isHovered ? '#103b2c' : '#52796f'}
-                  >
-                    D{pt.dayNumber}
-                  </text>
-
-                  {/* Node Circle */}
-                  {hasVal && (
-                    <>
-                      {(isMax || pt.isAcclimatization || isHovered) && (
-                        <circle
-                          cx={pt.x}
-                          cy={pt.y}
-                          r={isHovered ? 9 : 7}
-                          fill={pt.isAcclimatization ? 'rgba(217, 119, 6, 0.2)' : isMax ? 'rgba(16, 59, 44, 0.2)' : 'rgba(45, 106, 79, 0.2)'}
-                        />
-                      )}
-                      <circle
-                        cx={pt.x}
-                        cy={pt.y}
-                        r={isMax ? 6 : pt.isAcclimatization ? 5.5 : isHovered ? 6 : 4.5}
-                        fill={pt.isAcclimatization ? '#d97706' : isMax ? '#103b2c' : '#ffffff'}
-                        stroke={pt.isAcclimatization ? '#b45309' : '#103b2c'}
-                        strokeWidth="2.5"
-                      />
-                    </>
-                  )}
-
-                  {/* Top elevation callout label for Peak */}
-                  {isMax && (
-                    <g transform={`translate(${pt.x}, ${pt.y - 14})`}>
-                      <rect
-                        x="-38"
-                        y="-16"
-                        width="76"
-                        height="18"
-                        rx="9"
-                        fill="#103b2c"
-                      />
-                      <text
-                        x="0"
-                        y="-4"
-                        textAnchor="middle"
-                        fontSize="9.5"
-                        fontWeight="800"
-                        fill="#ffffff"
-                      >
-                        ⛰ {maxElev}m
-                      </text>
-                    </g>
-                  )}
-                </g>
-              );
-            })}
-          </svg>
-
-          {/* Interactive Tooltip Card */}
-          {hoveredIdx !== null && coords[hoveredIdx] && (
-            <div
-              className={styles.altitudeTooltip}
-              style={{
-                left: `${(coords[hoveredIdx].x / width) * 100}%`,
-                top: `${(coords[hoveredIdx].y / height) * 100}%`,
-              }}
-            >
-              <div className={styles.altitudeTooltipHead}>
-                <strong>Day {coords[hoveredIdx].dayNumber}</strong>
-                {coords[hoveredIdx].isAcclimatization && (
-                  <span className={styles.altitudeAcclimBadge}>Acclimatization</span>
-                )}
-              </div>
-              <div className={styles.altitudeTooltipTitle}>{coords[hoveredIdx].title}</div>
-              {coords[hoveredIdx].stay && (
-                <div className={styles.altitudeTooltipStay}>📍 {coords[hoveredIdx].stay}</div>
-              )}
-              <div className={styles.altitudeTooltipElev}>
-                {coords[hoveredIdx].rawElevation
-                  ? `⛰ ${Number(coords[hoveredIdx].rawElevation).toLocaleString()} m (${Math.round(Number(coords[hoveredIdx].rawElevation) * 3.28084).toLocaleString()} ft)`
-                  : 'Elevation not set'}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
+function AltitudeProfileGraph({days}:{days:AdminItineraryDay[]}) {
+  const points=profilePoints(days.map(day=>({...day,elevation_meters:day.elevation_meters===''||day.elevation_meters===null?null:Number(day.elevation_meters)})));
+  return <section className="cms-altitude-preview"><h3>Live altitude preview</h3><p>Edit each day’s overnight stay, elevation and acclimatisation marker below. This is the same graph visitors see; unknown elevations leave gaps.</p>{points.length?<RouteProfile points={points} itineraryLinks={false}/>:<p>No elevations entered yet. Add an overnight altitude to an itinerary day to see the graph.</p>}</section>;
 }
 
-/** Pop-up card from the trek list's Schedule column: that trek's departures. */
 function ScheduleModal({trek, onClose}: {
   trek: AdminTrek;
   onClose: () => void;
@@ -3432,7 +3091,7 @@ function TrekFullDetailEditor({
             className={styles.saveTrekBtn}
             disabled={saving || !trek.title || !trek.destination || !trek.category}
           >
-            {saving ? 'Saving Details…' : trek.id ? 'Save Trek Changes' : 'Publish New Trek'}
+            {saving ? 'Saving Details…' : trek.is_active ? 'Save & publish trek' : 'Save trek draft'}
           </button>
         </div>
       </div>
@@ -3573,7 +3232,7 @@ function TrekFullDetailEditor({
               <input
                 type="number"
                 min={0}
-                max={8848}
+                max={8849}
                 className={styles.formInput}
                 value={trek.altitude_max_meters ?? ''}
                 onChange={e => onChange(prev => prev ? {...prev, altitude_max_meters: e.target.value === '' ? '' : Number(e.target.value)} : null)}
@@ -3921,14 +3580,14 @@ function TrekFullDetailEditor({
                 Day-by-Day Itinerary Builder ({trek.itinerary_days.length} Days)
               </h3>
               <p className={styles.detailCardSub}>
-                Detailed trail breakdown with overnight stays, accommodations, and acclimatization markers
+                Enter each overnight place and altitude in metres. Saved elevations automatically update the public graph. Leave unknown altitudes blank.
               </p>
             </div>
           </div>
 
           <div style={{display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap'}}>
             {/* Minimalist Altitude / Elevation Mode Toggle */}
-            <label className={styles.miniToggleLabel} title="Toggle daily altitude editing fields">
+            <label className={styles.miniToggleLabel} title="Enable the live altitude graph preview">
               <input
                 type="checkbox"
                 checked={showAltitudeGraph}
@@ -3939,7 +3598,7 @@ function TrekFullDetailEditor({
               />
               <span className={styles.miniToggleSlider} />
               <span className={styles.miniToggleText}>
-                <span>⛰</span> Elevation Mode
+                <span>⛰</span> Graph preview
               </span>
             </label>
 
@@ -4012,7 +3671,7 @@ function TrekFullDetailEditor({
               </div>
 
               {/* Grid layout adjusts dynamically based on showAltitudeGraph */}
-              <div className={showAltitudeGraph ? styles.dayFieldsGridWithElevation : styles.dayFieldsGrid}>
+              <div className={styles.dayFieldsGridWithElevation}>
                 <div className={styles.formField}>
                   <label className={styles.formLabel}>
                     <span>Day Title</span>
@@ -4040,21 +3699,22 @@ function TrekFullDetailEditor({
                   />
                 </div>
 
-                {/* Altitude Editing Field (Available when Altitude Graph addon is activated) */}
-                {showAltitudeGraph && (
+                {/* Overnight altitude is editable for every day. */}
+                {(
                   <div className={styles.formField}>
-                    <label className={styles.formLabel}>
-                      <span>Elevation</span>
+                    <label className={styles.formLabel} htmlFor={`overnight-altitude-${idx}`}>
+                      <span>Overnight altitude (metres)</span>
                     </label>
                     <div className={styles.inputAffixWrapper}>
                       <input
+                        id={`overnight-altitude-${idx}`}
                         type="number"
                         min={0}
-                        max={8848}
+                        max={8849}
                         className={styles.formInput}
                         value={day.elevation_meters ?? ''}
                         onChange={e => handleUpdateDay(idx, 'elevation_meters', e.target.value === '' ? '' : Number(e.target.value))}
-                        placeholder="3440"
+                        placeholder="e.g. 3440; blank if unknown"
                       />
                       <span className={styles.inputSuffix}>m</span>
                     </div>
@@ -4112,6 +3772,7 @@ function TrekFullDetailEditor({
         defaultSeats={trek.max_group_size ? Number(trek.max_group_size) : undefined}
       />
 
+      <section className="publication-readiness"><h3>Before publishing</h3><p>Use approved trip information. Saving a draft keeps it off the public catalogue.</p><ul>{[['Approved description',Boolean(trek.overview.trim())],['Confirmed starting price',Number(trek.starting_price_usd)>0],['Cover photograph',Boolean(trek.hero_image_url)],['Inclusions, exclusions and preparation',trek.inclusions.length>0&&trek.exclusions.length>0&&trek.packing_list.length>0],['Day-by-day itinerary and elevations',trek.itinerary_days.length>0&&trek.itinerary_days.every(day=>Boolean(day.title&&day.overnight_stay)&&day.elevation_meters!==null&&day.elevation_meters!==undefined&&day.elevation_meters!==''&&Number.isFinite(Number(day.elevation_meters))&&Number(day.elevation_meters)>=0)]].map(([label,ready])=><li key={String(label)}>{ready?'✓':'○'} {label}</li>)}</ul><p>Add confirmed departure dates in Departures &amp; Capacity. Only publish authentic traveller reviews with permission.</p></section>
       {/* Footer Actions */}
       <div className={styles.detailTopNav}>
         <button type="button" className={styles.backBtn} onClick={onBack}>
@@ -4128,7 +3789,7 @@ function TrekFullDetailEditor({
             className={styles.saveTrekBtn}
             disabled={saving || !trek.title || !trek.destination || !trek.category}
           >
-            {saving ? 'Saving Details…' : trek.id ? 'Save Trek Changes' : 'Publish New Trek'}
+            {saving ? 'Saving Details…' : trek.is_active ? 'Save & publish trek' : 'Save trek draft'}
           </button>
         </div>
       </div>

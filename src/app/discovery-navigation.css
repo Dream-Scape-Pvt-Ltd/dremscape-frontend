@@ -1,0 +1,21 @@
+/* Region and activity discovery, paired with the existing Dreamscape header. */
+body .header.site-navigation.apple-nav[data-page] .nav{gap:2px}
+.apple-nav .nav-group-trigger{display:flex;align-items:center;gap:7px;padding:14px 10px;border:0;border-radius:8px;background:transparent;color:var(--apple-muted);font:inherit;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer}
+.apple-nav .nav-group-trigger:hover,.apple-nav .nav-group-trigger[aria-expanded=true]{background:var(--apple-hover);color:var(--apple-ink)}
+.apple-nav .nav-group-trigger svg{transition:transform .2s}.apple-nav .nav-group-trigger[aria-expanded=true] svg{transform:rotate(180deg)}
+.apple-nav .nav-group-trigger:focus-visible{outline:2px solid var(--apple-accent);outline-offset:2px}
+.apple-nav .nav-mega-panel{position:absolute;top:calc(100% + 10px);left:0;right:0;display:grid;grid-template-columns:1fr 1.65fr .85fr;gap:28px;background:#f8f6ef;color:#173e2f;border:1px solid #e0e3d7;border-radius:18px;padding:30px 30px 0;box-shadow:0 22px 50px #06241935;max-height:calc(100dvh - 110px);overflow-y:auto;animation:nav-search-arrive .2s both;white-space:normal}
+.apple-nav .nav-mega-panel[hidden]{display:none}
+.nav-mega-intro>p{font-size:9px;letter-spacing:.12em;color:#657565;margin:0 0 14px}.nav-mega-intro h2{font-size:25px;line-height:1.15;letter-spacing:-.035em;margin:0 0 14px}.nav-mega-intro>span{display:block;font-size:12px;line-height:1.7;color:#5b6a5e}
+body .header.site-navigation.apple-nav[data-page] .nav .nav-mega-panel a{color:#173e2f;padding:12px;border-radius:9px;white-space:normal;animation:none}
+body .header.site-navigation.apple-nav[data-page] .nav .nav-mega-panel a:after{display:none}
+body .header.site-navigation.apple-nav[data-page] .nav .nav-mega-panel a:hover{background:#e8ede2;color:#173e2f}
+body .header.site-navigation.apple-nav[data-page] .nav .nav-mega-panel a:focus-visible{outline:2px solid #9e773f;outline-offset:2px;background:#e8ede2}
+body .header.site-navigation.apple-nav[data-page] .nav .nav-mega-intro>a{display:inline-flex;padding:12px 0;gap:18px;margin-top:12px;font-size:11px}
+.nav-mega-links{display:grid;grid-template-columns:1fr 1fr;align-content:start;gap:4px 12px}.nav-mega-links strong{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:600}.nav-mega-links strong>span{color:#9e773f}.nav-mega-links small{display:block;margin-top:6px;font-size:10px;line-height:1.5;color:#687668}
+.nav-mega-photo{width:100%;height:220px;object-fit:cover;border-radius:12px}.nav-mega-foot{grid-column:1/-1;display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid #dde2d6}.nav-mega-foot a{font-size:11px!important}
+@media(min-width:901px) and (max-width:1100px){.apple-nav .nav-group-trigger{font-size:11px;padding-inline:7px}.apple-nav .nav-mega-panel{grid-template-columns:1fr 1.8fr}.nav-mega-photo{display:none}}
+@media(max-width:900px){body .header.site-navigation.apple-nav[data-page] .nav{max-height:calc(100dvh - 108px);overflow-y:auto;align-items:stretch}.apple-nav .nav-group-trigger{width:100%;justify-content:space-between;font-size:14px;padding:16px}.apple-nav .nav-group{border-bottom:1px solid var(--apple-edge)}.apple-nav .nav-mega-panel{position:static;grid-template-columns:1fr;padding:18px 12px 0;margin-bottom:12px;gap:14px;max-height:none;overflow:visible;box-shadow:none;border-radius:12px}.nav-mega-intro h2{font-size:21px}.nav-mega-intro>p,.nav-mega-intro>span,.nav-mega-photo{display:none}.nav-mega-intro h2{margin-bottom:0}.nav-mega-links{gap:4px}.nav-mega-foot{flex-wrap:wrap;gap:0}.apple-nav .nav-mega-panel a{font-size:12px!important}}
+@media(max-width:900px){body .header.site-navigation.apple-nav[data-page] .nav.open{background:var(--apple-solid)!important;color:var(--apple-ink)!important;display:flex;flex-direction:column;gap:0}body .header.site-navigation.apple-nav[data-page] .nav .nav-group-trigger{color:var(--apple-ink)}}
+@media(max-width:380px){.nav-mega-links{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.apple-nav .nav-mega-panel{animation:none}.apple-nav .nav-group-trigger svg{transition:none}}

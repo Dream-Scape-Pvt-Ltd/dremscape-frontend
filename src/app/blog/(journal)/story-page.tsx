@@ -1,3 +1,6 @@
+import StructuredData from '@/components/structured-data';
+import {absolutePublicUrl} from '@/lib/structured-data';
+import {asset} from '@/lib/assets';
 import Link from 'next/link';
 import Image from 'next/image';
 import {StoryPhoto,MemoryReveal} from '@/components/trek-memories';
@@ -68,7 +71,7 @@ export default async function StoryPage({id}:{id:string}){
   try{g=await load(id);}
   catch(e){if(e instanceof BackendError&&e.status===404)notFound();return <JourneyShell page="journal"><section className="utility-page container status" role="alert"><h1>This story will be back soon.</h1><Link href="/blog" className="button green">Back to the journal</Link></section></JourneyShell>;}
   const storyLayout=Boolean(g.sections?.some(s=>s.image));
-  return <JourneyShell page="journal"><article className={`journal-article ${g.photoIds?"memory-article":""}`}>
+  return <JourneyShell page="journal">{g.managed&&<StructuredData data={{"@context":"https://schema.org","@type":"BlogPosting",headline:g.title,description:g.excerpt,url:absolutePublicUrl(storyHref(g.id)),image:g.image?absolutePublicUrl(asset(g.image)):undefined,author:{"@type":"Organization",name:g.author||"Dreamscape Treks"},publisher:{"@type":"Organization",name:"Dreamscape Treks"}}}/>}<article className={`journal-article ${g.photoIds?"memory-article":""}`}>
     <header className="article-masthead container"><Link className="text-link" href="/blog">← The journal</Link><p className="eyebrow">{g.category}</p><h1>{g.title}</h1><p>{g.excerpt}</p><div className="article-byline"><span>{g.author||'Dreamscape journal'}</span>{g.reading&&<span>{g.reading} read</span>}</div></header>
     {g.image&&<div className="article-cover container"><Image className={g.photoIds?"memory-photo":""} src={g.image} alt="" width={2048} height={1536} sizes="(max-width: 1280px) 100vw, 1184px" loading="eager" unoptimized={!g.photoIds}/>{g.photoIds&&<p className="article-photo-note">A photo story from past treks · Original photographs from the Dreamscape collection</p>}</div>}
     {storyLayout&&g.sections?<StorySections sections={g.sections}/>:<ClassicReading g={g}/>}

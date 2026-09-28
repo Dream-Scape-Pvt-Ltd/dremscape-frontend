@@ -1,4 +1,4 @@
-import {bookingCookie} from '@/lib/booking-access';
+import {bookingCookie,publicReceipt} from '@/lib/booking-access';
 import {NextResponse} from 'next/server';
 import {cookies} from 'next/headers';
 import {backend,apiError,BackendError,readInput,requiredText,emailInput,noStore} from '@/lib/backend';
@@ -27,8 +27,7 @@ export async function POST(request:Request) {
     const data=await backend<BookingReceipt & {access_token?:string}>('bookings/',{method:'POST',headers:token?{Authorization:`Bearer ${token}`}:{},body:JSON.stringify(payload)});
     if(!data.booking_reference||!data.status||!Number.isFinite(Number(data.total_amount_usd)))throw new BackendError('Your booking result could not be confirmed. Please contact the team before submitting again.');
     // Return a receipt only; passport and insurance details stay off the confirmation page.
-    const {booking_reference,trip_title,trip_start_date,num_travelers,currency,total_amount_usd,deposit_amount_usd,amount_paid_usd,status}=data;
-    const response=NextResponse.json({success:true,receipt:{booking_reference,trip_title,trip_start_date,num_travelers,currency,total_amount_usd,deposit_amount_usd,amount_paid_usd,status}},{status:201,headers:noStore});
+    const response=NextResponse.json({success:true,receipt:publicReceipt(data)},{status:201,headers:noStore});
     if(data.access_token)response.cookies.set(bookingCookie(data.booking_reference),data.access_token,{httpOnly:true,sameSite:"lax",secure:new URL(request.url).protocol==="https:"||request.headers.get("x-forwarded-proto")==="https",path:"/",maxAge:60*60*24*30});
     return response;
   }catch(error){return apiError(error);}

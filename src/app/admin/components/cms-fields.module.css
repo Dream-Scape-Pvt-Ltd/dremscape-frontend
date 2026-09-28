@@ -9,7 +9,7 @@
 .fieldWide{grid-column:1/-1}
 .field input,.field select,.field textarea{box-sizing:border-box;width:100%;min-width:0;border:1px solid #d2dfd6;border-radius:10px;padding:11px 13px;background:#fbfcfa;color:#173d2d;font:inherit;font-size:13px;line-height:1.5}
 .field textarea{resize:vertical;min-height:110px}
-.field input:focus-visible,.field select:focus-visible,.field textarea:focus-visible,.button:focus-visible{outline:2px solid #ae8e4b;outline-offset:2px}
+.field input:focus-visible,.field select:focus-visible,.field textarea:focus-visible,.button:focus-visible{outline:2px solid #397758;outline-offset:2px}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:23px}
 .button{border:1px solid #143d2e;border-radius:11px;background:#143d2e;color:#fff;font:inherit;font-size:12px;font-weight:750;padding:11px 16px;min-height:42px;cursor:pointer}
 .button:hover{background:#205641}

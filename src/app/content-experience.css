@@ -1,7 +1,7 @@
 /* Dreamscape's forest / muted gold palette and photo-led editorial system. */
 :root{--gold:#c4b078;--gold-hover:#d2c393;--gold-dark:#8a753e}
-body .button.gold{background:linear-gradient(135deg,#c4b078,#d2c393)!important;color:#173c2e!important;border-color:#c4b078!important;box-shadow:0 6px 18px #665b2715!important}
-body .button.gold:hover{background:#d2c393!important;box-shadow:0 9px 22px #665b2720!important}
+body .button.gold{background:linear-gradient(135deg,#c4b078,#d2c393);color:#173c2e;border-color:#c4b078;box-shadow:0 6px 18px #665b2715}
+body .button.gold:hover{background:#d2c393;box-shadow:0 9px 22px #665b2720}
 body .text-gold,.hero-content .eyebrow{color:#dccb9b}.chapter-number,.day-number{color:#8a753e}
 .journal-editorial-hero{padding-top:145px;padding-bottom:65px}
 .journal-editorial-heading{display:grid;grid-template-columns:1.25fr .75fr;gap:70px;align-items:end;margin-bottom:42px}
