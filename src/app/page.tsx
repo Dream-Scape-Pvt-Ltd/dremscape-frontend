@@ -6,7 +6,7 @@ import {getHomepageReviews} from '@/lib/homepage-content';
 
 export default async function Page(){
   const [settings,regions,guides,stories]=await Promise.all([
-    getSiteSettings(),listDestinationContent(),listGuides(),getHomepageReviews(),
+    getSiteSettings(),listDestinationContent(),listGuides().catch(()=>[]),getHomepageReviews(),
   ]);
   return <Home heroTitle={settings.home_title} heroDescription={settings.home_description} heroEyebrow={settings.home_eyebrow} heroImage={settings.home_image_url} heroImageAlt={settings.home_image_alt}
     finderDestinations={settings.home_filter_destinations}

@@ -1,4 +1,5 @@
 import {isExpedition, type Trip} from './catalog.ts';
+import {zoneForTrip} from './nepal-zones.ts';
 
 export type JourneyKind = '' | 'treks' | 'tours' | 'expeditions';
 export const trekkingRegions = [
@@ -30,8 +31,9 @@ export function journeyKind(trip:Trip):Exclude<JourneyKind,''> {
   const category=`${trip.category_slug} ${trip.category_name}`;
   return /tour|cultur|sightseeing|wildlife|safari|heli|day.trip/i.test(category)?'tours':'treks';
 }
-export function matchesCollection(trip:Trip,{kind='',region='',tour='',country=''}:{kind?:string;region?:string;tour?:string;country?:string}) {
+export function matchesCollection(trip:Trip,{kind='',zone='',region='',tour='',country=''}:{kind?:string;zone?:string;region?:string;tour?:string;country?:string}) {
   if(kind&&journeyKind(trip)!==kind)return false;
+  if(zone&&zoneForTrip(trip)!==zone)return false;
   // Titles take precedence over combined destination labels such as “Annapurna & Mustang”.
   const route=`${trip.slug} ${trip.title} ${trip.tags||''}`.toLowerCase();
   const place=`${route} ${trip.destination_slug}`;
