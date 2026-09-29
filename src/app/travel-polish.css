@@ -1,6 +1,6 @@
 /* Calm section transitions and deliberate motion. */
 #main>.story,#main>.inspiration,#main>.testimonials,#main>.newsletter-section{box-shadow:none!important;border-block:0}
-#main>.story{border-radius:28px}
+#main>.story{border-radius:0}
 #main>.section:not(.story):not(.testimonials),#main>.inspiration,#main>.newsletter-section{background:#fdfefe!important}
 #main .planner{box-shadow:0 12px 32px #103b2c0c!important;border-color:#e8eee9!important}
 .button>.icon,.button>span[aria-hidden=true],.round-arrow,.destination-arrow,.hero-caption>a,.explore-link .play,.itinerary-plus{transition:transform .25s cubic-bezier(.22,1,.36,1),background .25s,box-shadow .25s}

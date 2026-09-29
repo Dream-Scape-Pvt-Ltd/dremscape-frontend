@@ -3295,6 +3295,20 @@
 .chipRemove { border: 0; background: transparent; color: inherit; font-size: 13px; line-height: 1; cursor: pointer; opacity: 0.7; }
 .chipRemove:hover { opacity: 1; }
 .addChipForm { display: flex; gap: 8px; margin-top: 10px; }
+.addChipForm select { width: 56px; font-size: 16px; }
+.tagAddSelect { width: auto !important; padding: 3px 8px !important; border: 1px dashed #b9cabf !important; border-radius: 999px !important; background: #fff; font-size: 10.5px !important; font-weight: 700; color: #4d6a5b; cursor: pointer; }
+.crmRowTags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.crmRowTags .chip { padding: 2px 7px; font-size: 9.5px; }
+
+/* CRM: inquiry list filters and bulk bar */
+.crmFilters { flex-wrap: wrap; align-items: center; margin-top: -6px; }
+.crmFilters select { width: auto; min-width: 140px; }
+.crmDate { flex: 0 0 auto !important; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #5c7467; }
+.crmDate input { width: auto; padding: 8px 9px; }
+.crmCheck { flex: 0 0 auto !important; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #5c7467; cursor: pointer; }
+.crmCheck input { width: auto !important; }
+.crmBulkBar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 0 0 12px; padding: 10px 12px; border-radius: 10px; background: #eef5f0; border: 1px solid #cfe0d5; font-size: 12px; color: #133e2f; }
+.crmBulkBar select { width: auto; min-width: 180px; border: 1px solid #dce4dd; border-radius: 8px; background: #fff; padding: 8px 10px; font-size: 13px; }
 
 /* CRM: Lost reason inline prompt */
 .lostReasonPrompt { margin-top: 8px; padding: 9px; border-radius: 8px; background: #fdf3ee; border: 1px solid #f0d9cb; }

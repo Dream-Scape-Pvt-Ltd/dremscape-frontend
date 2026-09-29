@@ -6,7 +6,9 @@ import {trekHref} from '@/lib/links';
 import {difficultyLevels} from '@/lib/format';
 import Link from 'next/link';
 import type {
+  Agent,
   Inquiry,
+  Tag,
   InquiryNote,
   InquiryStatus,
   LostReason,
@@ -14,7 +16,6 @@ import type {
   FunnelData,
   CustomerProfile,
   TrekPipeline,
-  TrekPipelineRow,
 } from '@/types/inquiry';
 import type {TravelGuideAdminItem, TravelGuideDetail, GuidePayload, GuideSection} from '@/types/content';
 import AdminLogin from '@/components/admin-login';
@@ -27,26 +28,17 @@ import TrekGuideEditor from './trek-guide-editor';
 import RevenueView from './revenue-view';
 import type {AdminDeparture} from './capacity-types';
 import styles from '@/app/admin/admin.module.css';
+import {api, date, formatCurrency, label, type Page} from './admin-utils';
+import {statuses, type BookingChoice} from './crm/crm-utils';
+import InquiriesView, {emptyFilters, filterParams, type InquiryFilters} from './crm/inquiry-list';
+import {TodayPanel} from './crm/follow-ups';
+import InquiryDrawer from './crm/inquiry-drawer';
+import {CrmTrekList, PipelineView} from './crm/pipeline';
+import CustomerProfileModal from './crm/customer-profile';
 import {fallbackTrekImage} from '@/lib/trek-images';
 
 type Tab = 'dashboard' | 'treks' | 'revenue' | 'journal' | 'inquiries' | 'pipeline' | 'reviews' | 'settings' | 'destinations' | 'trek-guides';
-type Page<T> = {count: number; next: string | null; previous: string | null; results: T[]};
 interface AdminProfile {full_name: string; role: string; email?: string;}
-const statuses: InquiryStatus[] = ['NEW','IN_CONTACT','BOOKED','TRAVELING','COMPLETED','CLOSED'];
-/** Which departure a lead is booked onto, and for how many people. */
-type BookingChoice = {departureId: string; travelersCount: number};
-/** Statuses in which a lead's travellers occupy seats on its departure. */
-function holdsSeats(value: InquiryStatus) {
-  return value === 'BOOKED' || value === 'TRAVELING' || value === 'COMPLETED';
-}
-const lostReasonOptions: {value: LostReason; label: string}[] = [
-  {value: 'PRICE', label: 'Price Too High'},
-  {value: 'DATES', label: "Dates Didn't Work"},
-  {value: 'COMPETITOR', label: 'Booked With Competitor'},
-  {value: 'NO_RESPONSE', label: 'Went Unresponsive'},
-  {value: 'NOT_SUITABLE', label: 'Trip Not Suitable'},
-  {value: 'OTHER', label: 'Other'},
-];
 const emptySection = (): GuideSection => ({heading: '', body: '', image_url: '', image_caption: ''});
 const emptyGuide: GuidePayload = {title: '', slug: '', country: 'NEPAL', category: 'ADVENTURE', hero_image_url: '', gallery_images: [], sections: [emptySection()], is_published: false};
 /**
@@ -207,52 +199,6 @@ export interface CategoryOption {
 
 const difficultyGrades = difficultyLevels;
 
-async function api<T>(path: string, options?: RequestInit): Promise<T> {
-  const headers = new Headers(options?.headers);
-  if (!(options?.body instanceof FormData) && !headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
-  }
-  const response = await fetch(path, {
-    ...options,
-    headers,
-  });
-  const body = await response.json().catch(() => null);
-  if (!response.ok) throw new Error(body?.error || 'The request could not be completed.');
-  return body?.data as T;
-}
-
-function date(value?: string | null) {
-  return value ? new Intl.DateTimeFormat('en-US', {month: 'short', day: 'numeric', year: 'numeric'}).format(new Date(value)) : '—';
-}
-
-/** What a lead is about: its trek, or its kind when it has none (B2B partnership, general…). */
-function interestLabel(item: {trip_title?: string | null; inquiry_type?: string | null}) {
-  if (item.trip_title) return item.trip_title;
-  if (item.inquiry_type === 'PARTNER_DMC') return 'B2B partnership';
-  if (item.inquiry_type === 'TAILOR_MADE') return 'Tailor-made trip';
-  return 'General inquiry';
-}
-function label(value?: string | null) {
-  return value?.replaceAll('_', ' ') || '—';
-}
-
-// Django nests the note author as a user object; older payloads sent a plain name.
-function authorName(author?: InquiryNote['author']) {
-  return (typeof author === 'string' ? author : author?.full_name || author?.email) || 'Staff';
-}
-
-function formatCurrency(amount: number): string {
-  if (amount >= 1000000) {
-    return `$${(amount / 1000000).toFixed(1)}M`;
-  }
-  if (amount >= 10000) {
-    return `$${(amount / 1000).toFixed(0)}k`;
-  }
-  if (amount >= 1000) {
-    return `$${(amount / 1000).toFixed(1)}k`;
-  }
-  return `$${amount.toLocaleString('en-US')}`;
-}
 
 function formatNumber(num: number): string {
   return num < 10 && num >= 0 ? `0${num}` : `${num}`;
@@ -289,6 +235,11 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
 
   // CRM: tour-based filtering
   const [tripFilter, setTripFilter] = useState('ALL');
+  const [filters, setFilters] = useState<InquiryFilters>(emptyFilters);
+  // CRM lookups for owner pickers and tag chips, plus a counter that refreshes the Today panel.
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [crmTags, setCrmTags] = useState<Tag[]>([]);
+  const [tasksKey, setTasksKey] = useState(0);
   const [scheduleTrek, setScheduleTrek] = useState<AdminTrek | null>(null);
   const [capacityAlerts, setCapacityAlerts] =useState<{total: number; bySlug: Record<string, number>}>({total: 0, bySlug: {}});
 
@@ -338,7 +289,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
     if (!adminUser) return;
     setLoading(true);
     try {
-      const params = new URLSearchParams({status, search: query});
+      const params = filterParams(filters, new URLSearchParams({status, search: query}));
       if (tripFilter !== 'ALL') params.set('trip', tripFilter);
       setInquiries(await api<Page<Inquiry>>(`/api/admin/inquiries?${params}`));
     } catch (error) {
@@ -454,6 +405,8 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
       void loadGuides();
       void loadTreks();
       void loadCapacityAlerts();
+      api<Agent[]>('/api/admin/agents').then(setAgents).catch(() => setAgents([]));
+      api<Tag[]>('/api/admin/tags').then(setCrmTags).catch(() => setCrmTags([]));
     }
   }, [adminUser]);
 
@@ -471,7 +424,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
       setSelectedTrekSlug(null);
       setSelectedTrekDetail(null);
     }
-  }, [tab, status, tripFilter, adminUser, crmTrek]);
+  }, [tab, status, tripFilter, filters, adminUser, crmTrek]);
 
   const metrics = useMemo(() => ({
     total: inquiries?.count || 0,
@@ -822,6 +775,47 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
     } finally {
       setSaving(false);
     }
+  }
+
+  /** Keep the open drawer and the list row in step after an ownership or tag change. */
+  function patchInquiry(reference: string, patch: Partial<Inquiry>) {
+    setSelectedInquiry(current => current?.inquiry_number === reference ? {...current, ...patch} : current);
+    setInquiries(current => current && {
+      ...current,
+      results: current.results.map(item => item.inquiry_number === reference ? {...item, ...patch} : item),
+    });
+  }
+
+  async function assignInquiry(agentId: string | null) {
+    if (!selectedInquiry) return;
+    setSaving(true);
+    setMessage('');
+    try {
+      const saved = await api<Inquiry>(`/api/admin/inquiries/${selectedInquiry.inquiry_number}`, {
+        method: 'PATCH',
+        body: JSON.stringify({assigned_agent_id: agentId})
+      });
+      const agent = agents.find(item => item.id === agentId);
+      patchInquiry(saved.inquiry_number, {
+        assigned_agent: saved.assigned_agent,
+        assigned_agent_id: agentId,
+        assigned_agent_name: agent ? agent.full_name || agent.email : null,
+      });
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to reassign this lead.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function bulkAssign(references: string[], agentId: string) {
+    const result = await api<{matched: number; reassigned: number}>('/api/admin/inquiries/bulk-assign', {
+      method: 'POST',
+      body: JSON.stringify({agent_id: agentId, inquiry_numbers: references})
+    });
+    await loadInquiries();
+    const skipped = references.length - result.matched;
+    return `${result.reassigned} lead${result.reassigned === 1 ? '' : 's'} reassigned.${skipped ? ` ${skipped} already booked or finished lead${skipped === 1 ? ' was' : 's were'} left as they were.` : ''}`;
   }
 
   async function openCustomer(email: string) {
@@ -1393,6 +1387,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
         )}
 
         {/* Tab 2: Full Inquiries View */}
+        {tab === 'inquiries' && <TodayPanel refreshKey={tasksKey} onOpen={reference => void openInquiry(reference)} />}
         {tab === 'inquiries' && (
           <InquiriesView
             inquiries={inquiries?.results || []}
@@ -1404,8 +1399,13 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
             onQuery={setQuery}
             onStatus={setStatus}
             onTrip={setTripFilter}
+            filters={filters}
+            agents={agents}
+            tags={crmTags}
+            onFilters={setFilters}
             onSearch={() => void loadInquiries()}
             onOpen={openInquiry}
+            onBulkAssign={bulkAssign}
           />
         )}
 
@@ -1515,8 +1515,14 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
           notes={notes}
           noteText={noteText}
           saving={saving}
+          agents={agents}
+          allTags={crmTags}
           onClose={() => setSelectedInquiry(null)}
           onStatus={updateStatus}
+          onAssign={agentId => void assignInquiry(agentId)}
+          onTags={tags => patchInquiry(selectedInquiry.inquiry_number, {tags})}
+          onTagCreated={tag => setCrmTags(current => [...current, tag].sort((a, b) => a.name.localeCompare(b.name)))}
+          onTasksChanged={() => setTasksKey(key => key + 1)}
           onNoteText={setNoteText}
           onSubmit={submitNote}
           onViewCustomer={() => void openCustomer(selectedInquiry.email)}
@@ -1596,97 +1602,6 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
   );
 }
 
-function InquiriesView({
-  inquiries, loading, query, status, treks, tripFilter, onQuery, onStatus, onTrip, onSearch, onOpen
-}: {
-  inquiries: Inquiry[];
-  loading: boolean;
-  query: string;
-  status: string;
-  treks: AdminTrek[];
-  tripFilter: string;
-  onQuery: (value: string) => void;
-  onStatus: (value: string) => void;
-  onTrip: (value: string) => void;
-  onSearch: () => void;
-  onOpen: (reference: string) => void;
-}) {
-  return (
-    <section className={styles.panel}>
-      <div className={styles.toolbar}>
-        <label>
-          <span className="sr-only">Search inquiries</span>
-          <input
-            value={query}
-            onChange={event => onQuery(event.target.value)}
-            onKeyDown={event => event.key === 'Enter' && onSearch()}
-            placeholder="Search traveler, email, or reference"
-          />
-        </label>
-        <select value={status} onChange={event => onStatus(event.target.value)}>
-          {['ALL', ...statuses].map(value => (
-            <option key={value}>{value}</option>
-          ))}
-        </select>
-        <select value={tripFilter} onChange={event => onTrip(event.target.value)} aria-label="Filter by tour">
-          <option value="ALL">All tours</option>
-          {treks.map(trek => (
-            <option key={trek.slug} value={trek.slug}>{trek.title}</option>
-          ))}
-        </select>
-        <button className={styles.primary} onClick={onSearch}>Search</button>
-      </div>
-      {loading ? (
-        <p className={styles.empty}>Loading inquiries…</p>
-      ) : inquiries.length ? (
-        <div className={styles.tableWrap}>
-          <table className={styles.modernTable}>
-            <thead>
-              <tr>
-                <th>Traveler</th>
-                <th>Trip interest</th>
-                <th>Status</th>
-                <th>Received</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {inquiries.map(item => (
-                <tr key={item.inquiry_number}>
-                  <td>
-                    <strong className={styles.travelerName}>{item.full_name}</strong>
-                    <small style={{fontSize: '11px', color: '#6d8276'}}>{item.email}</small>
-                  </td>
-                  <td>
-                    {/* trip_title is what the serializer actually sends. The old
-                        item.trip / item.journey reads were stripped by the field
-                        allowlist, so this column always fell through to the type. */}
-                    <span>{interestLabel(item)}</span>
-                    {item.departure_label && (
-                      <small style={{display: 'block', fontSize: '11px', color: '#6d8276'}}>{item.departure_label}</small>
-                    )}
-                  </td>
-                  <td>
-                    <em data-status={item.status}>{label(item.status)}</em>
-                  </td>
-                  <td>{date(item.created_at)}</td>
-                  <td>
-                    <button onClick={() => onOpen(item.inquiry_number)} aria-label={`Open inquiry from ${item.full_name}`}>
-                      →
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p className={styles.empty}>No inquiries match this view.</p>
-      )}
-    </section>
-  );
-}
-
 function JournalView({guides, loading, deleting, onCreate, onEdit, onDelete}: {guides: TravelGuideAdminItem[]; loading: boolean; deleting: boolean; onCreate: () => void; onEdit: (guide: TravelGuideAdminItem) => void; onDelete: (guide: TravelGuideAdminItem) => void}) {
   return (
     <section className={styles.panel}>
@@ -1746,489 +1661,6 @@ function JournalView({guides, loading, deleting, onCreate, onEdit, onDelete}: {g
         <p className={styles.empty}>No blog posts found.</p>
       )}
     </section>
-  );
-}
-
-function InquiryDrawer({
-  inquiry, notes, noteText, saving, onClose, onStatus, onNoteText, onSubmit, onViewCustomer,
-}: {
-  inquiry: Inquiry; notes: InquiryNote[]; noteText: string; saving: boolean;
-  onClose: () => void; onStatus: (value: InquiryStatus, lostReason?: LostReason | '', booking?: BookingChoice) => void;
-  onNoteText: (value: string) => void; onSubmit: (event: FormEvent) => void;
-  onViewCustomer: () => void;
-}) {
-  const [pendingStatus, setPendingStatus] = useState<InquiryStatus | null>(null);
-  const [lostReason, setLostReason] = useState<LostReason | ''>('');
-
-  const needsLostReason = pendingStatus === 'CLOSED' && !inquiry.converted_booking_reference;
-
-  function handleStatusChange(next: InquiryStatus) {
-    if (next === 'CLOSED' && !inquiry.converted_booking_reference) {
-      setPendingStatus(next);
-      setLostReason('');
-      return;
-    }
-    if (holdsSeats(next) && !holdsSeats(inquiry.status)) {
-      setPendingStatus(next);
-      return;
-    }
-    setPendingStatus(null);
-    onStatus(next);
-  }
-
-  function confirmLostReason() {
-    if (!pendingStatus || !lostReason) return;
-    onStatus(pendingStatus, lostReason);
-    setPendingStatus(null);
-  }
-
-  return (
-    <aside className={styles.drawer} aria-label="Inquiry details">
-      <button className={styles.close} onClick={onClose}>×</button>
-      <p style={{fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1.4px', color: '#74897d', fontWeight: 800}}>{inquiry.inquiry_number}</p>
-      <h2>{inquiry.full_name}</h2>
-      <a href={`mailto:${inquiry.email}`}>{inquiry.email}</a>
-      {inquiry.phone && <a href={`tel:${inquiry.phone}`}>{inquiry.phone}</a>}
-      <button type="button" className={styles.drawerHistoryBtn} onClick={onViewCustomer}>View customer history →</button>
-
-      <>
-          <dl>
-            <div>
-              <dt>Status</dt>
-              <dd>
-                <select value={inquiry.status} disabled={saving} onChange={event => handleStatusChange(event.target.value as InquiryStatus)}>
-                  {statuses.map(value => (
-                    <option key={value}>{value}</option>
-                  ))}
-                </select>
-                {pendingStatus && holdsSeats(pendingStatus) && (
-                  <BookingPrompt
-                    inquiry={inquiry}
-                    saving={saving}
-                    onConfirm={booking => { onStatus(pendingStatus, '', booking); setPendingStatus(null); }}
-                    onCancel={() => setPendingStatus(null)}
-                  />
-                )}
-                {needsLostReason && (
-                  <div className={styles.lostReasonPrompt}>
-                    <small>Why is this lead closing without a booking?</small>
-                    <select value={lostReason} onChange={event => setLostReason(event.target.value as LostReason)}>
-                      <option value="">Select a reason…</option>
-                      {lostReasonOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                    </select>
-                    <button type="button" className={styles.primary} disabled={!lostReason || saving} style={{marginTop: '6px'}} onClick={confirmLostReason}>
-                      Confirm close
-                    </button>
-                  </div>
-                )}
-              </dd>
-            </div>
-            <div>
-              <dt>Trip interest</dt>
-              {/* trip_title is the field the serializer actually sends; trip and
-                  journey are stripped by the staff field allowlist. */}
-              <dd>{interestLabel(inquiry)}</dd>
-            </div>
-            <div>
-              <dt>Departure</dt>
-              <dd>{inquiry.departure_label || 'No fixed batch'}</dd>
-            </div>
-            <div>
-              <dt>Preferred dates</dt>
-              <dd>{inquiry.preferred_dates || 'Not specified'}</dd>
-            </div>
-          </dl>
-          {inquiry.converted_booking_reference && (
-            <p style={{fontSize: '11px', color: '#24583f', fontWeight: 700}}>
-              ✓ Converted to booking {inquiry.converted_booking_reference}
-            </p>
-          )}
-          <section className={styles.message}>
-            <h3>Traveler message</h3>
-            <p>{inquiry.message || 'No message supplied.'}</p>
-          </section>
-          <section className={styles.notes}>
-            <h3>Consultation notes</h3>
-            {notes.map(note => (
-              <article key={note.id}>
-                <strong>{authorName(note.author)}</strong>
-                <small>{date(note.created_at)}</small>
-                <p>{note.note_text}</p>
-              </article>
-            ))}
-            <form onSubmit={onSubmit}>
-              <textarea
-                value={noteText}
-                onChange={event => onNoteText(event.target.value)}
-                placeholder="Add an internal note"
-                maxLength={5000}
-              />
-              <button className={styles.primary} disabled={saving || !noteText.trim()}>
-                {saving ? 'Saving…' : 'Add note'}
-              </button>
-            </form>
-          </section>
-      </>
-    </aside>
-  );
-}
-
-/** The CRM's landing page: every active trek, with its leads by stage and what it has earned. */
-function CrmTrekList({pipeline, summary, loading, onOpen}: {
-  pipeline: TrekPipeline | null;
-  summary: PipelineSummary | null;
-  loading: boolean;
-  onOpen: (slug: string) => void;
-}) {
-  const rows = pipeline?.results ?? [];
-  const openLeads = (row: TrekPipelineRow) => row.by_status.NEW + row.by_status.IN_CONTACT;
-
-  return (
-    <section className={styles.panel}>
-      <div className={styles.panelHead}>
-        <div>
-          <p style={{fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1.4px', color: '#74897d', fontWeight: 800, margin: '0 0 4px'}}>Sales & Leads</p>
-          <h2>CRM · Active Treks</h2>
-        </div>
-        <button type="button" className={styles.secondary} onClick={() => onOpen('ALL')}>All leads →</button>
-      </div>
-
-      <div className={styles.pipelineStats}>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>Active treks</span>
-          <strong className={styles.statValue}>{pipeline ? rows.length : '—'}</strong>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>Completed trek revenue</span>
-          <strong className={styles.statValue}>{pipeline ? formatCurrency(Number(pipeline.total_revenue_usd) || 0) : '—'}</strong>
-        </div>
-        <div className={styles.statCard}>
-          <span className={styles.statLabel}>SLA breaches</span>
-          <strong className={styles.statValue}>{summary?.sla_breached_count ?? '—'}</strong>
-        </div>
-      </div>
-
-      {loading && !pipeline ? (
-        <p className={styles.empty}>Loading treks…</p>
-      ) : rows.length === 0 ? (
-        <p className={styles.empty}>No active treks yet.</p>
-      ) : (
-        <div className={styles.crmTrekGrid}>
-          {rows.map(row => (
-            <button key={row.slug} type="button" className={styles.crmTrekCard} onClick={() => onOpen(row.slug)}>
-              <strong>{row.title}</strong>
-              <small>{row.destination_name || '—'} · {row.total_leads} lead{row.total_leads === 1 ? '' : 's'}</small>
-              <div className={styles.crmTrekCounts}>
-                <span><b>{openLeads(row)}</b>Open</span>
-                <span><b>{row.by_status.BOOKED}</b>Booked</span>
-                <span><b>{row.by_status.TRAVELING}</b>Traveling</span>
-                <span><b>{row.by_status.COMPLETED}</b>Completed</span>
-              </div>
-              <div className={styles.crmTrekRevenue}>
-                <span>{row.travelers_completed} travelled</span>
-                <strong>{formatCurrency(Number(row.revenue_usd) || 0)}</strong>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
-function PipelineView({summary, funnel, trek, inquiries, loading, onBack, onOpen, onStatusChange}: {
-  summary: PipelineSummary | null;
-  funnel: FunnelData | null;
-  /** The trek this board is scoped to; null for the all-leads board. */
-  trek: TrekPipelineRow | null;
-  inquiries: Inquiry[];
-  loading: boolean;
-  onBack: () => void;
-  onOpen: (reference: string) => void;
-  onStatusChange: (inquiry: Inquiry, next: InquiryStatus, lostReason?: LostReason | '', booking?: BookingChoice) => void;
-}) {
-  const columns = statuses.map(value => ({
-    value,
-    items: inquiries.filter(item => item.status === value),
-  }));
-
-  return (
-    <section className={styles.panel}>
-      <div className={styles.panelHead}>
-        <div>
-          <button type="button" className={styles.crmBackBtn} onClick={onBack}>← Active treks</button>
-          <h2>{trek ? trek.title : 'All leads'}</h2>
-        </div>
-      </div>
-
-      <div className={styles.pipelineStats}>
-        {trek ? (
-          <>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Leads</span>
-              <strong className={styles.statValue}>{trek.total_leads}</strong>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Booked</span>
-              <strong className={styles.statValue}>{trek.by_status.BOOKED}</strong>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Traveling now</span>
-              <strong className={styles.statValue}>{trek.by_status.TRAVELING}</strong>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>People travelled</span>
-              <strong className={styles.statValue}>{trek.travelers_completed}</strong>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Trek revenue</span>
-              <strong className={styles.statValue}>{formatCurrency(Number(trek.revenue_usd) || 0)}</strong>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Total leads</span>
-              <strong className={styles.statValue}>{funnel?.total_leads ?? '—'}</strong>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Conversion rate</span>
-              <strong className={styles.statValue}>{funnel ? `${funnel.conversion_rate_percent}%` : '—'}</strong>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Avg days to close</span>
-              <strong className={styles.statValue}>{funnel?.avg_days_to_close ?? '—'}</strong>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>SLA breaches</span>
-              <strong className={styles.statValue}>{summary?.sla_breached_count ?? '—'}</strong>
-            </div>
-          </>
-        )}
-      </div>
-
-      {loading ? (
-        <p className={styles.empty}>Loading pipeline…</p>
-      ) : (
-        <div className={styles.kanbanBoard}>
-          {columns.map(column => (
-            <div key={column.value} className={styles.kanbanColumn}>
-              <div className={styles.kanbanColumnHead}>
-                <h4>{label(column.value)}</h4>
-                <span className={styles.kanbanColumnCount}>{column.items.length}</span>
-              </div>
-              <div className={styles.kanbanCards}>
-                {column.items.map(item => (
-                  <KanbanCard key={item.inquiry_number} inquiry={item} onOpen={onOpen} onStatusChange={onStatusChange} />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
-function KanbanCard({inquiry, onOpen, onStatusChange}: {
-  inquiry: Inquiry;
-  onOpen: (reference: string) => void;
-  onStatusChange: (inquiry: Inquiry, next: InquiryStatus, lostReason?: LostReason | '', booking?: BookingChoice) => void;
-}) {
-  const [pendingStatus, setPendingStatus] = useState<InquiryStatus | null>(null);
-  const [lostReason, setLostReason] = useState<LostReason | ''>('');
-
-  function handleChange(next: InquiryStatus) {
-    if (next === 'CLOSED' && !inquiry.converted_booking_reference) {
-      setPendingStatus(next);
-      setLostReason('');
-      return;
-    }
-    // Moving into Booked puts people on a departure, so ask which one first.
-    if (holdsSeats(next) && !holdsSeats(inquiry.status)) {
-      setPendingStatus(next);
-      return;
-    }
-    onStatusChange(inquiry, next);
-  }
-
-  return (
-    <div className={styles.kanbanCard}>
-      <div onClick={() => onOpen(inquiry.inquiry_number)} role="button" tabIndex={0}>
-        <strong>{inquiry.full_name}</strong>
-        <small>{inquiry.trip_title || inquiry.journey || interestLabel(inquiry)}</small>
-        {inquiry.departure_label && <small>{inquiry.departure_label}</small>}
-        {holdsSeats(inquiry.status) && inquiry.travelers_count ? (
-          <small>
-            {inquiry.travelers_count} traveller{inquiry.travelers_count === 1 ? '' : 's'}
-            {inquiry.revenue_usd ? ` · ${formatCurrency(Number(inquiry.revenue_usd))}` : ''}
-          </small>
-        ) : null}
-      </div>
-      <div className={styles.kanbanCardMeta}>
-        <span>{inquiry.sla_breached && <span className={styles.slaDot} title="SLA breached" />}{date(inquiry.created_at)}</span>
-        <select value={inquiry.status} onClick={event => event.stopPropagation()} onChange={event => handleChange(event.target.value as InquiryStatus)}>
-          {statuses.map(value => <option key={value} value={value}>{value}</option>)}
-        </select>
-      </div>
-      {pendingStatus === 'CLOSED' && (
-        <div className={styles.lostReasonPrompt} onClick={event => event.stopPropagation()}>
-          <small>Why is this lead closing?</small>
-          <select value={lostReason} onChange={event => setLostReason(event.target.value as LostReason)}>
-            <option value="">Select a reason…</option>
-            {lostReasonOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-          </select>
-          <button
-            type="button"
-            className={styles.primary}
-            disabled={!lostReason}
-            style={{marginTop: '6px'}}
-            onClick={() => { onStatusChange(inquiry, 'CLOSED', lostReason); setPendingStatus(null); }}
-          >
-            Confirm close
-          </button>
-        </div>
-      )}
-      {pendingStatus && holdsSeats(pendingStatus) && (
-        <BookingPrompt
-          inquiry={inquiry}
-          onConfirm={booking => { onStatusChange(inquiry, pendingStatus, '', booking); setPendingStatus(null); }}
-          onCancel={() => setPendingStatus(null)}
-        />
-      )}
-    </div>
-  );
-}
-
-/**
- * Asks which departure a lead is booked on and how many people are going.
- * Confirming adds them to that departure's booked seats, shown in the trek editor's Departures & Capacity section.
- */
-function BookingPrompt({inquiry, saving = false, onConfirm, onCancel}: {
-  inquiry: Inquiry;
-  saving?: boolean;
-  onConfirm: (booking: BookingChoice) => void;
-  onCancel: () => void;
-}) {
-  const [departures, setDepartures] = useState<AdminDeparture[] | null>(null);
-  const [error, setError] = useState('');
-  const [departureId, setDepartureId] = useState(inquiry.departure || '');
-  const [travelers, setTravelers] = useState(inquiry.group_size || 1);
-
-  useEffect(() => {
-    if (!inquiry.trip_slug) {
-      setError('This lead is not linked to a trek, so it cannot be booked on a departure.');
-      return;
-    }
-    const today = new Date().toISOString().slice(0, 10);
-    api<Page<AdminDeparture>>(`/api/admin/treks/${inquiry.trip_slug}/departures`)
-      .then(page => setDepartures(page.results.filter(item => item.status !== 'CANCELLED' && item.end_date >= today)))
-      .catch(err => setError(err instanceof Error ? err.message : 'Unable to load departures.'));
-  }, [inquiry.trip_slug]);
-
-  const chosen = departures?.find(item => item.id === departureId);
-  const tooMany = chosen ? travelers > chosen.available_seats && departureId !== inquiry.departure : false;
-
-  return (
-    <div className={styles.lostReasonPrompt} onClick={event => event.stopPropagation()}>
-      <small>Book on which departure?</small>
-      {error ? (
-        <p className={styles.empty} style={{margin: '6px 0'}}>{error}</p>
-      ) : !departures ? (
-        <p className={styles.empty} style={{margin: '6px 0'}}>Loading departures…</p>
-      ) : (
-        <>
-          <select value={departureId} onChange={event => setDepartureId(event.target.value)}>
-            <option value="">Select a departure…</option>
-            {departures.map(item => (
-              <option key={item.id} value={item.id}>
-                {date(item.start_date)} – {date(item.end_date)} · {item.available_seats} left
-              </option>
-            ))}
-          </select>
-          <label style={{display: 'block', marginTop: '6px', fontSize: '11px'}}>
-            Travellers
-            <input
-              type="number"
-              min={1}
-              value={travelers}
-              onChange={event => setTravelers(Math.max(1, Number(event.target.value) || 1))}
-              style={{width: '100%', marginTop: '4px'}}
-            />
-          </label>
-          {tooMany && <small style={{color: '#b3261e'}}>Only {chosen?.available_seats} seat(s) left on this departure.</small>}
-        </>
-      )}
-      <div style={{display: 'flex', gap: '6px', marginTop: '6px'}}>
-        <button
-          type="button"
-          className={styles.primary}
-          disabled={!departureId || tooMany || saving}
-          onClick={() => onConfirm({departureId, travelersCount: travelers})}
-        >
-          Confirm booking
-        </button>
-        <button type="button" className={styles.secondary} onClick={onCancel}>Cancel</button>
-      </div>
-    </div>
-  );
-}
-
-function CustomerProfileModal({customer, loading, onClose, onOpenInquiry}: {
-  customer: CustomerProfile | null;
-  loading: boolean;
-  onClose: () => void;
-  onOpenInquiry: (reference: string) => void;
-}) {
-  return (
-    <div className={styles.modalBackdrop} role="dialog" aria-modal="true" aria-label="Customer history">
-      <div className={styles.editor} style={{maxWidth: '640px'}}>
-        <button className={styles.close} onClick={onClose}>×</button>
-        {loading || !customer ? (
-          <p className={styles.empty}>Loading customer history…</p>
-        ) : (
-          <>
-            <p style={{fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1.4px', color: '#74897d', fontWeight: 800, margin: '0 0 4px'}}>Customer</p>
-            <h2>{customer.full_name || customer.email}</h2>
-            <a href={`mailto:${customer.email}`}>{customer.email}</a>
-            {customer.phone && <a href={`tel:${customer.phone}`} style={{marginLeft: '12px'}}>{customer.phone}</a>}
-
-            <div className={styles.customerStats}>
-              <div><strong>{customer.lifetime_inquiries}</strong><span>Inquiries</span></div>
-              <div><strong>{customer.lifetime_bookings}</strong><span>Bookings</span></div>
-              <div><strong>{formatCurrency(Number(customer.lifetime_value_usd) || 0)}</strong><span>Lifetime value</span></div>
-            </div>
-
-            <section className={styles.notes}>
-              <h3>Inquiries</h3>
-              {customer.inquiries.length === 0 && <p className={styles.empty}>No inquiries yet.</p>}
-              {customer.inquiries.map(item => (
-                <article key={item.id}>
-                  <strong>{item.inquiry_number}</strong>
-                  <small>{date(item.created_at)} · {label(item.status)}</small>
-                  <p>
-                    {interestLabel(item)}{' '}
-                    <button type="button" className={styles.taskDoneBtn} onClick={() => onOpenInquiry(item.inquiry_number)}>Open →</button>
-                  </p>
-                </article>
-              ))}
-            </section>
-
-            <section className={styles.notes}>
-              <h3>Bookings</h3>
-              {customer.bookings.length === 0 && <p className={styles.empty}>No bookings yet.</p>}
-              {customer.bookings.map(item => (
-                <article key={item.id}>
-                  <strong>{item.booking_reference}</strong>
-                  <small>{date(item.created_at)} · {label(item.status)}</small>
-                  <p>{formatCurrency(Number(item.total_amount_usd) || 0)} · Trip starts {date(item.trip_start_date)}</p>
-                </article>
-              ))}
-            </section>
-          </>
-        )}
-      </div>
-    </div>
   );
 }
 

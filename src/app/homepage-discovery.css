@@ -76,20 +76,33 @@ html body .home-beyond{display:flex;align-items:center;justify-content:space-bet
 html body .home-beyond .eyebrow{margin-bottom:6px}
 html body .home-beyond h3{font-size:21px;line-height:1.3;font-weight:650}
 html body .home-beyond p:last-child{font-size:13px;margin-top:6px;color:#60715a}
-html body .home-discovery .story{border-radius:24px;background:#153f30;padding:48px 0}
-html body .home-discovery .story-grid{grid-template-columns:1fr 1fr;gap:48px;align-items:center}
-html body .home-discovery .story h2{font-size:clamp(30px,3.5vw,42px)}
+html body .home-discovery .story{position:relative;width:100%;border-radius:0!important;background:linear-gradient(175deg,#0d2e21 0%,#133c2c 45%,#0f3426 100%)!important;padding:clamp(115px,10.5vw,155px) 0 clamp(125px,11.5vw,165px)!important;margin:0!important;overflow:hidden;box-shadow:none!important}
+html body .home-discovery .story-grid{position:relative;z-index:3;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+html body .home-discovery .story-wave{position:absolute;left:0;width:100%;overflow:hidden;line-height:0;z-index:2;pointer-events:none}
+html body .home-discovery .story-wave-top{top:0;height:clamp(55px,6.8vw,100px)}
+html body .home-discovery .story-wave-bottom{bottom:0;height:clamp(60px,7.8vw,110px)}
+html body .home-discovery .story-wave svg{display:block;width:100%;height:100%}
+html body .home-discovery .story-wave path{fill:#fcfdf9}
+html body .home-discovery .story-backdrop{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+html body .home-discovery .story-backdrop-mountains{position:absolute;bottom:0;left:0;width:100%;height:100%;object-fit:cover;object-position:bottom center;opacity:.32}
+html body .home-discovery .story-backdrop-glow{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(35,105,75,.35) 0%,transparent 70%),radial-gradient(circle 380px at 45% 48%,rgba(225,185,115,.09) 0%,transparent 60%)}
+html body .home-discovery .story h2{font-size:clamp(32px,3.8vw,46px);color:#fff;line-height:1.15}
+html body .home-discovery .story h2 em{color:#eed094;font-style:normal}
 html body .home-discovery .story .eyebrow{color:#e2ca95}
-html body .home-discovery .story p:not(.eyebrow){font-size:14px;line-height:1.8;max-width:470px;margin-top:20px;color:#d5e0d4}
-html body .home-discovery .story-values{margin:24px 0;font-size:11px;padding:16px 0;gap:18px}
-html body .home-discovery .story-values li{color:#edf3e9}
-html body .home-discovery .photo-showcase{height:390px;max-width:490px;width:100%;margin:0 auto}
-html body .home-discovery .showcase-position-0{top:34px;left:3%;width:63%}
-html body .home-discovery .showcase-position-1{top:112px;right:0;width:43%}
-html body .home-discovery .showcase-position-2{top:215px;left:5%;width:38%}
+html body .home-discovery .story p:not(.eyebrow){font-size:15px;line-height:1.8;max-width:480px;margin-top:20px;color:#d5e0d4}
+html body .home-discovery .story-values{margin:28px 0;font-size:12px;padding:16px 0;gap:20px;border-block:1px solid rgba(255,255,255,.15)}
+html body .home-discovery .story-values li{color:#edf3e9;display:flex;align-items:center;gap:8px}
+html body .home-discovery .story-values li::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:#e5c483;flex-shrink:0}
+html body .home-discovery .story .button.gold{background:#eed094;color:#103626;border-color:#eed094;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+html body .home-discovery .story .button.gold:hover{background:#fae0aa;transform:translateY(-2px)}
+html body .home-discovery .photo-showcase{height:410px;max-width:500px;width:100%;margin:0 auto;position:relative;z-index:3}
+html body .home-discovery .showcase-position-0{top:30px;left:2%;width:65%}
+html body .home-discovery .showcase-position-1{top:115px;right:0;width:45%}
+html body .home-discovery .showcase-position-2{top:225px;left:4%;width:40%}
 html body .home-discovery .showcase-position-1 .showcase-photo{aspect-ratio:4/3}
-html body .home-discovery .showcase-kicker{font-size:8px}
-html body .home-discovery #about.story .showcase-note{font-size:11px;max-width:190px;margin:0;bottom:0;right:0}
+html body .home-discovery .showcase-kicker{font-size:9px;letter-spacing:.14em;color:#eed094}
+html body .home-discovery #about.story .showcase-note{font-size:11px;max-width:200px;margin:0;bottom:0;right:0;color:#c6d9cd}
+html body .home-discovery #about.story .showcase-note span{color:#eed094}
 html body .home-review-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
 html body .home-review-grid article{display:flex;flex-direction:column;min-width:0;padding:24px;background:#f2f4ec;border:1px solid #dfe6d6;border-radius:16px}
 html body .home-review-grid .review-stars{color:#816431;font-size:17px;letter-spacing:.08em}
@@ -150,7 +163,8 @@ html body .home-discovery .home-plan .button{flex:none}
   html body .home-region-card>div>span{right:10px;top:12px;font-size:15px}
   html body .home-beyond{flex-direction:column;align-items:flex-start;gap:10px;padding:20px;margin-top:18px}
   html body .home-beyond h3{font-size:20px}
-  html body .home-discovery .story-grid{grid-template-columns:1fr;gap:24px}
+  html body .home-discovery .story{padding:clamp(85px,13vw,115px) 0 clamp(95px,14vw,125px)!important}
+  html body .home-discovery .story-grid{grid-template-columns:1fr;gap:28px}
   html body .home-discovery .story-values{flex-direction:row;flex-wrap:wrap;gap:10px 18px;font-size:10px;margin:20px 0}
   html body .home-discovery .photo-showcase{height:330px;max-width:380px}
   html body .home-discovery .showcase-position-0{width:64%;top:32px;left:2%}

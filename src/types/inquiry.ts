@@ -28,6 +28,12 @@ export interface InquiryPayload {
   journey?: string;
   preferred_dates?: string;
   group_size?: number;
+  /** Optional "Plan my trip" preferences; keys in lib/trip-preferences. */
+  trip_style?: string;
+  private_party?: string;
+  children_ages?: string;
+  comfort_level?: string;
+  support_level?: string;
 }
 
 export interface InquiryResponse {
@@ -57,7 +63,8 @@ export interface Inquiry extends InquiryPayload {
   status: InquiryStatus;
   created_at: string;
   updated_at: string;
-  assigned_agent?: string | null;
+  /** The detail serializer nests the owner; older payloads sent a bare id. */
+  assigned_agent?: string | Agent | null;
   /** Display name of the owning agent, sent by the list and detail serializers. */
   assigned_agent_name?: string | null;
   assigned_agent_id?: string | null;
@@ -81,6 +88,25 @@ export interface Inquiry extends InquiryPayload {
   travelers_count?: number | null;
   /** Departure price x travellers, set once the trip completes. */
   revenue_usd?: string | null;
+}
+
+/** A staff member who can own leads, from /api/admin/agents. */
+export interface Agent {
+  id: string;
+  full_name?: string;
+  email?: string;
+}
+
+/** A follow-up reminder on a lead, from the staff task routes. */
+export interface CrmTask {
+  id: string;
+  inquiry_number: string;
+  inquiry_full_name?: string;
+  title: string;
+  due_at: string;
+  status: TaskStatus;
+  completed_at?: string | null;
+  assigned_agent_name?: string | null;
 }
 
 export interface InquiryNote {

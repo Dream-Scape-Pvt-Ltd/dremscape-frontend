@@ -89,7 +89,36 @@ export default function Home({articles=defaultArticles,reviews=[],reviewsUnavail
       </section>
       <UpcomingDepartures/>
       <section className="container section home-regions" id="destinations"><div className="section-heading"><div><Eyebrow>Six ways into the Himalaya</Eyebrow><h2>Find your corner of Nepal.</h2></div><Link className="text-link" href="/destinations/nepal">Explore Nepal <span aria-hidden="true">↗</span></Link></div><div className="home-region-grid">{homepageRegions.map(region=><Link className="home-region-card" key={region.value} href={region.href}><Photo name={region.image} alt={`${region.label} landscape`}/><div><h3>{region.label}</h3><p>{region.description}</p><span aria-hidden="true">↗</span></div></Link>)}</div><div className="home-beyond"><div><p className="eyebrow">BEYOND NEPAL</p><h3>Let the journey take you further.</h3><p>Explore Bhutan, Tibet and India with our team.</p></div><Link className="text-link" href="/destinations/beyond-nepal">Discover beyond Nepal <span aria-hidden="true">↗</span></Link></div></section>
-      <section id="about" className="story section"><div className="container story-grid"><div><Eyebrow>Our story · Since 2005</Eyebrow><h2>Rooted in Nepal.<br/><em>Built around people.</em></h2><p>We’re a Nepal-based team creating personally planned journeys. Since 2005, our work has brought travellers closer to the mountains, cultures and communities we call home.</p><ul className="story-values" aria-label="Our approach"><li>We listen first</li><li>Experience in the field</li><li>Travel with respect</li></ul><a className="button gold" href="/about">Meet Dreamscape <Icon /></a></div><PhotoShowcase/></div></section>
+      <section id="about" className="story section">
+        <div className="story-wave story-wave-top" aria-hidden="true">
+          <svg viewBox="0 0 1440 120" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 0 L1440 0 L1440 42 C1180 78 880 96 520 86 C290 80 130 52 0 32 Z" />
+          </svg>
+        </div>
+        <div className="story-backdrop" aria-hidden="true">
+          <img src="/images/story-mountain-backdrop.svg" alt="" className="story-backdrop-mountains" />
+          <div className="story-backdrop-glow" />
+        </div>
+        <div className="container story-grid">
+          <div>
+            <Eyebrow>Our story · Since 2005</Eyebrow>
+            <h2>Rooted in Nepal.<br/><em>Built around people.</em></h2>
+            <p>We’re a Nepal-based team creating personally planned journeys. Since 2005, our work has brought travellers closer to the mountains, cultures and communities we call home.</p>
+            <ul className="story-values" aria-label="Our approach">
+              <li>We listen first</li>
+              <li>Experience in the field</li>
+              <li>Travel with respect</li>
+            </ul>
+            <a className="button gold" href="/about">Meet Dreamscape <Icon /></a>
+          </div>
+          <PhotoShowcase/>
+        </div>
+        <div className="story-wave story-wave-bottom" aria-hidden="true">
+          <svg viewBox="0 0 1440 120" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 120 L1440 120 L1440 55 C1100 35 800 88 460 96 C200 102 80 68 0 38 Z" />
+          </svg>
+        </div>
+      </section>
       <section className="section container home-reviews" id="traveller-stories"><div className="section-heading"><div><Eyebrow>The trail, in their words</Eyebrow><h2>Stories from our travellers.</h2></div><Link href="/reviews" className="text-link">All traveller stories <span aria-hidden="true">↗</span></Link></div>{reviews.length>0?<div className="home-review-grid">{reviews.map(review=><article key={review.id}><span className="review-stars" aria-label={`${review.rating_overall} out of 5 stars`}>{'★'.repeat(Math.round(review.rating_overall))}</span><h3>{review.title}</h3><p className="home-review-excerpt">{review.content}</p><footer><strong>{review.reviewer_name}</strong>{review.reviewer_country&&<span>{review.reviewer_country}</span>}<span>{review.trip_title}</span>{review.is_verified&&<small>Verified booking</small>}</footer><Link className="text-link" href={`/reviews?trek=${encodeURIComponent(review.trip_slug)}#review-${review.id}`}>Read full story <span aria-hidden="true">↗</span></Link></article>)}</div>:<div className="home-review-empty"><p>{reviewsUnavailable?'Traveller stories are temporarily unavailable. You can visit our reviews page or speak with the team.':'Our next chapter is yours. Published traveller stories will appear here as they’re shared with our team.'}</p><Link className="text-link" href="/reviews">Share your experience <span aria-hidden="true">↗</span></Link></div>}</section>
       <section className="section container reveal" id="journal"><div className="section-heading"><div><Eyebrow>From our past treks</Eyebrow><h2>Some trails stay with you.</h2></div><a className="text-link" href="/blog">Explore the journal ↗</a></div><div className="article-grid">{articles.map(article=><article className="article-card" key={article.title}><Photo name={article.image} alt={article.title} /><div><p className="article-tag">{article.tag}</p><h3>{article.title}</h3><p className="home-story-excerpt">{article.excerpt}</p><p className="article-date">{article.date}</p><a className="text-link" href={storyHref(article.id)}>Read Story <Icon name="222-465-imgSvg" /></a></div></article>)}</div></section>
       <section className="container home-plan section"><div><Eyebrow>Your dates. Your pace.</Eyebrow><h2>Let’s plan your next chapter.</h2><p>Tell us what draws you to Nepal. We’ll help you find the right trail.</p></div><button className="button gold" onClick={()=>openInquiry()}>Plan my journey <span aria-hidden="true">↗</span></button></section>

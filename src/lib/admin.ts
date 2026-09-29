@@ -7,6 +7,7 @@ const inquiryFields = new Set([
   'inquiry_type','tailor_made_detail',
   'lost_reason','tags','sla_breached','first_response_at','converted_booking_reference','converted_at',
   'travelers_count','seats_held','revenue_usd',
+  'trip_style','private_party','children_ages','comfort_level','support_level',
 ]);
 const departureFields = new Set([
   'id','trip','trip_title','trip_slug','start_date','end_date','price_usd','max_seats','booked_seats',

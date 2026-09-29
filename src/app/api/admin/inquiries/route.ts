@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     if (status && status !== 'ALL') query.set('status', status);
     // Tour-based filters. Forwarded verbatim; the backend FilterSet validates
     // them and returns 400 on anything malformed.
-    for (const key of ['trip', 'departure', 'inquiry_type'] as const) {
+    for (const key of ['trip', 'departure', 'inquiry_type', 'assigned_agent', 'tag', 'trip_style', 'sla_breached', 'lead_source', 'created_after', 'created_before'] as const) {
       const value = params.get(key)?.trim();
       if (value && value !== 'ALL') query.set(key, value);
     }

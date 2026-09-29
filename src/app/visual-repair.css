@@ -13,8 +13,11 @@ html body .home-discovery .home-hero .hero-buttons{justify-content:center;margin
 html body .home-discovery .home-hero .hero-shade{background:linear-gradient(180deg,#081a2330 0%,#081a2350 40%,#081a2350 65%,#081a2340 100%)!important}
 html body .home-discovery .home-hero .button.gold{background:#fff;color:#153d2f;border-color:#fff;box-shadow:0 6px 24px #071c2530}
 html body .home-discovery .eyebrow,html body .journey-page .eyebrow{color:#50695c}
-html body .home-discovery .story h2,html body .home-discovery .story h2 em,html body .home-discovery .story .eyebrow{color:#fff}
-html body .home-discovery .story .button.gold{background:#fff;color:#153d2f;border-color:#fff}
+html body .home-discovery .story h2{color:#fff}
+html body .home-discovery .story h2 em{color:#eed094;font-style:normal}
+html body .home-discovery .story .eyebrow{color:#e2ca95}
+html body .home-discovery .story .button.gold{background:#eed094;color:#103626;border-color:#eed094}
+html body .home-discovery .story .button.gold:hover{background:#fae0aa;color:#0d2e20}
 html body .journey-page .trek-v2{--forest:#153d2f;--moraine:#58695f;--glacier:#f3f6f3;--brass:#153d2f;background:#fafaf8;color:#25372d}
 html body .journey-page .trek-v2 h1,html body .journey-page .trek-v2 h2,html body .journey-page .trek-v2 h3{color:#153d2f}
 html body .journey-page .trek-v2 .trek-head-book{background:#fff;border-color:#dce5de;box-shadow:0 12px 34px #153d2f12}

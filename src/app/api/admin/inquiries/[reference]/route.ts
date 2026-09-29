@@ -15,10 +15,20 @@ export async function GET(_request: Request, {params}: Context) {
 export async function PATCH(request: Request, {params}: Context) {
   try {
     const {reference} = await params; referenceIsValid(reference);
-    const input = await readInput(request); const status = requiredText(input, 'status', 30);
-    if (!statuses.has(status)) throw new BackendError('Please select a valid inquiry status.', 400);
-
-    const body: Record<string, unknown> = {status};
+    const input = await readInput(request);
+    const body: Record<string, unknown> = {};
+    if ('status' in input) {
+      const status = requiredText(input, 'status', 30);
+      if (!statuses.has(status)) throw new BackendError('Please select a valid inquiry status.', 400);
+      body.status = status;
+    }
+    // Reassigning a lead: an agent's id, or null to leave it unassigned.
+    if ('assigned_agent_id' in input) {
+      const agentId = input.assigned_agent_id;
+      if (agentId !== null && !(typeof agentId === 'string' && uuidPattern.test(agentId))) throw new BackendError('Please select a valid agent.', 400);
+      body.assigned_agent_id = agentId;
+    }
+    if (!('status' in body) && !('assigned_agent_id' in body)) throw new BackendError('Nothing to update.', 400);
     if ('lost_reason' in input) {
       const lostReason = input.lost_reason;
       if (lostReason !== '' && !(typeof lostReason === 'string' && lostReasons.has(lostReason))) {
