@@ -1,60 +1,52 @@
 'use client';
 
-import {useEffect, useState, type FormEvent} from 'react';
-import {defaultSettings, type SiteSettings} from '@/lib/site-settings-defaults';
+import {useState, type FormEvent} from 'react';
+import type {SiteSettings} from '@/lib/site-settings-defaults';
+import type {SiteSettingsState} from './use-site-settings';
 import WebsiteContentFields from './website-content-fields';
 import styles from './cms-fields.module.css';
+import settingsStyles from './settings.module.css';
 
 const fields = [
   ['home_title','Homepage headline'],['home_description','Homepage introduction'],['home_eyebrow','Homepage label'],['company_title','Company headline'],['company_accent','Company subtitle'],['gallery_title','Gallery headline'],['gallery_description','Gallery introduction'],
   ['home_image_url','Homepage photo URL (blank uses the original)'],
   ['home_image_alt','Homepage photo description'],
-  ['city','City'],['area','Neighbourhood'],['address','Office address'],
-  ['map_query','Map search address or latitude,longitude'],
-  ['directions_note','Arrival directions'],['map_zoom','Map zoom (1–20)'],
   ['journal_title','Journal headline'],['journal_description','Journal introduction'],
   ['featured_story_slug','Featured published story slug'],
 ] as const;
+const textareas=['home_description','gallery_description','journal_description'];
+const optional=['home_image_url','featured_story_slug'];
+const maxLength:Record<string,number>={home_image_url:500,journal_title:120,home_image_alt:250,featured_story_slug:255,journal_description:400};
 
-export default function SiteSettingsEditor() {
-  const [data,setData]=useState<SiteSettings|null>(null);
-  const [error,setError]=useState('');
-  const [saved,setSaved]=useState(false);
+/** Admin → Settings → Website content: homepage, company, partner, gallery and journal copy. */
+export default function SiteSettingsEditor({site}:{site:SiteSettingsState}) {
+  const [data,setData]=useState<SiteSettings>(site.settings!);
   const [busy,setBusy]=useState(false);
-  useEffect(()=>{
-    const controller=new AbortController();
-    fetch('/api/admin/site-settings',{signal:controller.signal}).then(async response=>{
-      const body=await response.json();
-      if(!response.ok)throw new Error(body.error||'Could not load settings.');
-      setData({...defaultSettings,...body.data,company_content:{...defaultSettings.company_content,...body.data.company_content},partner_content:{...defaultSettings.partner_content,...body.data.partner_content},gallery_images:Array.isArray(body.data.gallery_images)?body.data.gallery_images:defaultSettings.gallery_images});
-    }).catch(reason=>{if(!controller.signal.aborted)setError(reason instanceof Error?reason.message:'Could not load settings.');});
-    return ()=>controller.abort();
-  },[]);
+  const [status,setStatus]=useState<{tone:'ok'|'error';text:string}|null>(null);
+  const change=(next:SiteSettings)=>{setStatus(null);setData(next);};
+
   async function save(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if(!data||busy)return;
-    setBusy(true);setSaved(false);setError('');
-    try {
-      const response=await fetch('/api/admin/site-settings',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-      const body=await response.json();
-      if(!response.ok)throw new Error(body.error||'Could not save settings.');
-      setData({...defaultSettings,...body.data,company_content:{...defaultSettings.company_content,...body.data.company_content},partner_content:{...defaultSettings.partner_content,...body.data.partner_content},gallery_images:Array.isArray(body.data.gallery_images)?body.data.gallery_images:defaultSettings.gallery_images});setSaved(true);
-    } catch(reason){setError(reason instanceof Error?reason.message:'Could not save settings.');}
+    if(busy)return;
+    setBusy(true);setStatus(null);
+    const edited=Object.fromEntries([...fields.map(([key])=>key),'company_content','partner_content','gallery_images'].map(key=>[key,data[key as keyof SiteSettings]]));
+    try{await site.save({...site.settings!,...edited});setStatus({tone:'ok',text:'Saved. The public pages update within a minute.'});}
+    catch(reason){setStatus({tone:'error',text:reason instanceof Error?reason.message:'Could not save the website content.'});}
     finally{setBusy(false);}
   }
-  return <section className={styles.panel}>
-    <p className={styles.eyebrow}>Website content</p>
-    <h2>Website copy, photography &amp; location</h2>
-    <p className={styles.intro}>Changes are stored in the CMS and appear on the public site after refreshing the page.</p>
-    {error&&<p className={styles.alert} role="alert">{error}</p>}
-    {!data&&!error&&<p className={styles.empty} role="status">Loading settings…</p>}
-    {data&&<form onSubmit={save} className={styles.form}><fieldset disabled={busy}><div className={styles.grid}>
-      {fields.map(([key,label])=><label className={`${styles.field} ${['home_image_url','map_query','journal_description','directions_note'].includes(key)?styles.fieldWide:''}`} key={key}>
+  return <form onSubmit={save} className={styles.form}><fieldset disabled={busy}>
+    <div className={styles.grid}>
+      {fields.map(([key,label])=><label className={`${styles.field} ${['home_image_url','journal_description'].includes(key)?styles.fieldWide:''}`} key={key}>
         {label}
-        {['home_description','gallery_description','journal_description','directions_note'].includes(key)
-          ? <textarea name={key} rows={3} maxLength={key==='journal_description'?400:500} value={String(data[key])} onChange={event=>{setSaved(false);setData({...data,[key]:event.target.value});}}/>
-          : <input name={key} type={key==='map_zoom'?'number':'text'} min={key==='map_zoom'?1:undefined} max={key==='map_zoom'?20:undefined} maxLength={key==='home_image_url'?500:key==='journal_title'?120:key==='home_image_alt'?250:key==='area'?100:key==='city'?150:key==='featured_story_slug'?255:300} required={!['home_image_url','directions_note','featured_story_slug'].includes(key)} value={data[key]} onChange={event=>{setSaved(false);setData({...data,[key]:key==='map_zoom'?Number(event.target.value):event.target.value});}}/>}
+        {textareas.includes(key)
+          ? <textarea name={key} rows={3} maxLength={maxLength[key]||500} value={String(data[key])} onChange={event=>change({...data,[key]:event.target.value})}/>
+          : <input name={key} type="text" maxLength={maxLength[key]||300} required={!optional.includes(key)} value={data[key]} onChange={event=>change({...data,[key]:event.target.value})}/>}
       </label>)}
-    </div><WebsiteContentFields data={data} onChange={next=>{setSaved(false);setData(next);}}/><div className={styles.actions}><button className={styles.button} type="submit">{busy?'Saving…':'Save website settings'}</button></div></fieldset>{saved&&<p className={styles.success} role="status">Saved. Refresh the public page to see your changes.</p>}</form>}
-  </section>;
+    </div>
+    <WebsiteContentFields data={data} onChange={change}/>
+    <div className={settingsStyles.saveBar}>
+      <button className={settingsStyles.primary} type="submit">{busy?'Saving…':'Save website content'}</button>
+      {status&&<p className={status.tone==='ok'?settingsStyles.ok:settingsStyles.error} role={status.tone==='ok'?'status':'alert'}>{status.text}</p>}
+    </div>
+  </fieldset></form>;
 }

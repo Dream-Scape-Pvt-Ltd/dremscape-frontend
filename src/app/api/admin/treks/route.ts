@@ -14,17 +14,24 @@ export async function GET(request: Request) {
   try {
     const {headers} = await staffAccess();
     const query = new URL(request.url).searchParams.toString();
-    const [tripsData, destinationsData, categoriesData] = await Promise.all([
+    const [tripsData, destinationsData, categoriesData, menusData] = await Promise.all([
       backend(`trips/${query ? `?${query}` : ''}`, {headers}),
       backend('destinations/?page_size=100', {headers}).catch(() => ({results: []})),
       backend('destinations/activity-categories/?page_size=100', {headers}).catch(() => ({results: []})),
+      backend<{slug: string; name: string; sort_order: number}[]>('destinations/nav-menus/', {headers}).catch(() => []),
     ]);
+    // The trek form groups categories under the header menu each belongs to.
+    const menus = new Map(menusData.map(menu => [menu.slug, menu]));
+    const categories = ((categoriesData as {results?: {menu?: string | null}[]}).results || []).map(category => {
+      const menu = category.menu ? menus.get(category.menu) : undefined;
+      return {...category, menu_name: menu?.name ?? null, menu_order: menu?.sort_order ?? null};
+    });
 
     return NextResponse.json({
       data: {
         treks: tripsData,
         destinations: (destinationsData as {results?: unknown[]}).results || [],
-        categories: (categoriesData as {results?: unknown[]}).results || [],
+        categories,
       }
     }, {headers: noStore});
   } catch (error) {

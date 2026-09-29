@@ -19,3 +19,9 @@ test('latest film configuration, eligibility and service failures',async()=>{
  assert.equal((await getLatestYouTubeVideo(settings,env,async()=>{throw new Error('offline');})).status,'preview');
  }finally{globalThis.fetch=originalFetch;}
 });
+test('a channel saved in admin settings replaces the env channel',async()=>{
+ const env={YOUTUBE_CHANNEL_ID:'UCabcdefghijklmnopqrstuv'};
+ assert.equal((await getLatestYouTubeVideo({...settings,youtube_channel:'@HimalayaFilms'},env)).channelUrl,'https://www.youtube.com/@HimalayaFilms');
+ assert.equal((await getLatestYouTubeVideo({...settings,youtube_channel:'UCzyxwvutsrqponmlkjihgfe'},env)).channelUrl,'https://www.youtube.com/channel/UCzyxwvutsrqponmlkjihgfe');
+ assert.equal((await getLatestYouTubeVideo({...settings,youtube_channel:''},env)).channelUrl,'https://www.youtube.com/channel/UCabcdefghijklmnopqrstuv');
+});

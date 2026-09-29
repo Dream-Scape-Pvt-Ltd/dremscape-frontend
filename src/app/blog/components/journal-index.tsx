@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import Image from 'next/image';
+import { siteImage } from '@/lib/site-images';
 import { MemoryReveal } from './trek-memories';
 import type { Guide } from '@/lib/guides';
 import {memoryPhotos} from '@/lib/trek-memories';
@@ -39,7 +40,7 @@ export default function JournalIndex({ guides }: { guides: Guide[] }) {
                   {g.image ? (
                     <Image
                       className={g.photoIds ? 'memory-photo' : ''}
-                      src={g.image}
+                      src={siteImage(g.image)}
                       alt=""
                       fill
                       sizes="(max-width: 560px) 100vw, (max-width: 900px) 50vw, 33vw"

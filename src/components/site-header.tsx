@@ -7,6 +7,13 @@ import { searchSite } from '@/lib/search';
 import { toHits } from '@/lib/search-hits';
 import { useSearchIndex } from '@/hooks/useSearchIndex';
 import { navigationGroups } from '@/lib/navigation';
+import { useNavMenus } from './navigation-context';
+import { fallbackMenuImage } from '@/lib/nav-content';
+
+// A photo typed in admin → Settings that isn't a known asset, /images/ path or URL falls back instead of breaking the header.
+function panelPhoto(image: string) {
+  try { return image ? asset(image) : fallbackMenuImage; } catch { return fallbackMenuImage; }
+}
 
 const inspiration = [{ label: 'All treks', href: '/treks?kind=treks' }, { label: 'Expeditions', href: '/treks?kind=expeditions' }, ...['Everest', 'Annapurna', 'Short treks', 'Bhutan'].map(name => ({ label: name, href: `/search?q=${encodeURIComponent(name)}` }))];
 const hitLabel = { trek: 'Trek', expedition: 'Expedition', destination: 'Destination', story: 'Story' };
@@ -33,14 +40,16 @@ export default function SiteHeader({ page = 'home', onPlan }: { page?: string; a
   const index = useSearchIndex(searchOpen);
   const hits = useMemo(() => index && term.length >= 2 ? toHits(searchSite(term, index)) : [], [index, term]);
   const searching = term.length >= 2 && !index;
+  const menus = useNavMenus();
+  const groups = useMemo(() => navigationGroups(menus), [menus]);
   return <header data-page={page} className={`header site-navigation apple-nav ${searchOpen ? 'search-open' : ''}`} onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget)) { closeNavigation(); setSearchOpen(false); } }}><div className="container header-inner">
     <Link href="/" aria-label="Dreamscape Treks home"><img className="brand" src={asset('222-694-imgLinkBrandLogoDreamscapeTreks')} alt="Dreamscape Treks" width="166" height="57" /></Link>
-    <nav className={`nav ${menu ? 'open' : ''}`} id="main-navigation" aria-label="Main navigation">{navigationGroups.map(group=><div className="nav-group" key={group.id}>
+    <nav className={`nav ${menu ? 'open' : ''}`} id="main-navigation" aria-label="Main navigation">{groups.map(group=><div className="nav-group" key={group.id}>
       <button type="button" className="nav-group-trigger" aria-expanded={openGroup===group.id} aria-controls={`nav-${group.id}`} onClick={()=>{setSearchOpen(false);setOpenGroup(openGroup===group.id?null:group.id);}} onKeyDown={e=>{if(e.key==='ArrowDown'){e.preventDefault();setOpenGroup(group.id);requestAnimationFrame(()=>document.querySelector<HTMLAnchorElement>(`#nav-${group.id} a`)?.focus());}}}>{group.label}<svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg></button>
       <div id={`nav-${group.id}`} className="nav-mega-panel" hidden={openGroup!==group.id}>
         <div className="nav-mega-intro"><p>{group.eyebrow}</p><h2>{group.title}</h2><span>{group.intro}</span><Link href={group.href} onClick={closeNavigation}>{group.allLabel} <span aria-hidden="true">↗</span></Link></div>
         <div className="nav-mega-links">{group.items.map(item=><Link key={item.label} href={item.href} onClick={closeNavigation}><strong>{item.label}<span aria-hidden="true">↗</span></strong><small>{item.description}</small></Link>)}</div>
-        <img className="nav-mega-photo" src={asset(group.image)} alt="" width="320" height="240" loading="lazy"/>
+        <img className="nav-mega-photo" src={panelPhoto(group.image)} alt="" width="320" height="240" loading="lazy"/>
         <div className="nav-mega-foot"><Link href="/departures" onClick={closeNavigation}>Upcoming departures →</Link><Link href="/blog" onClick={closeNavigation}>Journal & travel notes →</Link></div>
       </div>
     </div>)}<Link href="/blog" aria-current={page==='journal'?'page':undefined} onClick={closeNavigation}>Journal</Link><Link href="/contact" aria-current={page==='contact'?'page':undefined} onClick={closeNavigation}>Contact</Link></nav>

@@ -2,6 +2,7 @@
 import {useEffect,useRef,useState,type FormEvent} from 'react';
 import type {Departure,Journey} from '@/lib/journeys';
 import {dateLabel,errorText,money} from '@/lib/format';
+import PhoneField from '@/components/phone-field';
 
 /**
  * "Choose date" on a trek page: a short booking request for one departure.
@@ -24,10 +25,12 @@ export default function BookingInquiryDialog({journey,departure,onClose}:{journe
     if(busy)return;
     setBusy(true);setError('');
     const input=Object.fromEntries(new FormData(event.currentTarget)) as Record<string,string>;
+    if(!input.phone_dial_code){setError('Please select your country code.');setBusy(false);return;}
+    const phone=`${input.phone_dial_code} ${input.phone}`.trim();
     const note=input.note?.trim();
     const message=`Booking request: ${journey.title}, ${dates}, ${trekkers} trekker${trekkers===1?'':'s'}.${note?`\n\n${note}`:''}`;
     try{
-      const r=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({full_name:input.full_name,email:input.email,phone:input.phone,group_size:trekkers,preferred_dates:dates,message,trip:journey.id,departure:departure.id})});
+      const r=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({full_name:input.full_name,email:input.email,phone,group_size:trekkers,preferred_dates:dates,message,trip:journey.id,departure:departure.id})});
       const body=await r.json();
       if(!r.ok||body.success!==true||!body.reference)throw new Error(errorText(body));
       setReference(body.reference);
@@ -57,7 +60,7 @@ export default function BookingInquiryDialog({journey,departure,onClose}:{journe
           <label>Full name<input name="full_name" autoComplete="name" required maxLength={150}/></label>
           <div className="form-columns">
             <label>Email address<input name="email" type="email" autoComplete="email" required maxLength={254}/></label>
-            <label>Phone / WhatsApp<input name="phone" type="tel" autoComplete="tel" inputMode="tel" required maxLength={50} placeholder="+977 98…"/></label>
+            <PhoneField name="phone" label="Phone / WhatsApp" required/>
           </div>
           <div className="booking-inquiry-trekkers">
             <span id="trekkers-label">Number of trekkers</span>

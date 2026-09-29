@@ -1,6 +1,7 @@
 'use client';
 import {useState,type FormEvent} from 'react';
 import {errorText} from '@/lib/format';
+import PhoneField from '@/components/phone-field';
 
 const partnerTypes=['Travel agency / tour operator','Independent agent / referrer','Group, school or corporate','Destination management company (DMC)','Other'];
 const volumes=['1–10','10–50','50–200','200+'];
@@ -17,6 +18,8 @@ export default function PartnerInquiryForm() {
     if(busy)return;
     setBusy(true);setError('');
     const input=Object.fromEntries(new FormData(event.currentTarget)) as Record<string,string>;
+    if(!input.phone_dial_code){setError('Please select your country code.');setBusy(false);return;}
+    const phone=`${input.phone_dial_code} ${input.phone}`.trim();
     const details=[
       `Company: ${input.company.trim()}`,
       input.country?.trim()&&`Country: ${input.country.trim()}`,
@@ -27,7 +30,7 @@ export default function PartnerInquiryForm() {
     const note=input.message?.trim();
     try{
       const r=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-        full_name:input.full_name,email:input.email,phone:input.phone,inquiry_type:'PARTNER_DMC',
+        full_name:input.full_name,email:input.email,phone,inquiry_type:'PARTNER_DMC',
         message:`B2B partnership enquiry\n\n${details}${note?`\n\n${note}`:''}`,
       })});
       const body=await r.json();
@@ -51,7 +54,7 @@ export default function PartnerInquiryForm() {
       </div>
       <div className="form-columns">
         <label>Email address<input name="email" type="email" required maxLength={254} autoComplete="email"/></label>
-        <label>Phone / WhatsApp<input name="phone" type="tel" required maxLength={50} autoComplete="tel" inputMode="tel"/></label>
+        <PhoneField name="phone" label="Phone / WhatsApp" required/>
       </div>
       <div className="form-columns">
         <label><span>Country <small>(optional)</small></span><input name="country" maxLength={100} autoComplete="country-name"/></label>

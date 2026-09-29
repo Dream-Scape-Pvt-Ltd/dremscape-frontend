@@ -1,7 +1,10 @@
 import {isExpedition, type Trip} from './catalog.ts';
 import {zoneForTrip} from './nepal-zones.ts';
+import {legacyMatch} from './menu-items.ts';
+import type {NavMenuData} from './nav-content.ts';
 
-export type JourneyKind = '' | 'treks' | 'tours' | 'expeditions';
+/** A catalogue collection: '' for everything, else a trek menu's slug (treks, tours, expeditions, …). */
+export type JourneyKind = string;
 export const trekkingRegions = [
   {value:'everest',label:'Everest Region',description:'Khumbu trails, lakes & high passes'},
   {value:'langtang',label:'Langtang Region',description:'Valley walks & mountain villages'},
@@ -10,29 +13,33 @@ export const trekkingRegions = [
   {value:'mustang',label:'Mustang Region',description:'Red cliffs & ancient kingdoms'},
   {value:'off-the-beaten',label:'Off the Beaten Path',description:'Dolpo, Kanchenjunga & quieter trails'},
 ];
-export const tourCategories = [
-  {value:'wildlife',label:'Wildlife Tours',description:'Forests, wildlife & jungle stays'},
-  {value:'luxury',label:'Luxury Tours',description:'Thoughtful journeys with extra comfort'},
-  {value:'culture',label:'Culture & Sightseeing',description:'Heritage, local life & living traditions'},
-  {value:'day',label:'Day Tours',description:'A different perspective in a single day'},
-  {value:'heli',label:'Heli Tours',description:'The Himalaya from above'},
-];
 const collectionHref=(kind:string,key?:string,value?:string)=>`/treks?${new URLSearchParams({kind,...(key&&value?{[key]:value}:{})})}`;
-export const navigationGroups = [
-  {id:'treks',label:'Treks',eyebrow:'NEPAL, ONE TRAIL AT A TIME',title:'Find your mountain trail.',intro:'Choose a region and explore the journeys that take you there.',image:'222-78-imgNepalEverestBaseCampAndAmaDablamPeak',href:collectionHref('treks'),allLabel:'Explore all treks',items:trekkingRegions.map(r=>({...r,href:collectionHref('treks','region',r.value)}))},
-  {id:'tours',label:'Tours',eyebrow:'A DIFFERENT WAY TO EXPLORE',title:'More than mountains.',intro:'Make time for Nepal’s wildlife, heritage and quieter moments.',image:'222-520-imgHimalayanAlpineLakeAndPeaks',href:collectionHref('tours'),allLabel:'Explore all tours',items:tourCategories.map(r=>({...r,href:collectionHref('tours','tour',r.value)}))},
-  {id:'climbing',label:'Climbing',eyebrow:'A LITTLE HIGHER',title:'Your next summit.',intro:'Browse climbing journeys by region and talk through the route with our team.',image:'222-78-imgAnnapurnaRangeAndHighGlacialLakesNepal',href:collectionHref('expeditions'),allLabel:'Explore all climbing trips',items:trekkingRegions.filter(r=>['everest','annapurna'].includes(r.value)).map(r=>({...r,href:collectionHref('expeditions','region',r.value)}))},
-  {id:'beyond-nepal',label:'Beyond Nepal',eyebrow:'BEYOND THE FAMILIAR',title:'Keep exploring.',intro:'Discover places and cultures beyond Nepal with a personally planned journey.',image:'/images/trek-memories/mountain-amphitheatre.jpg',href:'/destinations/beyond-nepal',allLabel:'Explore beyond Nepal',items:[{label:'Bhutan',description:'Valleys, monasteries & living traditions',href:'/treks?country=bhutan'},{label:'Tibet',description:'High plateaus & sacred landscapes',href:'/treks?country=tibet'},{label:'India',description:'Himalayan landscapes & cultural journeys',href:'/treks?country=india'}]},
-  {id:'company',label:'Company',eyebrow:'ROOTED IN NEPAL · SINCE 2005',title:'The people behind your journey.',intro:'Get to know Dreamscape, our approach and the people beside you on the trail.',image:'/images/trek-memories/together-in-the-mountains.jpg',href:'/about',allLabel:'Get to know Dreamscape',items:[{label:'About Us',description:'Our story & where we come from',href:'/about'},{label:'Why Us',description:'How we shape your journey',href:'/about#our-approach'},{label:'Our Team',description:'The people behind the plans',href:'/about#our-team'},{label:'Our Guides',description:'Meet the people who lead the way',href:'/guides'},{label:'Testimonials',description:'Stories from our travellers',href:'/reviews'}]},
-];
+/** Header menus, in the order and with the content set in admin → Settings → Header menus. */
+export function navigationGroups(menus:NavMenuData[]){
+  return menus.map(menu=>({
+    id:menu.slug,label:menu.name,eyebrow:menu.eyebrow,title:menu.title,intro:menu.intro,image:menu.image,allLabel:menu.all_label,
+    href:menu.menu_type==='CATEGORIES'?collectionHref(menu.slug):menu.href||'/',
+    items:menu.menu_type==='CATEGORIES'
+      ?menu.items.map(item=>({label:item.name,description:item.description,href:collectionHref(menu.slug,'category',item.slug)}))
+      :menu.links,
+  }));
+}
 
-export function journeyKind(trip:Trip):Exclude<JourneyKind,''> {
+/** A trek's collection: its menu when its category is in one, else the keyword rules the fixed menus used. */
+export function journeyKind(trip:Trip):string {
+  if(trip.category_menu)return trip.category_menu;
   if(isExpedition(trip))return 'expeditions';
   const category=`${trip.category_slug} ${trip.category_name}`;
   return /tour|cultur|sightseeing|wildlife|safari|heli|day.trip/i.test(category)?'tours':'treks';
 }
-export function matchesCollection(trip:Trip,{kind='',zone='',region='',tour='',country=''}:{kind?:string;zone?:string;region?:string;tour?:string;country?:string}) {
+export function matchesCollection(trip:Trip,{kind='',zone='',region='',tour='',country='',category=''}:{kind?:string;zone?:string;region?:string;tour?:string;country?:string;category?:string}):boolean {
   if(kind&&journeyKind(trip)!==kind)return false;
+  if(category){
+    // A trek assigned to a menu category shows only there; older treks fall back to the keyword rules.
+    if(trip.category_menu)return trip.category_slug===category&&matchesCollection(trip,{zone,region,tour,country});
+    const legacy=legacyMatch[category];
+    return Boolean(legacy)&&matchesCollection(trip,{zone,country,region:legacy.region||region,tour:legacy.tour||tour});
+  }
   if(zone&&zoneForTrip(trip)!==zone)return false;
   // Titles take precedence over combined destination labels such as “Annapurna & Mustang”.
   const route=`${trip.slug} ${trip.title} ${trip.tags||''}`.toLowerCase();

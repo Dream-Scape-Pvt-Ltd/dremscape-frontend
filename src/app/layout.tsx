@@ -25,6 +25,10 @@ import './connection-status.css';
 import PageMotion from '@/components/page-motion';
 import BackendStatus from '@/components/backend-status';
 import {AuthProvider} from '@/context/AuthContext';
+import {NavigationProvider} from '@/components/navigation-context';
+import {getNavigation} from '@/lib/menu-items-server';
+import {getPublicSiteSettings} from '@/lib/site-settings';
+import {contactFields} from '@/lib/company';
 
 export const metadata: Metadata = {
   metadataBase:new URL(publicSiteUrl()),
@@ -32,15 +36,17 @@ export const metadata: Metadata = {
   description: 'Explore the sacred Himalayas of Nepal. Discover trekking journeys through Everest, Annapurna, Mustang and Manaslu with Dreamscape Treks.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [menus,settings]=await Promise.all([getNavigation(),getPublicSiteSettings()]);
+  const chrome={menus,contact:contactFields(settings)};
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
-        <StructuredData data={{"@context":"https://schema.org","@type":"TravelAgency",name:"Dreamscape Treks",url:publicSiteUrl()}}/><AuthProvider>{children}<PageMotion/><BackendStatus/></AuthProvider>
+        <StructuredData data={{"@context":"https://schema.org","@type":"TravelAgency",name:"Dreamscape Treks",url:publicSiteUrl()}}/><AuthProvider><NavigationProvider chrome={chrome}>{children}<PageMotion/><BackendStatus/></NavigationProvider></AuthProvider>
       </body>
     </html>
   );

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import type { Journey, Departure } from '@/lib/journeys';
 import { dateLabel, money, errorText } from '@/lib/format';
 import JourneyShell from '@/components/journey-shell';
+import PhoneField from '@/components/phone-field';
 
 type Entry = { id: string; position: number; status: string; num_travelers: number };
 
@@ -25,6 +26,14 @@ export default function WaitlistForm({ journey, departure }: { journey: Journey;
     setBusy(true);
     setError('');
     const form = new FormData(e.currentTarget);
+    const customerPhone = form.get('customer_phone') as string;
+    const customerDialCode = form.get('customer_phone_dial_code') as string;
+    if (customerPhone && !customerDialCode) {
+      setError('Please select your country code.');
+      setBusy(false);
+      return;
+    }
+    const phone = [customerDialCode, customerPhone].filter(Boolean).join(' ').trim();
     try {
       const r = await fetch('/api/bookings/waitlist', {
         method: 'POST',
@@ -34,7 +43,7 @@ export default function WaitlistForm({ journey, departure }: { journey: Journey;
           departure_id: departure.id,
           customer_name: form.get('customer_name'),
           customer_email: form.get('customer_email'),
-          customer_phone: form.get('customer_phone'),
+          customer_phone: phone,
           num_travelers: count
         })
       });
@@ -98,7 +107,7 @@ export default function WaitlistForm({ journey, departure }: { journey: Journey;
                 <label>Contact name<input name="customer_name" autoComplete="name" required maxLength={255} /></label>
                 <label>Contact email<input name="customer_email" type="email" autoComplete="email" required maxLength={254} /></label>
               </div>
-              <label>Contact phone <small>(optional)</small><input name="customer_phone" type="tel" autoComplete="tel" maxLength={50} /></label>
+              <PhoneField name="customer_phone" label="Contact phone" optionalHint />
 
               {error && <p className="form-error" role="alert">{error}</p>}
               {uncertain && <p className="form-error" role="alert">We could not confirm whether your request was saved. Please contact the team before trying again.</p>}

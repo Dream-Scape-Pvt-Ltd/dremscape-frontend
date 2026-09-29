@@ -22,7 +22,7 @@ import AdminLogin from '@/components/admin-login';
 import ReviewEditor from './review-editor';
 import DeparturesEditor from './departures-editor';
 import ScheduleBoard from './schedule-board';
-import SiteSettingsEditor from './site-settings-editor';
+import SettingsPage from './settings-page';
 import DestinationEditor from './destination-editor';
 import TrekGuideEditor from './trek-guide-editor';
 import RevenueView from './revenue-view';
@@ -195,6 +195,10 @@ export interface CategoryOption {
   id: string;
   name: string;
   slug: string;
+  menu?: string | null;
+  menu_name?: string | null;
+  menu_order?: number | null;
+  is_active?: boolean;
 }
 
 const difficultyGrades = difficultyLevels;
@@ -206,6 +210,7 @@ function formatNumber(num: number): string {
 
 export default function AdminDashboard({backgroundImage}: {backgroundImage?: string}) {
   const [adminUser, setAdminUser] = useState<AdminProfile | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   const [tab, setTab] = useState<Tab>('dashboard');
@@ -507,7 +512,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
           title: '',
           slug: '',
           destination: destinations[0]?.id || '',
-          category: categories[0]?.id || '',
+          category: '',
           duration_days: 12,
           altitude_max_meters: null,
           difficulty_grade: 'NORMAL',
@@ -1044,7 +1049,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
     },
     {
       id: 'settings',
-      label: 'Lead Routing',
+      label: 'Settings',
       icon: (
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="12" cy="12" r="3"/>
@@ -1078,24 +1083,25 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
         </nav>
 
         <div className={styles.sidebarFoot}>
+          <div className={styles.accountCard}>
+            <span className={styles.accountAvatar} aria-hidden="true">{(adminUser.full_name || 'A').slice(0, 1).toUpperCase()}</span>
+            <span className={styles.accountText}>
+              <span className={styles.accountName}>{adminUser.full_name || 'Admin User'}</span>
+              <span className={styles.accountRole}>{label(adminUser.role || 'Superadmin')}</span>
+            </span>
+          </div>
           <button
             type="button"
-            className={`${styles.settingsBtn} ${tab === 'settings' ? styles.navItemActive : ''}`}
-            onClick={() => setTab('settings')}
+            className={styles.signOutButton}
+            disabled={signingOut}
+            onClick={() => { setSigningOut(true); void handleLockWorkspace().finally(() => setSigningOut(false)); }}
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <path d="m16 17 5-5-5-5"/>
+              <path d="M21 12H9"/>
             </svg>
-            Settings
-          </button>
-
-          <button
-            type="button"
-            className={styles.signOutLink}
-            onClick={() => void handleLockWorkspace()}
-          >
-            Sign out
+            {signingOut ? 'Signing out…' : 'Sign out'}
           </button>
         </div>
       </aside>
@@ -1501,7 +1507,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
         )}
 
         {/* Tab: Settings */}
-        {tab === 'settings' && <SiteSettingsEditor/>}
+        {tab === 'settings' && <SettingsPage/>}
 
         {tab === 'reviews' && <ReviewEditor/>}
         {tab === 'destinations' && <DestinationEditor/>}
@@ -2615,8 +2621,8 @@ function TrekFullDetailEditor({
           {/* Activity Category */}
           <div className={styles.formField}>
             <label className={styles.formLabel}>
-              <span>Activity Category</span>
-              <span className={styles.formLabelHint}>Trek style / Expedition type</span>
+              <span>Menu category</span>
+              <span className={styles.formLabelHint}>Where this trek appears in the header menus · edit the list in Settings</span>
             </label>
             <select
               className={styles.formSelect}
@@ -2624,13 +2630,17 @@ function TrekFullDetailEditor({
               required
               onChange={e => onChange(prev => prev ? {...prev, category: e.target.value} : null)}
             >
-              {categories.length > 0 ? (
-                categories.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))
-              ) : (
-                <option value="">Classic Trekking</option>
-              )}
+              <option value="" disabled>Choose where this trek appears…</option>
+              {[...Array.from(new Map(categories.filter(c => c.menu && c.menu_name).map(c => [c.menu as string, {label: c.menu_name as string, order: c.menu_order ?? 0}])))
+                  .sort(([, a], [, b]) => a.order - b.order)
+                  .map(([slug, menu]) => ({key: slug, label: menu.label, options: categories.filter(c => c.menu === slug)})),
+                {key: 'OTHER', label: 'Other (not in a menu)', options: categories.filter(c => !c.menu || !c.menu_name)}]
+                .filter(group => group.options.length > 0)
+                .map(group => (
+                  <optgroup key={group.key} label={group.label}>
+                    {group.options.map(c => <option key={c.id} value={c.id}>{c.name}{c.is_active === false ? ' (hidden)' : ''}</option>)}
+                  </optgroup>
+                ))}
             </select>
           </div>
 

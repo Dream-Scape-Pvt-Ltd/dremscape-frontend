@@ -1,0 +1,123 @@
+.page{max-width:900px}
+
+/* Section switch above the card */
+.sections{display:flex;gap:4px;margin:0 0 16px;border-bottom:1px solid #dce6df;overflow-x:auto;scrollbar-width:none}
+.sections button{border:0;border-bottom:2px solid transparent;background:transparent;color:#5d7466;font:inherit;font-size:13.5px;font-weight:650;padding:10px 14px 12px;margin-bottom:-1px;cursor:pointer;white-space:nowrap}
+.sections button:hover{color:#153e30}
+.sections button[aria-current=page]{color:#153e30;border-bottom-color:#103b2c}
+.sections button:focus-visible{outline:2px solid #397758;outline-offset:-2px;border-radius:6px}
+
+.card{background:#fff;border:1px solid #dce6df;border-radius:16px;padding:26px 28px;box-shadow:0 6px 20px rgba(19,62,47,.04);min-width:0}
+.head{margin-bottom:20px}
+.head h2{margin:0;color:#153e30;font-size:20px;font-weight:800;letter-spacing:-.03em}
+.head p{margin:6px 0 0;max-width:560px;color:#6a8072;font-size:13px;line-height:1.6}
+
+/* Menu switch inside Header menus */
+.switch{display:inline-flex;flex-wrap:wrap;gap:4px;margin:0 0 18px;padding:4px;border-radius:12px;background:#eef2ef}
+.switch button{border:0;border-radius:9px;background:transparent;color:#4c6557;font:inherit;font-size:13px;font-weight:650;padding:8px 14px;cursor:pointer;transition:background .15s,color .15s}
+.switch button[aria-selected=true]{background:#fff;color:#153e30;box-shadow:0 1px 4px rgba(19,62,47,.12)}
+.switch button:focus-visible{outline:2px solid #397758;outline-offset:2px}
+
+.ok,.error,.muted{margin:0 0 12px;font-size:12.5px;line-height:1.5}
+.ok{color:#285e3e}
+.error{color:#903f30}
+.muted{color:#6a8072}
+.hint{margin:14px 0 0;color:#6a8072;font-size:12px;line-height:1.6}
+
+/* Menu intro panel */
+.intro{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px;padding:14px 16px;border-radius:12px;background:#f6f8f6}
+.intro>div{display:grid;gap:3px;min-width:0;flex:1}
+.intro strong{color:#153e30;font-size:15px}
+.intro span:not(.introLabel){color:#5d7466;font-size:12.5px;line-height:1.5}
+.intro small{color:#8a998f;font-size:11.5px}
+.intro>.ok,.intro>.error{flex-basis:100%;margin:0}
+.introLabel{color:#6a8072;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.introEyebrow{margin:4px 0 0;color:#9a7b3f;font-size:10.5px;font-weight:700;letter-spacing:.1em}
+.introForm{display:grid;gap:12px;margin-bottom:18px;padding:16px;border-radius:12px;background:#f6f8f6}
+
+/* Field grids */
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px}
+.fields label,.form label{display:grid;align-content:start;gap:5px;color:#4c6557;font-size:11.5px;font-weight:700}
+.fields small{color:#7a8c80;font-size:11px;font-weight:500;line-height:1.5}
+.wide{grid-column:1/-1}
+.fields input,.fields textarea,.form input{box-sizing:border-box;width:100%;min-width:0;border:1px solid #d2dfd6;border-radius:9px;padding:9px 11px;background:#fbfcfa;color:#173d2d;font:inherit;font-size:13px;font-weight:500}
+.fields textarea{resize:vertical;line-height:1.5}
+.fields input:focus-visible,.fields textarea:focus-visible,.form input:focus-visible{outline:2px solid #397758;outline-offset:1px}
+.fields [aria-invalid=true],.form [aria-invalid=true]{border-color:#d9a092;background:#fff8f5}
+.plainFieldset{border:0;margin:0;padding:0;min-width:0}
+.groupTitle{margin:22px 0 10px;color:#153e30;font-size:13px;font-weight:800}
+.groupTitle:first-child{margin-top:0}
+.suffixInput{display:flex;align-items:center;gap:10px;color:#4c6557;font-size:13px;font-weight:500}
+.suffixInput input{width:90px}
+
+/* Item lists */
+.list{list-style:none;margin:0;padding:0;border-top:1px solid #e6ece8}
+.row{display:flex;align-items:center;gap:14px;padding:12px 4px;border-bottom:1px solid #e6ece8}
+.row.hidden .text strong,.row.hidden .text span{color:#8b9b91}
+.order{display:flex;flex-direction:column;gap:2px}
+.order button{width:26px;height:22px;border:0;border-radius:6px;background:transparent;color:#6a8072;font-size:13px;line-height:1;cursor:pointer}
+.order button:hover:not(:disabled){background:#eef2ef;color:#153e30}
+.order button:disabled{opacity:.25;cursor:default}
+.text{display:grid;gap:2px;flex:1;min-width:0}
+.text strong{display:flex;align-items:center;gap:8px;color:#153e30;font-size:14px;font-weight:700}
+.text span{color:#6a8072;font-size:12.5px;line-height:1.5;overflow-wrap:anywhere}
+.text small{color:#8a998f;font-size:11.5px;overflow-wrap:anywhere}
+.text em{color:#9aa9a0}
+.pill{padding:1px 8px;border-radius:99px;background:#eef2ef;color:#6a8072!important;font-size:10.5px!important;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.actions{display:flex;gap:4px;flex-shrink:0}
+
+.link{border:0;border-radius:8px;background:transparent;color:#35604a;font:inherit;font-size:12.5px;font-weight:650;padding:7px 10px;cursor:pointer}
+.link:hover:not(:disabled){background:#eef2ef}
+.link:disabled{opacity:.45;cursor:default}
+.danger{color:#a2483a}
+.danger:hover:not(:disabled){background:#fff2ed}
+.link:focus-visible,.order button:focus-visible,.add:focus-visible,.primary:focus-visible{outline:2px solid #397758;outline-offset:2px}
+
+.form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) auto;gap:12px;align-items:end;width:100%}
+.formWide{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr) auto}
+.formActions{display:flex;gap:4px;align-items:center}
+.primary{border:0;border-radius:9px;background:#103b2c;color:#fff;font:inherit;font-size:12.5px;font-weight:700;padding:10px 16px;cursor:pointer;white-space:nowrap}
+.primary:hover:not(:disabled){background:#205641}
+.primary:disabled{opacity:.55;cursor:default}
+.saveBar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:22px;padding-top:18px;border-top:1px solid #e6ece8}
+.saveBar .ok,.saveBar .error{margin:0}
+
+.add{margin-top:14px;border:1px dashed #c6d4ca;border-radius:10px;background:transparent;color:#35604a;font:inherit;font-size:13px;font-weight:650;padding:10px 16px;cursor:pointer}
+.add:hover:not(:disabled){background:#f4f7f5;border-style:solid}
+
+@media(max-width:700px){
+  .card{padding:20px 16px}
+  .fields{grid-template-columns:1fr}
+  .row{flex-wrap:wrap}
+  .actions{width:100%;padding-left:40px}
+  .form,.formWide{grid-template-columns:1fr}
+}
+
+/* Header menu tree */
+.menuTree{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:10px}
+.menuNode{border:1px solid #e0e8e3;border-radius:12px;background:#fff;transition:border-color .15s,box-shadow .15s}
+.menuOpen{border-color:#c9d8ce;box-shadow:0 4px 14px rgba(19,62,47,.05)}
+.menuNode.hidden .menuToggle strong{color:#8b9b91}
+.menuHead{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.menuToggle{display:flex;align-items:center;gap:10px;flex:1;min-width:0;border:0;background:transparent;padding:6px 4px;border-radius:8px;font:inherit;text-align:left;cursor:pointer}
+.menuToggle:hover{background:#f6f8f6}
+.menuToggle:focus-visible{outline:2px solid #397758;outline-offset:2px}
+.menuToggle strong{color:#153e30;font-size:15px;font-weight:800}
+.caret{width:14px;color:#6a8072;font-size:12px}
+.badge{padding:2px 9px;border-radius:99px;background:#eef2ef;color:#5d7466;font-size:11px;font-weight:700}
+.menuBody{padding:4px 18px 18px 50px;border-top:1px solid #eef2ef}
+.menuBody .intro,.menuBody .introForm{margin-top:14px}
+.renameForm{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.renameForm input{flex:1;min-width:0;max-width:280px;border:1px solid #d2dfd6;border-radius:9px;padding:8px 11px;background:#fbfcfa;color:#173d2d;font:inherit;font-size:14px;font-weight:700}
+.addMenuForm{display:grid;gap:14px;max-width:520px;padding:16px;border:1px dashed #c6d4ca;border-radius:12px}
+.addMenuForm>label{display:grid;gap:5px;color:#4c6557;font-size:11.5px;font-weight:700}
+.addMenuForm>label input{border:1px solid #d2dfd6;border-radius:9px;padding:9px 11px;background:#fbfcfa;color:#173d2d;font:inherit;font-size:13px}
+.addMenuForm fieldset{border:0;margin:0;padding:0;display:grid;gap:8px}
+.addMenuForm legend{margin-bottom:6px;color:#4c6557;font-size:11.5px;font-weight:700}
+.addMenuForm fieldset label{display:flex;align-items:baseline;gap:8px;color:#153e30;font-size:13px;font-weight:600;cursor:pointer}
+.addMenuForm fieldset small{color:#7a8c80;font-size:11.5px;font-weight:500}
+@media(max-width:700px){
+  .menuHead{flex-wrap:wrap}
+  .menuHead .actions{width:100%;padding-left:36px}
+  .menuBody{padding:4px 12px 14px}
+}

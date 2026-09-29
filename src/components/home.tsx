@@ -17,6 +17,7 @@ import JourneyCard from './journey-card';
 import InquiryForm from './inquiry-form';
 import { journalPosts } from '@/lib/editorial-content';
 import { nepalZones } from '@/lib/nepal-zones';
+import { homepageRegions } from '@/lib/homepage-regions';
 import type { HomeReview } from '@/lib/homepage-reviews';
 
 function Icon({ name = 'heroContext-imgSvg', className = '' }: { name?: string; className?: string }) { return <img className={`icon ${className}`} src={asset(name)} width="18" height="18" alt="" />; }

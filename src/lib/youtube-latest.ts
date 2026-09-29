@@ -2,6 +2,8 @@ type VideoSettings = {
   featured_video_title: string;
   featured_video_description: string;
   featured_video_thumbnail: string;
+  /** A channel handle (@name) or channel ID (UC…) set in admin → Settings; overrides the env values. */
+  youtube_channel?: string;
 };
 
 type VideoEnvironment = {
@@ -40,8 +42,9 @@ export async function getLatestYouTubeVideo(
     videoDescription: settings.featured_video_description,
     thumbnail: settings.featured_video_thumbnail,
   };
-  const channelId = env.YOUTUBE_CHANNEL_ID?.trim();
-  const handle = (env.YOUTUBE_CHANNEL_HANDLE || '@Dreamscapetreks').trim();
+  const saved = settings.youtube_channel?.trim();
+  const channelId = saved ? (saved.startsWith('UC') ? saved : undefined) : env.YOUTUBE_CHANNEL_ID?.trim();
+  const handle = ((saved && !saved.startsWith('UC') ? saved : env.YOUTUBE_CHANNEL_HANDLE) || '@Dreamscapetreks').trim();
   const key = env.YOUTUBE_API_KEY;
   const validChannelId = channelId && /^UC[\w-]{22}$/.test(channelId) ? channelId : undefined;
   const validHandle = /^@[\w.-]{3,30}$/.test(handle) ? handle : '@Dreamscapetreks';

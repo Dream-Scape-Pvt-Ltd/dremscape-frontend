@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import JourneyShell from './journey-shell';
-import {company} from '@/lib/company';
-export default function PolicyPage({kind}:{kind:'privacy'|'terms'}){const privacy=kind==='privacy';const sections=privacy?[
+import {companyFrom,contactFields} from '@/lib/company';
+import {getSiteSettings} from '@/lib/site-settings';
+export default async function PolicyPage({kind}:{kind:'privacy'|'terms'}){const company=companyFrom(contactFields(await getSiteSettings()));const privacy=kind==='privacy';const sections=privacy?[
  ['Information you provide','Inquiry forms ask for your name, email and message, with optional phone, travel dates and group size. Account forms ask for identity and sign-in information. Booking requests also collect traveller identity, passport, insurance and emergency-contact details required by the current booking service.'],
  ['What happens when you submit','A connected form sends the details to Dreamscape’s backend to process the relevant inquiry, account or booking request. A reference is shown only when the backend returns one. In preview mode, the website does not save submissions through a substitute demo service.'],
  ['Your browser session','Signing in creates an HttpOnly session cookie so the server can authenticate account requests. This cookie is unavailable to page JavaScript and is removed when you sign out. Passport and insurance details are not saved in browser storage by this frontend.'],

@@ -7,7 +7,7 @@ export type Departure={id:string; start_date:string; end_date:string; price_usd:
 export type ItineraryDay={day_number:number; title:string; description:string; overnight_stay:string; elevation_meters:number|null; is_acclimatization_day:boolean};
 export type JourneyGuide={id:string;slug:string;name:string;role:string;photo?:string};
 export type Journey=Trip & {guides?:JourneyGuide[];overview:string; min_group_size:number; max_group_size:number; best_seasons:string[]; inclusions:string[]; exclusions:string[]; packing_list:string[]; gallery_images:string[]; itinerary_days:ItineraryDay[]; departures:Departure[]};
-type RawTrip=Trip & {hero_image_url?:string;gallery_images?:string[];destination?:{id?:string;name:string;slug:string};category?:{name:string;slug:string}};
+type RawTrip=Trip & {hero_image_url?:string;gallery_images?:string[];destination?:{id?:string;name:string;slug:string};category?:{name:string;slug:string;menu?:string}};
 function publicImage(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
   const image = value.trim();
@@ -15,7 +15,7 @@ function publicImage(value: unknown): string | undefined {
 }
 export function normalizeTrip(raw:RawTrip):Trip {
   if (!raw || typeof raw.slug!=='string' || !/^[\w-]+$/.test(raw.slug) || typeof raw.title!=='string' || !Number.isFinite(raw.duration_days) || !Number.isFinite(Number(raw.starting_price_usd))) throw new BackendError('The journey data is incomplete. Please contact the team.');
-  const trip={...raw, destination_name:raw.destination?.name??raw.destination_name, destination_slug:raw.destination?.slug??raw.destination_slug, destination_id:raw.destination?.id??raw.destination_id, category_name:raw.category?.name??raw.category_name, category_slug:raw.category?.slug??raw.category_slug, hero_image_url:publicImage(raw.hero_image_url), gallery_images:Array.isArray(raw.gallery_images)?raw.gallery_images.map(publicImage).filter((image):image is string=>Boolean(image)):[], image:publicImage(raw.hero_image_url)};
+  const trip={...raw, destination_name:raw.destination?.name??raw.destination_name, destination_slug:raw.destination?.slug??raw.destination_slug, destination_id:raw.destination?.id??raw.destination_id, category_name:raw.category?.name??raw.category_name, category_slug:raw.category?.slug??raw.category_slug, category_menu:raw.category?.menu??raw.category_menu, hero_image_url:publicImage(raw.hero_image_url), gallery_images:Array.isArray(raw.gallery_images)?raw.gallery_images.map(publicImage).filter((image):image is string=>Boolean(image)):[], image:publicImage(raw.hero_image_url)};
   if(![trip.destination_name,trip.destination_slug,trip.category_name,trip.category_slug,trip.difficulty_grade].every(v=>typeof v==='string')||raw.starting_price_usd==null||Number(raw.starting_price_usd)<0)throw new BackendError('The journey data is incomplete. Please contact the team.');
   return trip;
 }

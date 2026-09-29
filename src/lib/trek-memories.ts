@@ -1,6 +1,7 @@
 // Original photographs supplied by the Dreamscape team. No invented trip dates or identities.
+import {siteImage} from './site-images';
 export type MemoryPhoto={id:string;title:string;alt:string;group:string;src:string;width:number;height:number};
-export const memoryPhotos:MemoryPhoto[]=[
+export const memoryPhotos:MemoryPhoto[]=([
   {
     "id": "together-in-the-mountains",
     "title": "The people beside you",
@@ -163,5 +164,5 @@ export const memoryPhotos:MemoryPhoto[]=[
     "width": 2048,
     "height": 1536
   }
-];
+] as MemoryPhoto[]).map(photo=>({...photo,src:siteImage(photo.src)}));
 export function memoryPhoto(id:string):MemoryPhoto {const photo=memoryPhotos.find(p=>p.id===id);if(!photo)throw new Error('Unknown archive photo: '+id);return photo;}

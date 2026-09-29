@@ -1,4 +1,3 @@
-import {company} from '@/lib/company';
 import {getSiteSettings} from '@/lib/site-settings';
 import LocationMap from './location-map';
 

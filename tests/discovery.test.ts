@@ -76,3 +76,23 @@ test('public departures endpoint reads every calendar page and reports partial f
     assert.ok(calls.every(path=>!path.includes('/trips/departures/')));
   }finally{globalThis.fetch=realFetch;if(previousUrl===undefined)delete process.env.BACKEND_API_URL;else process.env.BACKEND_API_URL=previousUrl;}
 });
+test('menu categories chosen in admin decide where a trek appears',()=>{
+  const assigned:Trip={...trips[1],category_slug:'everest-climbing',category_name:'Everest Region',category_menu:'expeditions'};
+  assert.equal(journeyKind(assigned),'expeditions');
+  assert.equal(matchesCollection(assigned,{kind:'expeditions',category:'everest-climbing'}),true);
+  // An explicit choice wins over the keywords: this Annapurna route no longer shows under Treks → Annapurna.
+  assert.equal(matchesCollection(assigned,{kind:'treks',category:'annapurna'}),false);
+  assert.equal(matchesCollection(assigned,{category:'annapurna-climbing'}),false);
+});
+test('treks still on an old category keep their keyword placement until edited',()=>{
+  assert.deepEqual(trips.filter(t=>matchesCollection(t,{kind:'treks',category:'mustang'})).map(t=>t.slug),['upper-mustang']);
+  assert.deepEqual(trips.filter(t=>matchesCollection(t,{kind:'treks',category:'everest'})).map(t=>t.slug),['everest-base-camp-cho-la']);
+  // Items added later in admin have no keyword rule, so only assigned treks appear.
+  assert.equal(trips.some(t=>matchesCollection(t,{category:'kanchenjunga'})),false);
+});
+test('treks in a menu added in admin form their own collection',()=>{
+  const safari:Trip={...trips[0],category_slug:'chitwan',category_name:'Chitwan',category_menu:'safaris'};
+  assert.equal(journeyKind(safari),'safaris');
+  assert.equal(matchesCollection(safari,{kind:'safaris',category:'chitwan'}),true);
+  assert.equal(matchesCollection(safari,{kind:'treks'}),false);
+});
