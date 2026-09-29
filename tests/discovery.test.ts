@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {registerHooks} from 'node:module';
 import {trips,type Trip} from '../src/lib/catalog.ts';
 import {matchesCollection,journeyKind} from '../src/lib/navigation.ts';
+import {zoneForPlace} from '../src/lib/nepal-zones.ts';
 import {scheduledJourneys,departureState} from '../src/lib/departure-calendar.ts';
 import type {Departure} from '../src/lib/journeys.ts';
 
@@ -11,6 +12,13 @@ test('combined destination labels do not mix Mustang and Annapurna routes',()=>{
   assert.deepEqual(trips.filter(t=>matchesCollection(t,{kind:'treks',region:'mustang'})).map(t=>t.slug),['upper-mustang']);
   assert.deepEqual(trips.filter(t=>matchesCollection(t,{kind:'treks',region:'annapurna'})).map(t=>t.slug),['annapurna-circuit-tilicho']);
   assert.equal(matchesCollection(trips[2],{region:'langtang'}),false);
+});
+test('Nepal travel areas keep CMS routes in the right broad group',()=>{
+  assert.deepEqual(trips.filter(t=>matchesCollection(t,{kind:'treks',zone:'eastern'})).map(t=>t.slug),['everest-base-camp-cho-la']);
+  assert.deepEqual(trips.filter(t=>matchesCollection(t,{kind:'treks',zone:'western'})).map(t=>t.slug),['annapurna-circuit-tilicho','manaslu-wild-circuit','upper-mustang']);
+  assert.equal(matchesCollection({...trips[0],slug:'dolpo-phoksundo',title:'Dolpo & Phoksundo',destination_slug:'dolpo',destination_name:'Dolpo & West Nepal'},{zone:'mid-western'}),true);
+  assert.equal(zoneForPlace('Langtang Valley'),'central');
+  assert.equal(zoneForPlace('Saipal Himal'),'far-western');
 });
 test('tour styles and climbing combine with geography without returning ordinary treks',()=>{
   const safari:Trip={...trips[0],slug:'chitwan-jungle-safari',title:'Chitwan Jungle Safari',category_slug:'wildlife-tours',category_name:'Wildlife Tours'};
