@@ -1,0 +1,186 @@
+diff --git a/apps/content_cms/admin.py b/apps/content_cms/admin.py
+index 35fc4bd..56498f2 100644
+--- a/apps/content_cms/admin.py
++++ b/apps/content_cms/admin.py
+@@ -1,5 +1,17 @@
+ from django.contrib import admin
+-from apps.content_cms.models import TravelGuide, ResponsibleTravelInitiative
++from apps.content_cms.models import TravelGuide, ResponsibleTravelInitiative, SiteSettings
++
++
++@admin.register(SiteSettings)
++class SiteSettingsAdmin(admin.ModelAdmin):
++    list_display = ('__str__', 'area', 'city', 'updated_at')
++    fieldsets = [('Homepage photograph', {'fields': ('home_image_url', 'home_image_alt')}), ('Office and map', {'fields': ('city', 'area', 'address', 'map_query', 'map_zoom', 'directions_note')}), ('Journal', {'fields': ('journal_title', 'journal_description', 'featured_story_slug')})]
++
++    def has_add_permission(self, request):
++        return not SiteSettings.objects.exists() and super().has_add_permission(request)
++
++    def has_delete_permission(self, request, obj=None):
++        return False
+ 
+ 
+ @admin.register(TravelGuide)
+diff --git a/apps/content_cms/models/__init__.py b/apps/content_cms/models/__init__.py
+index 7b4e86b..5c63d2d 100644
+--- a/apps/content_cms/models/__init__.py
++++ b/apps/content_cms/models/__init__.py
+@@ -1,5 +1,6 @@
+ from .guide import TravelGuide, GuideCategory, BlogComment
+ from .initiative import ResponsibleTravelInitiative
++from .site_settings import SiteSettings
+ 
+ __all__ = [
+     "TravelGuide",
+diff --git a/apps/content_cms/models/guide.py b/apps/content_cms/models/guide.py
+index c9027be..b097fd0 100644
+--- a/apps/content_cms/models/guide.py
++++ b/apps/content_cms/models/guide.py
+@@ -42,6 +42,7 @@ class TravelGuide(TimeStampedModel):
+         db_index=True,
+     )
+     markdown_content = models.TextField()
++    summary = models.CharField(max_length=500, blank=True)
+     hero_image_url = models.URLField(max_length=500, blank=True)
+     gallery_images = models.JSONField(default=list, blank=True)
+     meta_title = models.CharField(max_length=255, blank=True)
+diff --git a/apps/content_cms/serializers/guide_serializers.py b/apps/content_cms/serializers/guide_serializers.py
+index 6cbbe49..edaa884 100644
+--- a/apps/content_cms/serializers/guide_serializers.py
++++ b/apps/content_cms/serializers/guide_serializers.py
+@@ -64,7 +64,7 @@ class TravelGuideListSerializer(serializers.ModelSerializer):
+             "country",
+             "region",
+             "hero_image_url",
+-            "gallery_images",
++            "gallery_images", "summary",
+             "is_published",
+             "published_at",
+             "updated_at",
+@@ -104,7 +104,7 @@ class TravelGuideDetailSerializer(serializers.ModelSerializer):
+             "category",
+             "markdown_content",
+             "hero_image_url",
+-            "gallery_images",
++            "gallery_images", "summary",
+             "meta_title",
+             "meta_description",
+             "canonical_url",
+@@ -169,7 +169,7 @@ class TravelGuideWriteSerializer(serializers.ModelSerializer):
+     class Meta:
+         model = TravelGuide
+         fields = ['id', 'destination', 'author', 'title', 'slug', 'country', 'region', 'category',
+-                  'markdown_content', 'hero_image_url', 'gallery_images', 'meta_title', 'meta_description',
++                  'markdown_content', 'hero_image_url', 'gallery_images', 'summary', 'meta_title', 'meta_description',
+                   'canonical_url', 'is_published', 'published_at']
+         read_only_fields = ['id', 'author', 'published_at']
+ 
+diff --git a/apps/content_cms/urls.py b/apps/content_cms/urls.py
+index 8feadd6..aff15c7 100644
+--- a/apps/content_cms/urls.py
++++ b/apps/content_cms/urls.py
+@@ -3,11 +3,13 @@ apps.content_cms URL configuration -- Phase 0 stub.
+ Endpoints will be registered in their respective implementation phase.
+ """
+ from django.urls import path
++from apps.content_cms.views.site_settings_views import SiteSettingsView
+ from apps.content_cms.views import GuideCommentDetailView, GuideCommentListCreateView, GuideImageUploadView, GuideViewCountView, TravelGuideListCreateView, TravelGuideDetailView, ResponsibleTravelListCreateView, ResponsibleTravelDetailView
+ 
+ app_name = 'content_cms'
+ 
+ urlpatterns = [
++    path('site-settings/', SiteSettingsView.as_view(), name='site-settings'),
+     path('guides/', TravelGuideListCreateView.as_view(), name='guide-list'),
+     path('guides/media/upload/', GuideImageUploadView.as_view(), name='guide-image-upload'),
+     path('guides/<slug:slug>/view/', GuideViewCountView.as_view(), name='guide-view-count'),
+diff --git a/apps/destinations/models/destination.py b/apps/destinations/models/destination.py
+index c2fa945..0bedf25 100644
+--- a/apps/destinations/models/destination.py
++++ b/apps/destinations/models/destination.py
+@@ -23,6 +23,13 @@ class Destination(TimeStampedModel):
+         db_index=True,
+     )
+     region_name = models.CharField(max_length=150, blank=True)
++    headline = models.CharField(max_length=180, blank=True)
++    description = models.TextField(blank=True)
++    highlights = models.CharField(max_length=400, blank=True)
++    trail_style = models.CharField(max_length=200, blank=True)
++    pace = models.CharField(max_length=200, blank=True)
++    base = models.CharField(max_length=150, blank=True)
++    mood = models.CharField(max_length=30, blank=True)
+     visa_guidelines = models.TextField(blank=True)
+     permit_details = models.TextField(blank=True)
+     hero_media = models.URLField(max_length=500, blank=True)
+diff --git a/apps/destinations/serializers/destination_serializers.py b/apps/destinations/serializers/destination_serializers.py
+index 3cc6f81..b9e2831 100644
+--- a/apps/destinations/serializers/destination_serializers.py
++++ b/apps/destinations/serializers/destination_serializers.py
+@@ -18,7 +18,7 @@ class DestinationListSerializer(serializers.ModelSerializer):
+             "name",
+             "slug",
+             "country",
+-            "region_name",
++            "region_name", "headline", "description", "highlights", "trail_style", "pace", "base", "mood",
+             "hero_media",
+             "trips_count",
+             "is_active",
+@@ -49,7 +49,7 @@ class DestinationDetailSerializer(serializers.ModelSerializer):
+             "name",
+             "slug",
+             "country",
+-            "region_name",
++            "region_name", "headline", "description", "highlights", "trail_style", "pace", "base", "mood",
+             "visa_guidelines",
+             "permit_details",
+             "hero_media",
+@@ -101,7 +101,7 @@ class DestinationWriteSerializer(serializers.ModelSerializer):
+             "name",
+             "slug",
+             "country",
+-            "region_name",
++            "region_name", "headline", "description", "highlights", "trail_style", "pace", "base", "mood",
+             "visa_guidelines",
+             "permit_details",
+             "hero_media",
+diff --git a/apps/search/querysets.py b/apps/search/querysets.py
+index efc6aa2..1d2389d 100644
+--- a/apps/search/querysets.py
++++ b/apps/search/querysets.py
+@@ -1,5 +1,6 @@
+ from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
+-from django.db.models import CharField, F, Q, Value
++from django.db import connection
++from django.db.models import CharField, F, Q, Value, Case, When, FloatField
+ from django.db.models.functions import Cast, Coalesce, Concat, JSONObject, Substr
+ 
+ from apps.content_cms.models import TravelGuide
+@@ -34,7 +35,16 @@ def global_search_queryset(query_text, entity_type=None):
+     for kind, qs, vector, title, slug, snippet, prefix, meta in sources:
+         if entity_type and kind != entity_type:
+             continue
+-        qs = qs.annotate(search_vector=vector, search_rank=SearchRank(vector, query)).filter(search_vector=query)
++        if connection.vendor == 'postgresql':
++            qs = qs.annotate(search_vector=vector, search_rank=SearchRank(vector, query)).filter(search_vector=query)
++        else:
++            # SQLite development uses portable matching; PostgreSQL keeps full-text ranking.
++            fields = {'trip': ('title', 'overview'), 'destination': ('name', 'region_name'),
++                      'guide': ('title', 'markdown_content'), 'faq': ('question', 'answer')}[kind]
++            title_match = Q(**{fields[0] + '__icontains': query_text.strip()})
++            body_match = Q(**{fields[1] + '__icontains': query_text.strip()})
++            qs = qs.filter(title_match | body_match).annotate(search_rank=Case(
++                When(title_match, then=Value(2.0)), default=Value(1.0), output_field=FloatField()))
+         # Fixed projection gives all UNION arms identical SQL types and column order.
+         queries.append(qs.order_by().values('id').annotate(
+             entity_type=Value(kind, output_field=CharField()), title=title, slug=slug,
+diff --git a/apps/trips/serializers/review_serializers.py b/apps/trips/serializers/review_serializers.py
+index 5bb91f7..92d92e5 100644
+--- a/apps/trips/serializers/review_serializers.py
++++ b/apps/trips/serializers/review_serializers.py
+@@ -24,6 +24,7 @@ class TripReviewReadSerializer(serializers.ModelSerializer):
+             "content",
+             "travel_date",
+             "is_verified",
++            "is_published",
+             "created_at",
+         ]
+         read_only_fields = fields

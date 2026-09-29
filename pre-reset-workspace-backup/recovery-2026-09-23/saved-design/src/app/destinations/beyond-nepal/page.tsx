@@ -1,0 +1,6 @@
+import {getSiteSettings} from '@/lib/site-settings';
+import Link from 'next/link';
+import JourneyShell from '@/components/journey-shell';
+import DestinationScope from '@/components/destination-scope';
+import {listDestinationContent} from '@/lib/destination-content';
+export default async function Page(){const s=await getSiteSettings();const places=(await listDestinationContent()).filter(r=>r.country!=='NEPAL');return <JourneyShell page="destinations"><section className="beyond-nepal container"><DestinationScope beyond/><p className="eyebrow">BEYOND THE HORIZON</p><h1>A little further.<br/><em>{s.beyond_title}</em></h1><p>{s.beyond_description}</p>{places.length?<div className="collection-grid">{places.map(p=><Link className="collection-card" href={`/destinations/${p.slug}`} key={p.slug}><img src={p.image} alt={p.name}/><div><h2>{p.name}</h2><p>{p.description}</p><span>Explore ↗</span></div></Link>)}</div>:<div className="beyond-nepal-note"><span className="eyebrow">MORE TO COME</span><h2>The next chapter is taking shape.</h2><p>Our destinations beyond Nepal will appear here as they become available. Have somewhere in mind? Share it with the Dreamscape team.</p><Link href="/contact" className="button gold">Tell us where you dream of going ↗</Link></div>}</section></JourneyShell>;}

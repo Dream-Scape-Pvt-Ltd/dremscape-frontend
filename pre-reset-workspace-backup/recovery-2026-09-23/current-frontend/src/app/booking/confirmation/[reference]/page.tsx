@@ -1,0 +1,3 @@
+import PaymentPage from '@/app/payment/components/payment-page';
+export const metadata = { title: 'Booking details | Dreamscape', robots: { index: false, follow: false } };
+export default async function Page({ params }: { params: Promise<{ reference: string }> }) { return <PaymentPage reference={(await params).reference} confirmation />; }

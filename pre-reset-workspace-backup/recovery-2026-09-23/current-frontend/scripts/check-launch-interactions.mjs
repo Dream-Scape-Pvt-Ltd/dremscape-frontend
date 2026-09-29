@@ -1,0 +1,10 @@
+import {chromium} from '@playwright/test';import assert from 'node:assert/strict';
+const browser=await chromium.launch({channel:'chrome'}),page=await browser.newPage({viewport:{width:390,height:844}});
+await page.goto('http://127.0.0.1:3000/contact');await page.getByRole('button',{name:/Menu/}).click();assert(await page.getByRole('link',{name:'Journal',exact:true}).first().isVisible());await page.keyboard.press('Escape');assert.equal(await page.getByRole('button',{name:/Menu/}).getAttribute('aria-expanded'),'false');
+await page.screenshot({path:'test-results/contact-final.png'});
+await page.locator('.footer-landscape').scrollIntoViewIfNeeded();await page.screenshot({path:'test-results/footer-final.png'});
+assert(await page.locator('.footer-landscape img').evaluate(e=>e.complete&&e.naturalWidth>0));
+await page.route('**/api/youtube/latest',r=>r.fulfill({json:{status:'ready',videoId:'abcdefghijk',title:'Dreamscape test film'}}));
+await page.route('https://www.youtube-nocookie.com/**',r=>r.fulfill({body:'<html>Video test</html>',contentType:'text/html'}));
+await page.goto('http://127.0.0.1:3000/');await page.getByRole('button',{name:'Explore Treks'}).click();await page.locator('.youtube-film iframe').waitFor();assert((await page.locator('.youtube-film iframe').getAttribute('src')).includes('abcdefghijk'));await page.keyboard.press('Escape');assert.equal(await page.locator('dialog[open]').count(),0);
+console.log('Mobile navigation, vector rendering and latest-video dialog passed.');await browser.close();

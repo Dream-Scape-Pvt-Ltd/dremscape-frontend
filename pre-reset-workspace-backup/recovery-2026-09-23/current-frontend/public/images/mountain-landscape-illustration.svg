@@ -1,0 +1,81 @@
+<svg viewBox="0 0 1920 450" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice">
+  <defs>
+    <!-- Sky gradient -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#d8dcd4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e4e6df;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Mountain gradients for depth -->
+    <linearGradient id="farMountain" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8ba598;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6d8c7e;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="midMountain" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#5a7869;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#486355;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="nearMountain" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d4d3e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a3828;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Sky background -->
+  <rect width="1920" height="450" fill="url(#skyGrad)"/>
+  
+  <!-- Distant peaks with snow -->
+  <path d="M 0,280 L 350,140 L 520,200 L 680,110 L 850,180 L 1050,90 L 1200,150 L 1400,120 L 1600,180 L 1920,200 L 1920,450 L 0,450 Z" fill="url(#farMountain)" opacity="0.7"/>
+  
+  <!-- Snow caps on distant peaks -->
+  <path d="M 680,110 L 700,125 L 660,125 Z M 1050,90 L 1080,115 L 1020,115 Z M 1400,120 L 1425,140 L 1375,140 Z" fill="#f5f7f5" opacity="0.8"/>
+  
+  <!-- Middle range mountains -->
+  <path d="M 0,320 L 280,210 L 450,260 L 620,190 L 780,240 L 950,200 L 1150,250 L 1350,220 L 1550,270 L 1750,240 L 1920,280 L 1920,450 L 0,450 Z" fill="url(#midMountain)" opacity="0.85"/>
+  
+  <!-- Near mountains with trees -->
+  <path d="M 0,360 L 200,280 L 400,320 L 650,260 L 900,310 L 1150,270 L 1400,320 L 1650,290 L 1920,340 L 1920,450 L 0,450 Z" fill="url(#nearMountain)"/>
+  
+  <!-- Tree silhouettes - left side -->
+  <path d="M 80,360 L 85,330 L 90,360 Z M 88,345 L 82,345 Z" fill="#103b2c"/>
+  <path d="M 120,370 L 127,335 L 134,370 Z M 130,350 L 124,350 Z" fill="#103b2c"/>
+  <path d="M 160,365 L 165,340 L 170,365 Z M 167,352 L 163,352 Z" fill="#103b2c"/>
+  
+  <!-- Tree silhouettes - right side -->
+  <path d="M 1750,350 L 1757,320 L 1764,350 Z M 1760,335 L 1754,335 Z" fill="#103b2c"/>
+  <path d="M 1800,360 L 1807,330 L 1814,360 Z M 1810,345 L 1804,345 Z" fill="#103b2c"/>
+  <path d="M 1850,355 L 1857,325 L 1864,355 Z M 1860,340 L 1854,340 Z" fill="#103b2c"/>
+  
+  <!-- Trekker silhouette - left foreground -->
+  <g transform="translate(180, 320)">
+    <!-- Backpack -->
+    <ellipse cx="0" cy="-25" rx="12" ry="18" fill="#0d2e22"/>
+    <!-- Head -->
+    <circle cx="0" cy="-42" r="7" fill="#0d2e22"/>
+    <!-- Body -->
+    <rect x="-5" y="-35" width="10" height="22" fill="#0d2e22"/>
+    <!-- Legs -->
+    <path d="M -5,-13 L -7,5 M 5,-13 L 7,5" stroke="#0d2e22" stroke-width="3" fill="none"/>
+    <!-- Arms with trekking poles -->
+    <path d="M -5,-28 L -15,-18 L -15,10 M 5,-28 L 15,-18 L 15,10" stroke="#0d2e22" stroke-width="2.5" fill="none"/>
+    <!-- Trekking poles -->
+    <line x1="-15" y1="10" x2="-15" y2="25" stroke="#4a5f56" stroke-width="1.5"/>
+    <line x1="15" y1="10" x2="15" y2="25" stroke="#4a5f56" stroke-width="1.5"/>
+  </g>
+  
+  <!-- Prayer flags (subtle) -->
+  <g opacity="0.6">
+    <line x1="1400" y1="240" x2="1550" y2="260" stroke="#8b6f47" stroke-width="1"/>
+    <rect x="1420" y="238" width="8" height="12" fill="#c97632" opacity="0.7"/>
+    <rect x="1450" y="243" width="8" height="12" fill="#d4a840" opacity="0.7"/>
+    <rect x="1480" y="248" width="8" height="12" fill="#7a9d7e" opacity="0.7"/>
+    <rect x="1510" y="253" width="8" height="12" fill="#5b7fa8" opacity="0.7"/>
+  </g>
+  
+  <!-- Cloud/mist layer (very subtle) -->
+  <ellipse cx="500" cy="180" rx="200" ry="40" fill="#ffffff" opacity="0.15"/>
+  <ellipse cx="1200" cy="200" rx="250" ry="50" fill="#ffffff" opacity="0.12"/>
+  
+</svg>

@@ -1,0 +1,8 @@
+import {NextResponse} from 'next/server';
+import {cookies} from 'next/headers';
+import {backend,backendConfigured,BackendError,apiError,noStore,readInput,requiredText} from '@/lib/backend';
+import {allPages} from '@/lib/journeys';
+function slug(value:unknown){if(typeof value!=='string'||!/^[\w-]+$/.test(value))throw new BackendError('Choose a journey first.',400);return value;}
+export async function GET(request:Request){try{const trek=slug(new URL(request.url).searchParams.get('trek'));if(!backendConfigured())return NextResponse.json({reviews:[],demo:false},{headers:noStore});return NextResponse.json({reviews:await allPages(`trips/${trek}/reviews/`),demo:false},{headers:noStore});}catch(e){return apiError(e);}}
+
+export async function POST(request:Request){try{const input=await readInput(request),trek=slug(input.trek);const rating=Number(input.rating_overall);if(!Number.isInteger(rating)||rating<1||rating>5)throw new BackendError('Choose a rating from 1 to 5.',400);const payload={reviewer_name:requiredText(input,'reviewer_name',150),reviewer_country:requiredText(input,'reviewer_country',100),title:requiredText(input,'title',200),content:requiredText(input,'content',5000),rating_overall:rating};const token=(await cookies()).get('dreamscape_session')?.value;const data=await backend<{id:string}>(`trips/${trek}/reviews/`,{method:'POST',headers:token?{Authorization:`Bearer ${token}`}:{},body:JSON.stringify(payload)});if(!data.id)throw new BackendError('We could not confirm your review was saved.');return NextResponse.json({success:true},{status:201,headers:noStore});}catch(e){return apiError(e);}}

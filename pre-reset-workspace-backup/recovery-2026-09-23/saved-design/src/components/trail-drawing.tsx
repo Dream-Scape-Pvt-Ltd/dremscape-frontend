@@ -1,0 +1,1 @@
+export default function TrailDrawing(){return <svg className="quiet-trail" viewBox="0 0 600 220" fill="none" aria-hidden="true"><path d="M-20 180C80 20 190 250 300 120S480 0 630 70" stroke="currentColor" strokeWidth="2" strokeDasharray="2 10" strokeLinecap="round"/></svg>;}

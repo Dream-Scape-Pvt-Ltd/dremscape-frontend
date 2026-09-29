@@ -1,0 +1,843 @@
+/* Enhanced UI - Journal-inspired clean aesthetic across all pages */
+
+/* ========================================
+   GLOBAL IMPROVEMENTS
+   ======================================== */
+
+/* Softer, warmer whites - remove harsh yellowish tint */
+:root {
+  --paper: #f9faf8;
+  --soft-white: #fdfefe;
+  --card-white: #ffffff;
+  --warm-gray: #f4f6f5;
+  --gold: #d4a574;
+  --gold-hover: #e2b685;
+  --forest: #103b2c;
+  --forest-light: #1a4f3c;
+  --shadow-soft: rgba(9, 36, 25, 0.04);
+  --shadow-medium: rgba(9, 36, 25, 0.08);
+  --shadow-strong: rgba(9, 36, 25, 0.12);
+  --shadow-deep: rgba(9, 36, 25, 0.18);
+}
+
+body {
+  background: var(--soft-white);
+}
+
+/* Better shadows everywhere - add depth */
+.trip-card,
+.article-card,
+.destination-card,
+.planner,
+.quote {
+  box-shadow: 
+    0 2px 8px var(--shadow-soft),
+    0 8px 24px var(--shadow-medium);
+}
+
+.trip-card:hover,
+.article-card:hover {
+  box-shadow: 
+    0 8px 16px var(--shadow-medium),
+    0 16px 48px var(--shadow-strong);
+  transform: translateY(-4px);
+}
+
+/* More rounded corners - less straight lines */
+.planner {
+  border-radius: 24px !important;
+}
+
+.trip-card,
+.article-card,
+.destination-card {
+  border-radius: 20px !important;
+}
+
+.button {
+  border-radius: 12px !important;
+}
+
+/* Cards with proper white background */
+.trip-card,
+.article-card,
+.dialog {
+  background: var(--card-white) !important;
+  border: 1px solid rgba(230, 235, 232, 0.5);
+}
+
+/* ========================================
+   HERO / LANDING PAGE IMPROVEMENTS
+   ======================================== */
+
+/* Sharper, clearer hero images */
+.hero-image {
+  filter: contrast(1.08) brightness(1.02) saturate(1.05);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Better hero overlay for clarity */
+.hero-shade {
+  background: 
+    linear-gradient(90deg, rgba(5, 24, 19, 0.85), rgba(5, 24, 19, 0.35) 60%, transparent),
+    linear-gradient(0deg, rgba(9, 36, 25, 0.92), transparent 55%, rgba(9, 36, 25, 0.3));
+}
+
+/* Enhanced hero glassmorphism */
+.planner {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(32px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 8px 32px rgba(9, 36, 25, 0.08),
+    0 24px 64px rgba(9, 36, 25, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* ========================================
+   CONTACT PAGE FIXES
+   ======================================== */
+
+/* Remove green banner / Fix header overlap */
+.contact-intro {
+  padding-top: 140px !important;
+  margin-top: 0 !important;
+}
+
+/* Fix yellowish tint on contact */
+.contact-intro,
+.contact-form-panel {
+  background: var(--soft-white);
+  color: var(--forest);
+}
+
+.contact-intro h1,
+.contact-intro h2,
+.contact-form-panel h1,
+.contact-form-panel h2 {
+  color: var(--forest);
+}
+
+/* Better contact form panel */
+.contact-form-panel {
+  background: var(--card-white);
+  border-radius: 24px;
+  padding: 48px;
+  box-shadow: 
+    0 4px 16px var(--shadow-soft),
+    0 12px 40px var(--shadow-medium);
+  border: 1px solid rgba(230, 235, 232, 0.6);
+}
+
+/* Contact map container */
+.contact-map-section {
+  background: var(--warm-gray);
+  padding: 80px 0;
+  margin-top: 80px;
+}
+
+.contact-map-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+.contact-map-container h3 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--forest);
+  margin-bottom: 32px;
+  letter-spacing: -0.5px;
+}
+
+.map-wrapper {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 
+    0 8px 24px var(--shadow-medium),
+    0 16px 48px var(--shadow-strong);
+  border: 1px solid rgba(230, 235, 232, 0.8);
+}
+
+.map-wrapper iframe {
+  width: 100%;
+  height: 450px;
+  border: 0;
+  display: block;
+}
+
+/* ========================================
+   DESTINATION PAGE IMPROVEMENTS
+   ======================================== */
+
+/* Clearer destination images */
+.destination-card > img {
+  filter: contrast(1.06) brightness(1.01) saturate(1.08);
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.destination-card {
+  box-shadow: 
+    0 4px 12px var(--shadow-soft),
+    0 12px 36px var(--shadow-medium);
+}
+
+.destination-card:hover {
+  box-shadow: 
+    0 12px 24px var(--shadow-strong),
+    0 24px 56px var(--shadow-deep);
+}
+
+/* ========================================
+   TREK CATALOG IMPROVEMENTS  
+   ======================================== */
+
+/* Cleaner trek cards */
+.trip-image > img {
+  filter: contrast(1.04) saturate(1.05);
+}
+
+.trip-content {
+  padding: 24px 22px 20px;
+}
+
+.trip-bottom {
+  padding-top: 16px;
+  margin-top: 16px;
+}
+
+/* ========================================
+   STORY SECTION IMPROVEMENTS
+   ======================================== */
+
+.story {
+  background: linear-gradient(135deg, var(--forest) 0%, var(--forest-light) 100%);
+  border-radius: 32px;
+  box-shadow: 
+    0 16px 48px var(--shadow-strong),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.story-photos figure {
+  box-shadow: 
+    0 12px 32px rgba(5, 30, 20, 0.24),
+    0 4px 12px rgba(5, 30, 20, 0.16);
+}
+
+/* ========================================
+   GLASSMORPHISM ENHANCEMENTS
+   ======================================== */
+
+.header,
+.header.scrolled {
+  background: 
+    linear-gradient(120deg, rgba(255,255,255,0.18), rgba(255,255,255,0.08)),
+    rgba(9,36,25,0.75) !important;
+  backdrop-filter: blur(32px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 
+    0 8px 32px rgba(4,20,13,0.2),
+    0 16px 64px rgba(4,20,13,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.header.scrolled {
+  background: 
+    linear-gradient(120deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)),
+    rgba(9,36,25,0.88) !important;
+  box-shadow: 
+    0 12px 40px rgba(4,20,13,0.24),
+    0 20px 72px rgba(4,20,13,0.16),
+    inset 0 1px 0 rgba(255,255,255,0.16);
+}
+
+/* ========================================
+   BUTTON IMPROVEMENTS
+   ======================================== */
+
+.button {
+  box-shadow: 
+    0 2px 8px var(--shadow-soft),
+    0 4px 16px var(--shadow-medium);
+  font-weight: 600;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 16px var(--shadow-medium),
+    0 12px 32px var(--shadow-strong);
+}
+
+.button.gold {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-hover) 100%);
+  box-shadow: 
+    0 4px 12px rgba(212, 165, 116, 0.25),
+    0 8px 24px rgba(212, 165, 116, 0.15);
+}
+
+.button.gold:hover {
+  box-shadow: 
+    0 8px 20px rgba(212, 165, 116, 0.3),
+    0 16px 40px rgba(212, 165, 116, 0.2);
+}
+
+/* ========================================
+   INSPIRATION / NEWSLETTER SECTIONS
+   ======================================== */
+
+.inspiration,
+.newsletter-section {
+  background: linear-gradient(180deg, var(--warm-gray) 0%, var(--paper) 100%);
+}
+
+.newsletter {
+  border-radius: 28px;
+  box-shadow: 
+    0 16px 48px rgba(9, 36, 25, 0.2),
+    0 8px 24px rgba(9, 36, 25, 0.12);
+}
+
+/* ========================================
+   COLLAGE / PHOTO IMPROVEMENTS
+   ======================================== */
+
+.collage figure,
+.story-photos figure {
+  box-shadow: 
+    0 16px 40px rgba(5, 30, 20, 0.28),
+    0 8px 16px rgba(5, 30, 20, 0.16);
+  border: 2px solid rgba(255, 255, 255, 0.95);
+}
+
+.collage figure:hover,
+.story-photos figure:hover {
+  box-shadow: 
+    0 24px 56px rgba(5, 30, 20, 0.36),
+    0 12px 24px rgba(5, 30, 20, 0.24);
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+
+footer {
+  background: linear-gradient(180deg, var(--forest) 0%, #082218 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ========================================
+   TESTIMONIALS
+   ======================================== */
+
+.testimonials {
+  background: var(--forest);
+  border-radius: 40px;
+  box-shadow: 
+    0 16px 48px var(--shadow-deep),
+    inset 0 2px 0 rgba(255, 255, 255, 0.08);
+}
+
+.quote {
+  box-shadow: 
+    0 12px 40px rgba(9, 36, 25, 0.12),
+    0 4px 16px rgba(9, 36, 25, 0.08);
+  border-radius: 24px;
+}
+
+/* ========================================
+   SUBTLE GRADIENTS & TEXTURES
+   ======================================== */
+
+/* Add subtle grain texture for warmth */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.015;
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+
+@media (max-width: 900px) {
+  .contact-intro {
+    padding-top: 120px !important;
+  }
+  
+  .contact-form-panel {
+    padding: 32px;
+  }
+  
+  .map-wrapper iframe {
+    height: 400px;
+  }
+  
+  .contact-map-section {
+    padding: 60px 0;
+    margin-top: 60px;
+  }
+}
+
+@media (max-width: 600px) {
+  .contact-intro {
+    padding-top: 100px !important;
+  }
+  
+  .contact-form-panel {
+    padding: 28px;
+    border-radius: 20px;
+  }
+  
+  .map-wrapper iframe {
+    height: 350px;
+  }
+  
+  .contact-map-container {
+    padding: 0 22px;
+  }
+  
+  .contact-map-section {
+    padding: 48px 0;
+    margin-top: 48px;
+  }
+  
+  .button {
+    border-radius: 10px !important;
+  }
+  
+  .story {
+    border-radius: 24px;
+  }
+}
+
+/* ========================================
+   IMPROVED FOCUS STATES
+   ======================================== */
+
+:focus-visible {
+  outline: 3px solid rgba(212, 165, 116, 0.6);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+/* ========================================
+   SMOOTH SCROLLING WITH DATA ATTRIBUTE
+   ======================================== */
+
+html[data-scroll-behavior="smooth"] {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-scroll-behavior="smooth"] {
+    scroll-behavior: auto;
+  }
+}
+
+
+/* ========================================
+   CONTACT PAGE - REMOVE GREEN BANNER FIX
+   ======================================== */
+
+/* Override the green banner from journeys.css */
+.journey-page:has(.contact-intro) {
+  border-top: 0 !important;
+  background: linear-gradient(180deg, #fdfefe 0%, #f9faf8 100%) !important;
+}
+
+/* Fix contact intro spacing and colors */
+.contact-intro {
+  padding-top: 140px !important;
+  padding-bottom: 80px !important;
+  background: transparent !important;
+}
+
+/* Remove yellowish tint completely */
+.contact-intro,
+.contact-intro h1,
+.contact-intro h2,
+.contact-intro p:not(.eyebrow),
+.contact-form-panel {
+  color: var(--forest) !important;
+}
+
+.contact-intro .eyebrow {
+  color: #d4a574 !important;
+}
+
+/* Better contact form panel */
+.contact-form-panel {
+  background: var(--card-white) !important;
+  border: 1px solid rgba(230, 235, 232, 0.6) !important;
+}
+
+/* Contact channels - fix any yellowish appearance */
+.contact-channel {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(230, 235, 232, 0.8);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contact-channel:hover {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    0 4px 12px rgba(9, 36, 25, 0.08),
+    0 8px 24px rgba(9, 36, 25, 0.06);
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   HEADER FOR CONTACT/UTILITY PAGES - FIX COLOR
+   ======================================== */
+
+body:has(.contact-intro) .header,
+body:has(.contact-intro) .header.scrolled,
+body:has(.utility-page) .header,
+body:has(.utility-page) .header.scrolled {
+  color: white !important;
+  background: 
+    linear-gradient(120deg, rgba(255,255,255,0.18), rgba(255,255,255,0.08)),
+    rgba(9,36,25,0.75) !important;
+}
+
+body:has(.contact-intro) .header.scrolled,
+body:has(.utility-page) .header.scrolled {
+  background: 
+    linear-gradient(120deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)),
+    rgba(9,36,25,0.88) !important;
+}
+
+/* ========================================
+   IMPROVED IMAGE CLARITY EVERYWHERE
+   ======================================== */
+
+/* All hero images - sharper and clearer */
+.hero-image,
+.dest-hero-photo,
+.sanctuary-photo img,
+.activity-photo img {
+  filter: contrast(1.1) brightness(1.03) saturate(1.08) !important;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Destination card images - extra sharp */
+.destination-card > img,
+.sanctuary-card img,
+.activity-card img {
+  filter: contrast(1.08) brightness(1.02) saturate(1.1) !important;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* Trip/trek card images */
+.trip-image > img,
+.trip-card img {
+  filter: contrast(1.06) brightness(1.01) saturate(1.06) !important;
+}
+
+/* Gallery and photo grids */
+.gallery-grid img,
+.collage img,
+.story-photos img,
+.article-card > img {
+  filter: contrast(1.05) saturate(1.04) !important;
+}
+
+/* ========================================
+   BETTER DEPTH & SHADOWS THROUGHOUT
+   ======================================== */
+
+/* Enhanced section backgrounds - less flat */
+.section {
+  position: relative;
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Better trust section cards */
+.trust > div {
+  background: rgba(255, 255, 255, 0.6);
+  padding: 20px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(230, 235, 232, 0.7);
+  box-shadow: 0 2px 8px rgba(9, 36, 25, 0.04);
+  transition: all 0.3s ease;
+}
+
+.trust > div:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 16px rgba(9, 36, 25, 0.08);
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   DESTINATION SECTION - MORE DEPTH
+   ======================================== */
+
+.destinations {
+  background: linear-gradient(135deg, #fdfefe 0%, #f9faf8 50%, #f4f6f5 100%);
+  padding: 90px 0;
+}
+
+.destination-intro {
+  background: rgba(255, 255, 255, 0.6);
+  padding: 40px 36px;
+  border-radius: 24px;
+  border: 1px solid rgba(230, 235, 232, 0.7);
+  box-shadow: 
+    0 4px 16px rgba(9, 36, 25, 0.06),
+    0 8px 32px rgba(9, 36, 25, 0.04);
+}
+
+/* ========================================
+   STORY SECTION - JOURNAL-STYLE DEPTH
+   ======================================== */
+
+.story {
+  background: linear-gradient(135deg, #103b2c 0%, #1a4f3c 100%) !important;
+  box-shadow: 
+    0 16px 48px rgba(9, 36, 25, 0.2),
+    0 32px 80px rgba(9, 36, 25, 0.12),
+    inset 0 2px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+.story-grid {
+  position: relative;
+  z-index: 2;
+}
+
+/* Story value cards */
+.story-values {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* ========================================
+   TREK/TRIP CATALOG - JOURNAL AESTHETICS
+   ======================================== */
+
+.catalogue-grid {
+  gap: 28px !important;
+}
+
+.trip-card {
+  background: var(--card-white) !important;
+  border: 1px solid rgba(230, 235, 232, 0.6) !important;
+  border-radius: 20px !important;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.trip-card:hover {
+  border-color: rgba(212, 165, 116, 0.3) !important;
+  box-shadow: 
+    0 12px 32px rgba(9, 36, 25, 0.12),
+    0 24px 64px rgba(9, 36, 25, 0.08) !important;
+}
+
+.trip-image {
+  border-bottom: 1px solid rgba(230, 235, 232, 0.4);
+}
+
+/* ========================================
+   INSPIRATION SECTION - SOFTER BACKGROUND
+   ======================================== */
+
+.inspiration,
+.newsletter-section {
+  background: linear-gradient(135deg, #f9faf8 0%, #f4f6f5 100%) !important;
+}
+
+.inspiration-grid {
+  gap: 80px;
+}
+
+/* ========================================
+   TESTIMONIALS - MORE PREMIUM LOOK
+   ======================================== */
+
+.testimonials {
+  background: linear-gradient(135deg, var(--forest) 0%, var(--forest-light) 100%) !important;
+  box-shadow: 
+    0 20px 60px rgba(9, 36, 25, 0.24),
+    inset 0 2px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.quote {
+  background: var(--card-white) !important;
+  border: 1px solid rgba(230, 235, 232, 0.5);
+  box-shadow: 
+    0 16px 48px rgba(9, 36, 25, 0.16),
+    0 8px 24px rgba(9, 36, 25, 0.08) !important;
+}
+
+/* ========================================
+   NEWSLETTER - CLEAN WHITE CARD
+   ======================================== */
+
+.newsletter {
+  background: var(--forest) !important;
+  box-shadow: 
+    0 20px 60px rgba(9, 36, 25, 0.2),
+    0 32px 96px rgba(9, 36, 25, 0.12) !important;
+}
+
+.newsletter input {
+  background: var(--card-white) !important;
+  border: 1px solid rgba(230, 235, 232, 0.8) !important;
+  box-shadow: 0 2px 8px rgba(9, 36, 25, 0.04);
+  transition: all 0.3s ease;
+}
+
+.newsletter input:focus {
+  border-color: #d4a574 !important;
+  box-shadow: 
+    0 4px 12px rgba(212, 165, 116, 0.15),
+    0 0 0 3px rgba(212, 165, 116, 0.1) !important;
+}
+
+/* ========================================
+   ARTICLE/BLOG CARDS - JOURNAL STYLE
+   ======================================== */
+
+.article-card {
+  background: var(--card-white) !important;
+  border: 1px solid rgba(230, 235, 232, 0.6) !important;
+  border-radius: 20px !important;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.article-card:hover {
+  border-color: rgba(212, 165, 116, 0.3) !important;
+  box-shadow: 
+    0 12px 32px rgba(9, 36, 25, 0.12),
+    0 24px 64px rgba(9, 36, 25, 0.08) !important;
+}
+
+.article-card > img {
+  border-bottom: 1px solid rgba(230, 235, 232, 0.4);
+}
+
+/* ========================================
+   FORM INPUTS - CLEANER APPEARANCE
+   ======================================== */
+
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  background: var(--card-white) !important;
+  border: 1px solid rgba(200, 210, 205, 0.8) !important;
+  border-radius: 12px !important;
+  transition: all 0.25s ease;
+}
+
+input:focus:not([type="checkbox"]):not([type="radio"]),
+textarea:focus,
+select:focus {
+  border-color: #d4a574 !important;
+  box-shadow: 
+    0 4px 12px rgba(212, 165, 116, 0.12),
+    0 0 0 3px rgba(212, 165, 116, 0.08) !important;
+  outline: none;
+}
+
+/* ========================================
+   DIALOG/MODAL - PREMIUM APPEARANCE
+   ======================================== */
+
+dialog {
+  background: var(--card-white) !important;
+  border: 1px solid rgba(230, 235, 232, 0.7) !important;
+  border-radius: 24px !important;
+  box-shadow: 
+    0 24px 72px rgba(9, 36, 25, 0.2),
+    0 48px 120px rgba(9, 36, 25, 0.12) !important;
+}
+
+dialog::backdrop {
+  background: rgba(4, 22, 14, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+
+@media (max-width: 900px) {
+  .contact-intro {
+    padding-top: 120px !important;
+  }
+  
+  .section::before {
+    height: 150px;
+  }
+  
+  .destination-intro {
+    padding: 32px 28px;
+  }
+}
+
+@media (max-width: 600px) {
+  .contact-intro {
+    padding-top: 100px !important;
+    padding-bottom: 60px !important;
+  }
+  
+  .section::before {
+    height: 100px;
+  }
+  
+  .destination-intro {
+    padding: 24px 20px;
+  }
+  
+  .trust > div {
+    padding: 16px 14px;
+  }
+}
+
+/* ========================================
+   PRINT STYLES - BONUS
+   ======================================== */
+
+@media print {
+  .header,
+  .footer,
+  .button,
+  .nav {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+  }
+  
+  .hero-image {
+    filter: none !important;
+  }
+}

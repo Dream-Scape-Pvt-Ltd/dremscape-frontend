@@ -1,0 +1,1 @@
+Original working files remain untouched. current-frontend is a copy excluding dependencies, Git metadata and secrets. saved-design-stash.zip is the complete tracked tree of stash@{0}, saved 2026-09-22 17:38:44.
