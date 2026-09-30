@@ -1,0 +1,40 @@
+# Render Blueprint for the Dreamscape Treks website (Next.js).
+# Deploys from GitHub `main` only after the GitHub Actions checks pass
+# (.github/workflows/ci.yml). Values marked `sync: false` are entered once in
+# the Render dashboard and never stored in this repo. NEXT_PUBLIC_* values are
+# read at build time, so changing one needs a redeploy.
+services:
+  - type: web
+    name: dreamscape-web
+    runtime: node
+    # Same region as the API and its database.
+    region: singapore
+    plan: free
+    branch: main
+    autoDeployTrigger: checksPass
+    buildCommand: npm ci && npm run build
+    # `npm start` binds 127.0.0.1 for local use; Render needs all interfaces.
+    startCommand: npx next start --hostname 0.0.0.0 --port $PORT
+    healthCheckPath: /robots.txt
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # The API's public origin + /api/v1, e.g. https://dreamscape-api.onrender.com/api/v1
+      - key: BACKEND_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      # Copy the value Render generated for INTERNAL_API_TOKEN on dreamscape-api.
+      - key: INTERNAL_API_TOKEN
+        sync: false
+      # This site's public origin, used for the sitemap, robots.txt and structured data.
+      - key: NEXT_PUBLIC_BASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_COMPANY_EMAIL
+        value: info@dreamscapetreks.com
+      - key: YOUTUBE_CHANNEL_HANDLE
+        value: "@Dreamscapetreks"
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: NEXT_PUBLIC_GA_MEASUREMENT_ID
+        sync: false
