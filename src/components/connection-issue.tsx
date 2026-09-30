@@ -32,7 +32,7 @@ export function RefreshButton({busy, onClick, label = 'Refresh'}: {busy: boolean
   );
 }
 
-export type BackendState = 'unknown' | 'up' | 'down' | 'unconfigured' | 'offline';
+export type BackendState = 'unknown' | 'up' | 'down' | 'unconfigured' | 'offline' | 'preview';
 
 /** Asks the Next server whether the backend answers. Browser offline wins over everything. */
 export async function checkBackend(): Promise<BackendState> {
@@ -40,7 +40,7 @@ export async function checkBackend(): Promise<BackendState> {
   try {
     const response = await fetch('/api/health', {cache: 'no-store', signal: AbortSignal.timeout(8000)});
     const body = await response.json().catch(() => null) as {backend?: BackendState} | null;
-    return body?.backend === 'up' ? 'up' : body?.backend === 'unconfigured' ? 'unconfigured' : 'down';
+    return body?.backend === 'up' ? 'up' : body?.backend === 'unconfigured' ? 'unconfigured' : body?.backend === 'preview' ? 'preview' : 'down';
   } catch {
     return typeof navigator !== 'undefined' && navigator.onLine === false ? 'offline' : 'down';
   }

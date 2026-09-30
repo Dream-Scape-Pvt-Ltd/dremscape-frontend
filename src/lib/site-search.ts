@@ -1,4 +1,4 @@
-import {trips as sampleTrips,type Trip} from './catalog';
+import type {Trip} from './catalog';
 import {listJourneys} from './journeys';
 import {listDestinationContent} from './destination-content';
 import {listGuides} from './guides';
@@ -10,7 +10,7 @@ import {searchSite,type SearchDestination,type SearchGuide} from './search';
  * is kept here for a few minutes because every backend call counts against the
  * backend's per-IP rate limit, which all visitors of this server share.
  */
-export type SearchIndex={trips:Trip[];destinations:SearchDestination[];guides:SearchGuide[];catalogUnavailable:boolean};
+export type SearchIndex={trips:Trip[];destinations:SearchDestination[];guides:SearchGuide[];catalogUnavailable:boolean;demo:boolean};
 const FRESH_MS=5*60_000;
 let cached:{at:number;data:Promise<SearchIndex>}|null=null;
 
@@ -21,11 +21,11 @@ async function load():Promise<SearchIndex>{
     listGuides().catch(()=>[]),
   ]);
   return {
-    // Mirror the catalogue pages: an empty live catalogue shows the sample routes.
-    trips:!catalog?[]:catalog.trips.length?catalog.trips:sampleTrips,
+    trips:catalog?.trips||[],
     destinations:destinations.map(({id,slug,name,short,country,tag,description,highlights,image})=>({id,slug,name,short,country,tag,description,highlights,image})),
     guides:guides.map(({id,slug,title,category,excerpt,image})=>({id,slug,title,category,excerpt,image})),
     catalogUnavailable:!catalog,
+    demo:Boolean(catalog?.demo),
   };
 }
 export function getSearchIndex(){
@@ -39,6 +39,6 @@ export function getSearchIndex(){
 }
 
 export async function runSiteSearch(query:string){
-  const {catalogUnavailable,...data}=await getSearchIndex();
-  return {...searchSite(query,data),catalogUnavailable};
+  const {catalogUnavailable,demo,...data}=await getSearchIndex();
+  return {...searchSite(query,data),catalogUnavailable,demo};
 }

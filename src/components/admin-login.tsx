@@ -21,6 +21,7 @@ export default function AdminLogin({backgroundImage='/images/admin-login-backgro
       const result=await response.json();
       if(!response.ok||result.success!==true){
         if(response.status===400||response.status===401)throw new Error(`Sign-in failed for ${email.trim()}. Check the email address and password, then try again.`);
+        if(response.status>=500)throw new Error('Admin sign-in is temporarily unavailable. Please try again shortly.');
         throw new Error(errorText(result));
       }
       const access=await fetch('/api/admin?resource=inquiries&page=1');

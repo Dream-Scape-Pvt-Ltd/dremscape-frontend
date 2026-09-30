@@ -9,7 +9,10 @@ export function companyFrom(settings:CompanyContact){
   const digits=settings.contact_whatsapp.replace(/\D/g,'');
   const validWhatsapp=/^\d{8,15}$/.test(digits);
   return {
-    name:'Dreamscape Treks',
+    name:'Dreamscape Adventure Treks Pvt. Ltd.',
+    registration:'32543/61/62',
+    pan:'301826486',
+    tourismLicense:'712/061/062',
     email:settings.contact_email,
     whatsapp:validWhatsapp?settings.contact_whatsapp:'',
     whatsappUrl:validWhatsapp?`https://wa.me/${digits}`:'',

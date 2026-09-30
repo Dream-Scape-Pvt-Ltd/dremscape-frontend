@@ -63,7 +63,7 @@ export default function JourneyDetail({journey:t,demo,related}:{journey:Journey;
   useEffect(()=>{const id=new URLSearchParams(window.location.search).get('departure');if(!id)return;if(departures.some(d=>d.id===id))setRequestId(id);const url=new URL(window.location.href);url.searchParams.delete('departure');window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);},[]);
   const requested=demo?undefined:departures.find(d=>d.id===requestId);
 
-  useEffect(()=>{if(!playing)return;const timer=window.setTimeout(()=>setActivePhoto(index=>(index+1)%photos.length),PHOTO_INTERVAL);return()=>window.clearTimeout(timer);},[activePhoto,playing,photos.length]);
+  useEffect(()=>{if(!playing||reducedMotion)return;const timer=window.setTimeout(()=>setActivePhoto(index=>(index+1)%photos.length),PHOTO_INTERVAL);return()=>window.clearTimeout(timer);},[activePhoto,playing,photos.length,reducedMotion]);
   function movePhoto(step:number){setActivePhoto(index=>(index+step+photos.length)%photos.length);}
 
   const facts=[
@@ -91,7 +91,7 @@ export default function JourneyDetail({journey:t,demo,related}:{journey:Journey;
       <div className="container journey-media-shell" onMouseEnter={()=>setHovering(true)} onMouseLeave={()=>setHovering(false)}>
         <section className={`trek-hero journey-stage ${!selectedPhoto?'trek-hero-plain':''}`} aria-label={`${t.title} photographs`}>
           <AnimatePresence initial={false}>
-            {selectedPhoto&&<motion.img key={selectedPhoto} src={asset(selectedPhoto)} alt={`${t.title}, photograph ${activePhoto+1} of ${photos.length}`} initial={reducedMotion?false:{opacity:0,scale:1.035}} animate={{opacity:1,scale:1}} exit={reducedMotion?undefined:{opacity:0}} transition={{duration:reducedMotion?0:.85,ease:[.2,.75,.2,1]}} fetchPriority={activePhoto===0?'high':undefined}/>}
+            {selectedPhoto&&<motion.img key={selectedPhoto} src={asset(selectedPhoto)} alt={`${demo?'Illustrative image for ':''}${t.title}, photograph ${activePhoto+1} of ${photos.length}`} initial={reducedMotion?false:{opacity:0,scale:1.035}} animate={{opacity:1,scale:1}} exit={reducedMotion?undefined:{opacity:0}} transition={{duration:reducedMotion?0:.85,ease:[.2,.75,.2,1]}} fetchPriority={activePhoto===0?'high':undefined}/>}
           </AnimatePresence>
           <div className="journey-stage-content"><span className="journey-stage-badge">DREAMSCAPE · {t.destination_name.toUpperCase()}</span><div className="journey-stage-foot"><div><small>THE TRAIL IN PICTURES</small><strong>{credit?.caption||t.title}</strong></div>{photos.length>1&&<div className="journey-stage-controls"><button type="button" onClick={()=>movePhoto(-1)} aria-label="Previous trek photo">←</button><span>{String(activePhoto+1).padStart(2,'0')} / {String(photos.length).padStart(2,'0')}</span><button type="button" onClick={()=>movePhoto(1)} aria-label="Next trek photo">→</button></div>}</div></div>
           {playing&&<div key={selectedPhoto} className="journey-stage-progress" aria-hidden="true"/>}

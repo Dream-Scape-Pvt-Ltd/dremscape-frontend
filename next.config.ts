@@ -8,6 +8,9 @@ const backendOrigin = new URL(
 ).origin;
 
 const nextConfig: NextConfig = {
+  async headers() {
+    return process.env.NODE_ENV === "production" ? [{source:"/:path*",headers:[{key:"Strict-Transport-Security",value:"max-age=31536000"}]}] : [];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     // In development the backend runs on 127.0.0.1, which Next 16 refuses to

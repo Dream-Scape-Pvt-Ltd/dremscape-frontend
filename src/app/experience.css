@@ -47,7 +47,7 @@ h1,h2{text-wrap:balance}p{ text-wrap:pretty }
 /* Blend white sky with the page without fading the pine silhouettes. */
 .footer-landscape{position:relative;isolation:isolate;background:var(--landscape-surface,#fafaf8);line-height:0;margin:0;overflow:hidden}
 .footer-landscape img{mask-image:none;-webkit-mask-image:none;mix-blend-mode:multiply;image-rendering:auto;display:block;width:100%;height:auto;margin:0}
-.footer-landscape:after{display:none!important;content:none!important}
+
 .dest-page+.footer-landscape{--landscape-surface:#fafaf8}.destination-cta{background:#f2f6f4;color:#103b2c}.destination-cta h2{color:#103b2c}.destination-cta h2 em{color:#678674}.destination-cta .eyebrow{color:#587562}.destination-cta p:not(.eyebrow){color:#536e60}
 body .header.site-navigation[data-page]{--nav-menu-surface:#f9fcfafa}body:has(.hero,.trek-hero,.dest-page) .header.site-navigation[data-page],body .header.site-navigation[data-page="journal"]{--nav-menu-surface:#092419fa}
 @media(max-width:1100px){.editorial-hero.has-photo,.catalog-hero{gap:36px}.editorial-hero.has-photo>img,.catalog-hero>img{height:420px}.carousel-slide>div{height:290px}}

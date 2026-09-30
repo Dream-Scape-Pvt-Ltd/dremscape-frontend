@@ -7,14 +7,15 @@ import {noStore} from '@/lib/backend';
  */
 export async function GET() {
   const base = process.env.BACKEND_API_URL?.replace(/\/$/, '');
-  if (!base) return NextResponse.json({backend: 'unconfigured'}, {headers: noStore});
+  const preview = process.env.NODE_ENV === 'development';
+  if (!base) return NextResponse.json({backend: preview ? 'preview' : 'unconfigured'}, {headers: noStore});
   const started = Date.now();
   try {
-    const response = await fetch(`${base}/trips/?page_size=1`, {cache:'force-cache',next:{revalidate:30}, signal: AbortSignal.timeout(5000), redirect: 'error'});
+    const response = await fetch(`${base}/trips/?page_size=1`, {cache:'no-store', signal: AbortSignal.timeout(5000), redirect: 'error'});
     // Any non-5xx answer means the service is up; a 5xx means it is running but broken.
     const up = response.status < 500;
-    return NextResponse.json({backend: up ? 'up' : 'down', latency_ms: Date.now() - started}, {status: up ? 200 : 503, headers: noStore});
+    return NextResponse.json({backend: up ? 'up' : preview ? 'preview' : 'down', latency_ms: Date.now() - started}, {status: up || preview ? 200 : 503, headers: noStore});
   } catch {
-    return NextResponse.json({backend: 'down'}, {status: 503, headers: noStore});
+    return NextResponse.json({backend: preview ? 'preview' : 'down'}, {status: preview ? 200 : 503, headers: noStore});
   }
 }

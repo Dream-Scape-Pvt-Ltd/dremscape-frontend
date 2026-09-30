@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-transform-types --no-warnings --test tests/*.test.ts",
+    "check:links": "node scripts/check-static-links.mjs",
     "assets": "node scripts/download-assets.mjs"
   },
   "dependencies": {

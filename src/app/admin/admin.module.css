@@ -1431,6 +1431,12 @@
   transition: all 0.2s ease;
 }
 
+.trekImportControls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:#365947;font-size:12px;font-weight:700}
+.trekImportControls select{max-width:220px;min-height:38px;padding:7px 10px;border:1px solid #cbdccd;border-radius:9px;background:#fff;color:#173b2d;font:inherit}
+.trekImportControls button{min-height:38px;padding:7px 12px;border:1px solid #24543b;border-radius:9px;background:#eef5ee;color:#1c4b34;font:inherit;cursor:pointer}
+.trekImportControls button:disabled{opacity:.5;cursor:not-allowed}
+.trekImportControls select:focus-visible,.trekImportControls button:focus-visible{outline:3px solid #d8aa48;outline-offset:2px}
+
 .trekAddBtn:hover {
   background: #154c39;
   transform: translateY(-1px);

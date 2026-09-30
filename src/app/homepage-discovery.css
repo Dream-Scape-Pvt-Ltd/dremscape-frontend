@@ -73,6 +73,7 @@ html body .home-region-card>img{width:100%;height:auto;aspect-ratio:16/9;object-
 html body .home-region-card>div{position:relative;padding:18px 44px 18px 18px}
 html body .home-region-card h3{font-size:18px;line-height:1.3;font-weight:700}
 html body .home-region-card p{font-size:12px;line-height:1.6;margin-top:7px;color:#657360}
+html body .home-region-card small{display:block;margin-top:8px;color:#405b4d;font-size:10px;line-height:1.5;font-weight:650}
 html body .home-region-card>div>span{position:absolute;right:18px;top:18px;font-size:19px}
 html body .home-beyond{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:24px;padding:24px 28px;background:#eaf0e3;border-radius:16px}
 html body .home-beyond .eyebrow{margin-bottom:6px}
@@ -85,9 +86,7 @@ html body .home-discovery .story-wave-top{top:0;height:clamp(55px,6.8vw,100px)}
 html body .home-discovery .story-wave-bottom{bottom:0;height:clamp(60px,7.8vw,110px)}
 html body .home-discovery .story-wave svg{display:block;width:100%;height:100%}
 html body .home-discovery .story-wave path{fill:#fcfdf9}
-html body .home-discovery .story-backdrop{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
-html body .home-discovery .story-backdrop-mountains{position:absolute;bottom:0;left:0;width:100%;height:100%;object-fit:cover;object-position:bottom center;opacity:.32}
-html body .home-discovery .story-backdrop-glow{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(35,105,75,.35) 0%,transparent 70%),radial-gradient(circle 380px at 45% 48%,rgba(225,185,115,.09) 0%,transparent 60%)}
+html body .home-discovery .story-backdrop{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1;background:radial-gradient(ellipse 68% 85% at 88% 77%,rgba(224,185,94,.35),transparent 72%),linear-gradient(125deg,#0c3024 0%,#18543b 61%,#315e3c 100%)}
 html body .home-discovery .story h2{font-size:clamp(32px,3.8vw,46px);color:#fff;line-height:1.15}
 html body .home-discovery .story h2 em{color:#eed094;font-style:normal}
 html body .home-discovery .story .eyebrow{color:#e2ca95}
@@ -164,6 +163,7 @@ html body .home-discovery .home-plan .button{flex:none}
   html body .home-region-card>div{padding:12px}
   html body .home-region-card h3{font-size:14px;line-height:1.4;min-height:2.8em;padding-right:14px}
   html body .home-region-card p{font-size:11px;line-height:1.6;margin-top:5px}
+  html body .home-region-card small{font-size:9px;margin-top:6px}
   html body .home-region-card>div>span{right:10px;top:12px;font-size:15px}
   html body .home-region-card:last-child{display:grid;grid-template-columns:42% 1fr;align-items:stretch}
   html body .home-region-card:last-child>img{height:100%;aspect-ratio:auto}

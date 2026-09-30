@@ -19,6 +19,9 @@
 .connection-dismiss:hover{background:#f1ede2}
 .connection-toast{position:fixed;z-index:1000;left:50%;bottom:22px;transform:translateX(-50%);display:flex;align-items:center;gap:9px;padding:12px 20px;border-radius:30px;background:#173e2c;color:#fff;font-size:13px;font-weight:650;box-shadow:0 16px 40px #0b221840;animation:connection-in .3s ease-out}
 .connection-toast span{color:#7fd6a4}
+.preview-chip{position:fixed;z-index:29;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:12px;max-width:calc(100vw - 24px);padding:8px 8px 8px 13px;border:1px solid #d5e6d280;border-radius:13px;background:#123d2eee;color:#fff;box-shadow:0 8px 24px #0b221833;backdrop-filter:blur(8px)}
+.preview-chip span{display:grid;gap:2px;line-height:1.2}.preview-chip strong{font-size:10px}.preview-chip small{font-size:9px;color:#dbead8}.preview-chip button{display:grid;place-items:center;width:28px;height:28px;border:0;border-radius:8px;background:#ffffff1c;color:#fff;font-size:18px;cursor:pointer}.preview-chip button:hover,.preview-chip button:focus-visible{background:#ffffff35}
+body:has(.site-navigation .nav.open) .preview-chip{visibility:hidden}
 .connection-page{min-height:100vh;display:grid;place-items:center;padding:32px 16px;background:radial-gradient(ellipse at 50% 0%,#e8efe4,transparent 70%),#f7f5ef}
 .connection-page-card{width:min(560px,100%);text-align:center;padding:44px 36px;border-radius:24px;background:#fffdf8;border:1px solid #dfe5d6;box-shadow:0 30px 80px #16332214;color:#173c2d}
 .connection-page-card .connection-art{margin:0 auto 18px;display:block}
@@ -33,6 +36,7 @@
 @keyframes connection-spark{0%,100%{opacity:.2}50%{opacity:1}}
 @keyframes connection-spin{to{transform:rotate(360deg)}}
 @media(max-width:640px){
+  .preview-chip{position:static;max-width:none;justify-content:space-between;border-radius:0;margin:0;padding:10px max(18px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));box-shadow:none}
   .connection-banner{grid-template-columns:auto minmax(0,1fr);bottom:12px;padding:16px 40px 16px 16px;gap:12px}
   .connection-banner .connection-art{width:48px;height:48px}
   .connection-actions{grid-column:1/-1;flex-direction:row;justify-content:space-between}

@@ -1,5 +1,4 @@
 .photo-showcase{position:relative;min-width:0;height:660px;perspective:1200px;isolation:isolate}
-.showcase-orbit{position:absolute;inset:12% -3% 12% 3%;border:1px solid #c5d9bc26;border-radius:50%;transform:rotate(-22deg);pointer-events:none}
 .showcase-kicker{position:absolute;top:0;left:10%;font-size:9px;color:#c0d6c8;letter-spacing:.22em}
 .showcase-position{position:absolute;width:72%;transform-origin:50% 65%;perspective:1000px}
 .showcase-position-0{top:55px;left:3%;z-index:1}
@@ -25,7 +24,7 @@
 .pswp__dreamscape-caption{position:absolute;bottom:22px;left:50%;translate:-50% 0;max-width:calc(100% - 32px);width:max-content;background:#103b2ce6;border:1px solid #ffffff1a;backdrop-filter:blur(12px);padding:14px 24px;border-radius:30px;color:#f3f7ee;font-size:13px;text-align:center;line-height:1.6;pointer-events:none}
 .pswp__button:focus-visible{outline:2px solid #e1b77a;outline-offset:-5px}.pswp__counter{font-family:inherit;font-size:12px}
 @media(max-width:1100px){.photo-showcase{height:560px}.showcase-position-1{top:200px}.showcase-position-2{top:315px}}
-@media(max-width:700px){.photo-showcase{max-width:480px;width:100%;height:610px;margin:auto}.showcase-position-0{left:5%;width:78%;top:50px}.showcase-position-1{right:1%;width:57%;top:220px}.showcase-position-2{left:4%;top:370px;width:45%}.showcase-orbit{inset:10% 0}.showcase-kicker{left:7%;font-size:8px}#about.story .showcase-note{bottom:0;right:2%;font-size:11px}.showcase-caption strong{font-size:11px}}
+@media(max-width:700px){.photo-showcase{max-width:480px;width:100%;height:610px;margin:auto}.showcase-position-0{left:5%;width:78%;top:50px}.showcase-position-1{right:1%;width:57%;top:220px}.showcase-position-2{left:4%;top:370px;width:45%}.showcase-kicker{left:7%;font-size:8px}#about.story .showcase-note{bottom:0;right:2%;font-size:11px}.showcase-caption strong{font-size:11px}}
 @media(max-width:400px){.photo-showcase{height:520px}.showcase-position-1{top:185px}.showcase-position-2{top:295px}.showcase-caption{padding-top:9px}.showcase-print{padding:8px 8px 12px}.showcase-caption small{font-size:7px}.pswp__dreamscape-caption{font-size:12px;padding:10px 16px}}
 @media(prefers-reduced-motion:reduce){.showcase-photo .memory-photo,.showcase-glint,.showcase-open{transition:none}.showcase-glint{display:none}}
 

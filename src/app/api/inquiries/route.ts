@@ -4,6 +4,7 @@ import {TRIP_STYLES,PRIVATE_PARTIES,COMFORT_LEVELS,SUPPORT_LEVELS} from '@/lib/t
 export async function POST(request: Request) {
   try {
     const input=await readInput(request);
+    if(input.website) throw new BackendError('Unable to send this inquiry.',400);
     // A booking request for a specific departure needs a phone number but no free-text message.
     const departureRequest=Boolean(input.departure);
     // B2B partnership enquiries from /partners are the only type a visitor may choose; everything else is derived.

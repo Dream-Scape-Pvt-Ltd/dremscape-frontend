@@ -1,4 +1,5 @@
 import {isExpedition,type Trip} from './catalog.ts';
+import {editorialTagOptions} from './editorial-tags.ts';
 
 /**
  * Site search tuned for a trekking catalogue. Visitors type partial names
@@ -84,7 +85,8 @@ export function parseQuery(raw:string):{tokens:string[];constraints:Constraints}
 
 function tripFields(trip:Trip):Field[]{
   const kind=isExpedition(trip)?'expedition peak climbing':'trek trekking';
-  return [[trip.title,4],[trip.slug.replace(/-/g,' '),3],[trip.destination_name,3],[trip.destination_slug.replace(/-/g,' '),2],[trip.tags||'',2.5],[`${trip.category_name} ${kind}`,2],[`${trip.difficulty_grade} ${GRADE_WORDS[trip.difficulty_grade]||''}`,1.5],[trip.overview||'',0.8]];
+  const themes=editorialTagOptions.filter(tag=>trip.editorial_tags?.includes(tag.value)).map(tag=>tag.label).join(' ');
+  return [[trip.title,4],[trip.slug.replace(/-/g,' '),3],[trip.destination_name,3],[trip.destination_slug.replace(/-/g,' '),2],[trip.tags||'',2.5],[themes,1.8],[`${trip.category_name} ${kind}`,2],[`${trip.difficulty_grade} ${GRADE_WORDS[trip.difficulty_grade]||''}`,1.5],[trip.overview||'',0.8]];
 }
 function meetsConstraints(trip:Trip,{maxPrice,minPrice,days,maxDays,minDays}:Constraints){
   const price=Number(trip.starting_price_usd);

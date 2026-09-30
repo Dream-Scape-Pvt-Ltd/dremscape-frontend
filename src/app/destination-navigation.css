@@ -12,4 +12,4 @@ body .header .nav .destination-navigation-options a{display:flex;justify-content
 .footer-landscape+.complete-footer{margin-top:0;background:#09291e;box-shadow:none;border-top:0}
 @media(min-width:901px) and (max-width:1100px){.header .brand{width:138px;height:48px}.destination-trigger{padding:10px 8px;font-size:11px}.header .search-link{display:none}}
 @media(max-width:900px){.destination-trigger{width:100%;justify-content:space-between;text-align:left;padding:12px 16px;font-size:14px}.destination-navigation-options{position:static;width:auto;margin:5px 8px 8px;box-shadow:none}.destination-scope{margin-bottom:22px}}
-@media(max-width:600px){.header .brand{width:130px;height:45px}.beyond-nepal{padding-top:125px;padding-bottom:60px}.beyond-nepal-note{padding:25px}.beyond-nepal-note h2{font-size:23px}.footer-landscape img{height:220px;object-fit:cover;object-position:40% bottom}}
+@media(max-width:600px){.header .brand{width:130px;height:45px}.beyond-nepal{padding-top:125px;padding-bottom:60px}.beyond-nepal-note{padding:25px}.beyond-nepal-note h2{font-size:23px}}

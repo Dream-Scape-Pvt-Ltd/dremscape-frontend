@@ -4,6 +4,8 @@ import React, {FormEvent, useEffect, useMemo, useState} from 'react';
 import RouteProfile,{profilePoints} from '@/components/route-profile';
 import {trekHref} from '@/lib/links';
 import {difficultyLevels} from '@/lib/format';
+import {editorialTagOptions} from '@/lib/editorial-tags';
+import {unpersistedTripFields} from '@/lib/trip-save-verification';
 import Link from 'next/link';
 import type {
   Agent,
@@ -36,6 +38,9 @@ import InquiryDrawer from './crm/inquiry-drawer';
 import {CrmTrekList, PipelineView} from './crm/pipeline';
 import CustomerProfileModal from './crm/customer-profile';
 import {fallbackTrekImage} from '@/lib/trek-images';
+import {previewTrips as sampleTrekTemplates} from '@/lib/catalog';
+import {asset} from '@/lib/assets';
+import type {Journey} from '@/lib/journeys';
 
 type Tab = 'dashboard' | 'treks' | 'revenue' | 'journal' | 'inquiries' | 'pipeline' | 'reviews' | 'settings' | 'destinations' | 'trek-guides';
 interface AdminProfile {full_name: string; role: string; email?: string;}
@@ -507,7 +512,29 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
     setLoadingTrekDetail(true);
     setSelectedTrekSlug(slug);
     try {
-      if (slug === 'new') {
+      if (slug.startsWith('preview:')) {
+        const previewId=slug.slice('preview:'.length);
+        if(!sampleTrekTemplates.some(t=>t.id===previewId))throw new Error('That sample trek is unavailable.');
+        const response=await fetch(`/api/trips/${encodeURIComponent(previewId)}`,{cache:'no-store'});
+        const preview=await response.json() as {journey?:Journey;demo?:boolean;error?:string};
+        if(!response.ok||!preview.demo||!preview.journey)throw new Error(preview.error||'This trek is already in the CMS or the sample could not be loaded.');
+        const journey=preview.journey;
+        const destination=destinations.find(d=>d.slug===journey.destination_slug||d.name.toLowerCase()===journey.destination_name.toLowerCase());
+        const category=categories.find(c=>c.slug===journey.category_slug||c.name.toLowerCase()===journey.category_name.toLowerCase())||categories.find(c=>/trek/i.test(c.name));
+        setSelectedTrekDetail({
+          title:journey.title,slug:journey.slug,destination:destination?.id||'',
+          destination_name:destination?.name||journey.destination_name,destination_slug:destination?.slug||journey.destination_slug,
+          category:category?.id||'',category_name:category?.name||journey.category_name,category_slug:category?.slug||journey.category_slug,
+          duration_days:journey.duration_days,altitude_max_meters:journey.altitude_max_meters||'',difficulty_grade:journey.difficulty_grade,
+          starting_price_usd:journey.starting_price_usd,min_group_size:1,max_group_size:14,best_seasons:journey.best_seasons,
+          inclusions:journey.inclusions,exclusions:journey.exclusions,packing_list:journey.packing_list,overview:journey.overview,
+          hero_image_url:journey.image?asset(journey.image):'',gallery_images:journey.gallery_images.map(asset),
+          is_active:false,is_featured:false,
+          itinerary_days:journey.itinerary_days.map(day=>({...day,elevation_meters:day.elevation_meters??'',accommodation_type:'TEAHOUSE',meals_included:[]})),
+        });
+        setSelectedTrekSlug('new');
+        setMessage(`Sample “${journey.title}” copied into a new CMS draft. Review the destination, photos, route details and elevations before saving or publishing.`);
+      } else if (slug === 'new') {
         setSelectedTrekDetail({
           title: '',
           slug: '',
@@ -683,9 +710,18 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
         savedSlug = created?.slug || savedSlug;
         successMessage = `Trek "${selectedTrekDetail.title}" created successfully. It is now loaded for editing.`;
       }
+      let verificationMessage='';
+      try {
+        if(!savedSlug)throw new Error('The CMS did not return a trip slug.');
+        const saved=await api<Record<string,unknown>>(`/api/admin/treks/${savedSlug}`);
+        const missing=unpersistedTripFields(payload,saved);
+        if(missing.length)verificationMessage=`Trip saved, but these fields did not survive a fresh CMS read: ${missing.join(', ')}. Review the trip before publishing.`;
+      }catch{
+        verificationMessage='Trip save was sent, but a fresh CMS read could not verify it. Reopen the trip before publishing.';
+      }
       await loadTreks();
       if (savedSlug) await loadTrekDetail(savedSlug);
-      setMessage(successMessage);
+      setMessage(verificationMessage||successMessage);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to save trek details.');
     } finally {
@@ -1493,6 +1529,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
               onQueryChange={setTrekQuery}
               onStatusFilterChange={setTrekStatusFilter}
               onSelectTrek={slug => void loadTrekDetail(slug)}
+              onImportPreview={id => void loadTrekDetail(`preview:${id}`)}
               onToggleActive={handleToggleTrekActive}
               onToggleFeatured={handleToggleTrekFeatured}
               onDeleteTrek={trek => setTrekToDelete(trek)}
@@ -1964,6 +2001,7 @@ function TagListManager({
   onChange: (newItems: string[]) => void;
 }) {
   const [inputVal, setInputVal] = useState('');
+  const inputId = React.useId();
 
   const handleAdd = () => {
     const trimmed = inputVal.trim();
@@ -1981,10 +2019,10 @@ function TagListManager({
   return (
     <div className={styles.tagGroup}>
       <div className={styles.tagGroupHeader}>
-        <div className={styles.tagGroupTitle}>
+        <label className={styles.tagGroupTitle} htmlFor={inputId}>
           {icon && <span>{icon}</span>}
           <span>{label}</span>
-        </div>
+        </label>
         <span className={styles.tagGroupCount}>{items.length} items</span>
       </div>
       <div className={styles.tagContainer}>
@@ -2011,6 +2049,7 @@ function TagListManager({
       </div>
       <div className={styles.tagAddRow}>
         <input
+          id={inputId}
           type="text"
           className={styles.tagAddInput}
           placeholder={placeholder}
@@ -2160,6 +2199,7 @@ function TrekManagementView({
   onQueryChange,
   onStatusFilterChange,
   onSelectTrek,
+  onImportPreview,
   onToggleActive,
   onToggleFeatured,
   onDeleteTrek,
@@ -2174,11 +2214,13 @@ function TrekManagementView({
   onQueryChange: (val: string) => void;
   onStatusFilterChange: (val: 'ALL' | 'ACTIVE' | 'INACTIVE' | 'FEATURED') => void;
   onSelectTrek: (slug: string) => void;
+  onImportPreview: (id: string) => void;
   onToggleActive: (trek: AdminTrek) => void;
   onToggleFeatured: (trek: AdminTrek) => void;
   onDeleteTrek: (trek: AdminTrek) => void;
   onSchedule: (trek: AdminTrek) => void;
 }) {
+  const [previewToImport,setPreviewToImport]=useState('');
   const filtered = useMemo(() => {
     return treks.filter(t => {
       if (statusFilter === 'ACTIVE' && !t.is_active) return false;
@@ -2219,6 +2261,7 @@ function TrekManagementView({
           </select>
         </div>
 
+        <div className={styles.trekImportControls}><label htmlFor="trek-preview-template">Start from a sample</label><select id="trek-preview-template" value={previewToImport} onChange={event=>setPreviewToImport(event.target.value)}><option value="">Choose a trek</option>{sampleTrekTemplates.filter(sample=>!treks.some(trek=>trek.slug===sample.slug)).map(sample=><option key={sample.id} value={sample.id}>{sample.title}</option>)}</select><button type="button" disabled={!previewToImport} onClick={()=>onImportPreview(previewToImport)}>Copy into CMS draft</button></div>
         <button type="button" className={styles.trekAddBtn} onClick={() => onSelectTrek('new')}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <line x1="12" y1="5" x2="12" y2="19" />
@@ -2608,6 +2651,7 @@ function TrekFullDetailEditor({
               required
               onChange={e => onChange(prev => prev ? {...prev, destination: e.target.value} : null)}
             >
+              <option value="">Choose a destination</option>
               {destinations.length > 0 ? (
                 destinations.map(d => (
                   <option key={d.id} value={d.id}>{d.name}</option>
@@ -2642,6 +2686,11 @@ function TrekFullDetailEditor({
                   </optgroup>
                 ))}
             </select>
+          </div>
+
+          <div className={styles.formFieldFull}>
+            <p className={styles.formLabel}>Secondary discovery tags</p>
+            <p className={styles.uploadHint}>Keep one destination as the trip’s geographic home. Tags can cross regions: {editorialTagOptions.map(tag=>tag.label).join(' · ')}. The current CMS does not store trip tags, so this editor cannot save them yet. Do not treat preview tags as published assignments.</p>
           </div>
 
           {/* Duration */}
@@ -2848,6 +2897,7 @@ function TrekFullDetailEditor({
                 </p>
               </div>
             </div>
+            {trek.hero_image_url&&<p className={styles.mediaError} role="status">Photo verification needed: the current CMS stores this image URL but not its exact location, photographer/credit, usage permission or descriptive alt text. Keep the trip as a draft until those details are recorded and approved.</p>}
           </div>
         </div>
 
@@ -2882,6 +2932,7 @@ function TrekFullDetailEditor({
             <span className={styles.uploadHint}>Select up to 12 images per upload</span>
           </div>
           {mediaError && <p className={styles.mediaError} role="alert">{mediaError}</p>}
+          {trek.gallery_images.length>0&&<p className={styles.mediaError} role="status">Gallery photos are unverified until each image has a confirmed location, credit, permission and alt text. This CMS does not persist those fields yet.</p>}
 
           <div className={styles.mediaGrid}>
             {(trek.gallery_images || []).map((imgUrl, idx) => (
@@ -2975,7 +3026,7 @@ function TrekFullDetailEditor({
             <span className={styles.sectionBadge}>03</span>
             <div>
               <h3 className={styles.detailCardTitle}>Seasons, Inclusions, Exclusions & Packing List</h3>
-              <p className={styles.detailCardSub}>Comprehensive preparation lists and gear guidance for travelers</p>
+              <p className={styles.detailCardSub}>Add or remove each item here. What’s Included and What’s Not Included appear on the public journey page after the trip is saved and published.</p>
             </div>
           </div>
         </div>
@@ -3214,7 +3265,7 @@ function TrekFullDetailEditor({
         defaultSeats={trek.max_group_size ? Number(trek.max_group_size) : undefined}
       />
 
-      <section className="publication-readiness"><h3>Before publishing</h3><p>Use approved trip information. Saving a draft keeps it off the public catalogue.</p><ul>{[['Approved description',Boolean(trek.overview.trim())],['Confirmed starting price',Number(trek.starting_price_usd)>0],['Cover photograph',Boolean(trek.hero_image_url)],['Inclusions, exclusions and preparation',trek.inclusions.length>0&&trek.exclusions.length>0&&trek.packing_list.length>0],['Day-by-day itinerary and elevations',trek.itinerary_days.length>0&&trek.itinerary_days.every(day=>Boolean(day.title&&day.overnight_stay)&&day.elevation_meters!==null&&day.elevation_meters!==undefined&&day.elevation_meters!==''&&Number.isFinite(Number(day.elevation_meters))&&Number(day.elevation_meters)>=0)]].map(([label,ready])=><li key={String(label)}>{ready?'✓':'○'} {label}</li>)}</ul><p>Add confirmed departure dates in Departures &amp; Capacity. Only publish authentic traveller reviews with permission.</p></section>
+      <section className="publication-readiness"><h3>Before publishing</h3><p>Use approved trip information. Saving a draft keeps it off the public catalogue.</p><ul>{[['Approved description',Boolean(trek.overview.trim())],['Confirmed starting price',Number(trek.starting_price_usd)>0],['Cover photograph',Boolean(trek.hero_image_url)],['Photo location, credit, permission and alt text recorded',false],['Inclusions, exclusions and preparation',trek.inclusions.length>0&&trek.exclusions.length>0&&trek.packing_list.length>0],['Day-by-day itinerary and elevations',trek.itinerary_days.length>0&&trek.itinerary_days.every(day=>Boolean(day.title&&day.overnight_stay)&&day.elevation_meters!==null&&day.elevation_meters!==undefined&&day.elevation_meters!==''&&Number.isFinite(Number(day.elevation_meters))&&Number(day.elevation_meters)>=0)]].map(([label,ready])=><li key={String(label)}>{ready?'✓':'○'} {label}</li>)}</ul><p>Photo provenance cannot be marked complete until the backend stores it per image. Add confirmed departure dates in Departures &amp; Capacity. Only publish authentic traveller reviews with permission.</p></section>
       {/* Footer Actions */}
       <div className={styles.detailTopNav}>
         <button type="button" className={styles.backBtn} onClick={onBack}>

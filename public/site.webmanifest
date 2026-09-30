@@ -1,0 +1,14 @@
+{
+  "name": "Dreamscape Treks",
+  "short_name": "Dreamscape",
+  "description": "Thoughtful trekking journeys through Nepal and the Himalaya.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f5ef",
+  "theme_color": "#153d2f",
+  "icons": [
+    { "src": "/icons/dreamscape-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/dreamscape-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

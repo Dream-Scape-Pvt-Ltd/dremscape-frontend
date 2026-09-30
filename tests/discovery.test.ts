@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {registerHooks} from 'node:module';
-import {trips,type Trip} from '../src/lib/catalog.ts';
-import {matchesCollection,journeyKind} from '../src/lib/navigation.ts';
+import {expeditionPreviewTrips,trips,type Trip} from '../src/lib/catalog.ts';
+import {climbingType,matchesCollection,journeyKind} from '../src/lib/navigation.ts';
 import {zoneForPlace} from '../src/lib/nepal-zones.ts';
 import {scheduledJourneys,departureState} from '../src/lib/departure-calendar.ts';
 import type {Departure} from '../src/lib/journeys.ts';
@@ -15,10 +15,23 @@ test('combined destination labels do not mix Mustang and Annapurna routes',()=>{
 });
 test('Nepal travel areas keep CMS routes in the right broad group',()=>{
   assert.deepEqual(trips.filter(t=>matchesCollection(t,{kind:'treks',zone:'eastern'})).map(t=>t.slug),['everest-base-camp-cho-la']);
+  assert.deepEqual(trips.filter(t=>matchesCollection(t,{kind:'treks',zone:'eastern',region:'Everest'})).map(t=>t.slug),['everest-base-camp-cho-la']);
+  assert.deepEqual(trips.filter(t=>matchesCollection(t,{kind:'treks',zone:'eastern',region:'Kanchenjunga'})).map(t=>t.slug),[]);
   assert.deepEqual(trips.filter(t=>matchesCollection(t,{kind:'treks',zone:'western'})).map(t=>t.slug),['annapurna-circuit-tilicho','manaslu-wild-circuit','upper-mustang']);
   assert.equal(matchesCollection({...trips[0],slug:'dolpo-phoksundo',title:'Dolpo & Phoksundo',destination_slug:'dolpo',destination_name:'Dolpo & West Nepal'},{zone:'mid-western'}),true);
   assert.equal(zoneForPlace('Langtang Valley'),'central');
   assert.equal(zoneForPlace('Saipal Himal'),'far-western');
+});
+test('a changed CMS destination and category replace old title-based collections',()=>{
+  const reassigned={...trips[0],destination_slug:'khaptad',destination_name:'Khaptad National Park'};
+  assert.equal(matchesCollection(reassigned,{kind:'treks',zone:'eastern'}),false);
+  assert.equal(matchesCollection(reassigned,{kind:'treks',zone:'far-western'}),true);
+  assert.equal(matchesCollection(reassigned,{kind:'treks',region:'Everest'}),false);
+  assert.equal(matchesCollection(reassigned,{kind:'treks',region:'Khaptad'}),true);
+  const recategorized={...reassigned,category_slug:'culture-sightseeing',category_name:'Culture & Sightseeing'};
+  assert.equal(matchesCollection(recategorized,{kind:'treks'}),false);
+  assert.equal(matchesCollection(recategorized,{kind:'tours',tour:'culture'}),true);
+  assert.equal(matchesCollection({...recategorized,category_slug:'luxury-tours',category_name:'Luxury Tours'},{kind:'tours',tour:'culture'}),false);
 });
 test('tour styles and climbing combine with geography without returning ordinary treks',()=>{
   const safari:Trip={...trips[0],slug:'chitwan-jungle-safari',title:'Chitwan Jungle Safari',category_slug:'wildlife-tours',category_name:'Wildlife Tours'};
@@ -30,6 +43,23 @@ test('tour styles and climbing combine with geography without returning ordinary
   assert.equal(matchesCollection(climbing,{kind:'expeditions',region:'everest'}),true);
   assert.equal(matchesCollection(climbing,{kind:'expeditions',region:'annapurna'}),false);
   assert.equal(matchesCollection({...trips[0],destination_slug:'paro',destination_name:'Bhutan',title:'Druk Path',slug:'druk-path'},{country:'bhutan'}),true);
+});
+test('climbing collections follow the saved CMS category, including after reassignment',()=>{
+  const expedition=expeditionPreviewTrips[0];
+  assert.equal(climbingType(expedition),'expedition');
+  assert.equal(matchesCollection(expedition,{kind:'expeditions',climb:'expedition'}),true);
+  assert.equal(matchesCollection(expedition,{kind:'expeditions',climb:'peak'}),false);
+  const moved={...expedition,category_slug:'peak-climbing',category_name:'Peak Climbing'};
+  assert.equal(climbingType(moved),'peak');
+  assert.equal(matchesCollection(moved,{kind:'expeditions',climb:'expedition'}),false);
+  assert.equal(matchesCollection(moved,{kind:'expeditions',climb:'peak'}),true);
+  assert.equal(matchesCollection(trips[0],{kind:'expeditions'}),false);
+});
+test('Bhutan place assignments determine country results even when the trip title omits Bhutan',()=>{
+  const assigned={...trips[0],title:'Druk Path',slug:'druk-path',destination_name:'Paro',destination_slug:'paro',destination_country:'BHUTAN'};
+  assert.equal(matchesCollection(assigned,{country:'bhutan'}),true);
+  assert.equal(matchesCollection(assigned,{country:'india'}),false);
+  assert.equal(matchesCollection({...assigned,destination_country:'INDIA'},{country:'bhutan'}),false);
 });
 test('upcoming calendar removes past/cancelled dates and keeps full trips in chronological order',()=>{
   const result=scheduledJourneys([

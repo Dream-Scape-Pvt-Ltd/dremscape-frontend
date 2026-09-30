@@ -24,6 +24,6 @@ function PhotoCard({photo,index}:{photo:MemoryPhoto;index:number}){
 }
 export default function PhotoShowcase(){
   const root=useRef<HTMLDivElement>(null);usePhotoLightbox(root);
-  return <div className="photo-showcase" ref={root}><div className="showcase-orbit" aria-hidden="true"/><span className="showcase-kicker">COLLECT MOMENTS, NOT MILES</span>{photos.map((photo,index)=><PhotoCard key={photo.id} photo={photo} index={index}/>)}<p className="showcase-note">Real trails. Real memories.<span>Tap a photograph to step inside ↗</span></p></div>;
+  return <div className="photo-showcase" ref={root}><span className="showcase-kicker">COLLECT MOMENTS, NOT MILES</span>{photos.map((photo,index)=><PhotoCard key={photo.id} photo={photo} index={index}/>)}<p className="showcase-note">Real trails. Real memories.<span>Tap a photograph to step inside ↗</span></p></div>;
 }
 

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Dreamscape mountain and pine mark">
+  <defs>
+    <linearGradient id="forest" x1="40" y1="20" x2="470" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#214f3d"/>
+      <stop offset="1" stop-color="#102f25"/>
+    </linearGradient>
+    <linearGradient id="summit" x1="140" y1="170" x2="363" y2="392" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fffaf0"/>
+      <stop offset="1" stop-color="#e6d19f"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#forest)"/>
+  <circle cx="371" cy="145" r="49" fill="#e9cc8e"/>
+  <path d="M64 374 193 190l59 82 69-123 127 225H64Z" fill="url(#summit)"/>
+  <path d="m193 190 31 43-26-8-25 19-16-4 36-50Zm128-41 43 77-37-18-23 18-22-10 39-67Z" fill="#fffdf7"/>
+  <path d="m64 374 112-92 39 16 43-26 39 17 46-34 105 119H64Z" fill="#b69a62" opacity=".58"/>
+  <path d="M255 231v143h-15V231h15Zm-7-15 35 39h-23l30 34h-21l30 34h-30l18 24h-78l18-24h-30l30-34h-21l30-34h-23l35-39Z" fill="#173d30"/>
+  <path d="M70 391h372" stroke="#f4e7c3" stroke-width="9" stroke-linecap="round" opacity=".85"/>
+</svg>

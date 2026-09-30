@@ -17,7 +17,7 @@ export const ENV = {
   /**
    * Company contact email
    */
-  COMPANY_EMAIL: process.env.NEXT_PUBLIC_COMPANY_EMAIL || 'dreamscapetrek@gmail.com',
+  COMPANY_EMAIL: process.env.NEXT_PUBLIC_COMPANY_EMAIL || 'info@dreamscapetreks.com',
 
   /**
    * Company contact WhatsApp phone number

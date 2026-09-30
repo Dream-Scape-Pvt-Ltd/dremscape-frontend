@@ -15,7 +15,7 @@ function panelPhoto(image: string) {
   try { return image ? asset(image) : fallbackMenuImage; } catch { return fallbackMenuImage; }
 }
 
-const inspiration = [{ label: 'All treks', href: '/treks?kind=treks' }, { label: 'Expeditions', href: '/treks?kind=expeditions' }, ...['Everest', 'Annapurna', 'Short treks', 'Bhutan'].map(name => ({ label: name, href: `/search?q=${encodeURIComponent(name)}` }))];
+const inspiration = [{ label: 'All treks', href: '/treks?kind=treks' }, { label: 'Expeditions', href: '/treks?kind=expeditions' }, ...[{label:'Eastern Nepal',zone:'eastern'},{label:'Central Nepal',zone:'central'},{label:'Western Nepal',zone:'western'},{label:'Mid-Western Nepal',zone:'mid-western'},{label:'Far-Western Nepal',zone:'far-western'}].map(({label,zone})=>({label,href:`/treks?kind=treks&zone=${zone}`}))];
 const hitLabel = { trek: 'Trek', expedition: 'Expedition', destination: 'Destination', story: 'Story' };
 
 export default function SiteHeader({ page = 'home', onPlan }: { page?: string; activeSection?: string; onPlan: () => void }) {
@@ -38,7 +38,7 @@ export default function SiteHeader({ page = 'home', onPlan }: { page?: string; a
   const term = query.trim();
   // Load the index the first time search opens, then answer every keystroke locally.
   const index = useSearchIndex(searchOpen);
-  const hits = useMemo(() => index && term.length >= 2 ? toHits(searchSite(term, index)) : [], [index, term]);
+  const hits = useMemo(() => index && term.length >= 2 ? toHits(searchSite(term, index),{preview:index.demo}) : [], [index, term]);
   const searching = term.length >= 2 && !index;
   const menus = useNavMenus();
   const groups = useMemo(() => navigationGroups(menus), [menus]);
