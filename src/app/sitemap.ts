@@ -9,12 +9,13 @@ import { destinationHref, guideHref, storyHref, trekHref } from '@/lib/links';
 const safely = async <T,>(load: () => Promise<T[]>): Promise<T[]> => { try { return await load(); } catch { return []; } };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://dreamscapetrek.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://dreamscapetreks.com';
   const currentDate = new Date();
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
-    ...['departures'].map(path=>({url:`${baseUrl}/${path}`,lastModified:currentDate,changeFrequency:'weekly' as const,priority:0.7})),
+    ...['departures','faq','tailor-made'].map(path=>({url:`${baseUrl}/${path}`,lastModified:currentDate,changeFrequency:'weekly' as const,priority:0.7})),
+    ...['destinations/nepal'].map(path=>({url:`${baseUrl}/${path}`,lastModified:currentDate,changeFrequency:'yearly' as const,priority:0.4})),
     {
       url: baseUrl,
       lastModified: currentDate,
@@ -62,40 +63,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: currentDate,
       changeFrequency: 'weekly',
       priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/privacy-policy`,
-      lastModified: currentDate,
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/terms-conditions`,
-      lastModified: currentDate,
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-  ];
-
-  // Authentication pages
-  const authPages: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/login`,
-      lastModified: currentDate,
-      changeFrequency: 'yearly',
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/register`,
-      lastModified: currentDate,
-      changeFrequency: 'yearly',
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/forgot-password`,
-      lastModified: currentDate,
-      changeFrequency: 'yearly',
-      priority: 0.3,
     },
   ];
 
@@ -153,7 +120,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Combine all pages
   return [
     ...staticPages,
-    ...authPages,
     ...destinationPages,
     ...activityPages,
     ...trekPages,

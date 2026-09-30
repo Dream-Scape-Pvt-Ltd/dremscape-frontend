@@ -78,6 +78,9 @@ export default function BackendStatus() {
   if (reconnected && state === 'up') {
     return <div className="connection-toast" role="status"><span aria-hidden="true">●</span> Connection restored. You’re back online.</div>;
   }
+  if (state === 'preview') {
+    return dismissed?null:<div className="preview-chip" role="status"><span><strong>Design preview</strong><small>No live offers or seats</small></span><button type="button" aria-label="Dismiss preview notice" onClick={()=>setDismissed(true)}>×</button></div>;
+  }
   if (dismissed || (state !== 'down' && state !== 'offline' && state !== 'unconfigured')) return null;
 
   const copy = connectionCopy[state];

@@ -106,13 +106,13 @@ export const journalPosts=[
   }
 ] as const;
 export const galleryPhotos=[
- {image:'heroContext-imgHimalayanAlpineSunriseWithPrayerFlagsAndSnowPeaks',title:'A horizon worth pausing for',group:'Landscapes'},
- {image:'151-209-imgGokyoRiSacredEmeraldLakes',title:'A different kind of blue',group:'Landscapes'},
- {image:'222-370-imgTibetanPrayerFlagsFlyingOnMountainRidge',title:'Written in the wind',group:'On the trail'},
- {image:'222-242-imgUpperMustangLoManthangWalledCityRedCliffs',title:'The colours of Mustang',group:'Culture'},
- {image:'222-370-imgTrekkersSmilingWithHimalayanSnowPeaksBackground',title:'Better when shared',group:'On the trail'},
- {image:'151-31-imgManasluAndTsumValleySanctuary',title:'The quieter horizon',group:'Landscapes'},
- {image:'222-465-imgAncientSkyCavesAndGompasInMustangNepal',title:'A story in the stone',group:'Culture'},
- {image:'151-209-imgKalaPattharSunrise5545M',title:'Before the day begins',group:'Landscapes'},
- {image:'222-370-imgHimalayanMountainPassTrekkerReflection',title:'One step, then another',group:'On the trail'},
+ {image:'heroContext-imgHimalayanAlpineSunriseWithPrayerFlagsAndSnowPeaks',title:'A horizon worth pausing for',group:'Landscapes',alt:'Prayer flags beside snowy Himalayan peaks at sunrise'},
+ {image:'151-209-imgGokyoRiSacredEmeraldLakes',title:'A different kind of blue',group:'Landscapes',alt:'Blue-green lakes below rocky Himalayan slopes'},
+ {image:'222-370-imgTibetanPrayerFlagsFlyingOnMountainRidge',title:'Written in the wind',group:'On the trail',alt:'Prayer flags fluttering along a mountain ridge'},
+ {image:'222-242-imgUpperMustangLoManthangWalledCityRedCliffs',title:'The colours of Mustang',group:'Culture',alt:'Red cliffs and settlement in the Mustang landscape'},
+ {image:'222-370-imgTrekkersSmilingWithHimalayanSnowPeaksBackground',title:'Better when shared',group:'On the trail',alt:'Trekkers together with snowy mountains behind them'},
+ {image:'151-31-imgManasluAndTsumValleySanctuary',title:'The quieter horizon',group:'Landscapes',alt:'Himalayan valley framed by snowy peaks'},
+ {image:'222-465-imgAncientSkyCavesAndGompasInMustangNepal',title:'A story in the stone',group:'Culture',alt:'Cliffside caves and traditional buildings in Mustang'},
+ {image:'151-209-imgKalaPattharSunrise5545M',title:'Before the day begins',group:'Landscapes',alt:'Sunrise light falling across Himalayan peaks'},
+ {image:'222-370-imgHimalayanMountainPassTrekkerReflection',title:'One step, then another',group:'On the trail',alt:'Trekker on a rocky mountain pass'},
 ] as const;

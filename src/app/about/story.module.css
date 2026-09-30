@@ -18,12 +18,14 @@
 .signature { margin-top:32px; font-weight:650; font-size:15px; }
 .signature span { display:block; font-size:11px; font-weight:400; margin-top:4px; }
 .profiles { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:26px; align-items:start; margin-top:42px; }
-.profile { overflow:hidden; background:#fff; border:1px solid #24453b18; border-radius:22px; box-shadow:0 12px 32px #173f320b; padding-top:28px; }
-.portrait { width:164px; height:164px; display:flex; align-items:center; justify-content:center; overflow:hidden; margin:0 auto; border-radius:50%; border:4px solid #f1f5f0; background:#e8eee9; color:#305647; font-size:48px; font-weight:600; box-shadow:0 7px 20px #173f3214; }
-.portrait img { display:block; width:100%; height:100%; object-fit:cover; object-position:center 26%; }
-.profileContent { padding:22px 32px 30px; }
+.profile { overflow:hidden; background:#fff; border:1px solid #24453b18; border-radius:22px; box-shadow:0 12px 32px #173f320b; padding-top:0; }
+.portrait { width:100%; aspect-ratio:4/3; display:flex; align-items:center; justify-content:center; overflow:hidden; margin:0; border:0; border-radius:0; background:linear-gradient(145deg,#f3f5ef,#e7ece5); color:#305647; font-size:48px; font-weight:600; }
+.portrait img { display:block; width:100%; height:100%; object-fit:contain; object-position:center; }
+.portraitCeo { width:100%; height:auto; border:0; }
+.portraitCeo img { object-fit:contain; object-position:center; }
+.profileContent { padding:24px 32px 32px; }
 .profiles h3 { font-size:25px; letter-spacing:-.7px; line-height:1.2; margin:10px 0 17px; color:#173f32; }
 .profiles p { font-size:14px; color:#526c62; }
-.profiles .eyebrow { font-size:10px; line-height:1.7; color:#3a7659; }
+.profiles .eyebrow { font-size:12px; line-height:1.7; letter-spacing:.06em; color:#3a7659; }
 @media(max-width:900px) { .letter { gap:32px; padding:32px; } .profiles { gap:18px; } }
-@media(max-width:640px) { .letter { grid-template-columns:1fr; padding:28px 24px; width:calc(100% - 40px); } .index { gap:6px 20px; } .index a { font-size:11px; } .beyond > img { position:static; } .profiles { grid-template-columns:1fr; } .profile { padding-top:22px; } .portrait { width:138px; height:138px; } .profileContent { padding:18px 24px 24px; } }
+@media(max-width:640px) { .letter { grid-template-columns:1fr; padding:28px 24px; width:calc(100% - 40px); } .index { gap:6px 20px; } .index a { font-size:11px; } .beyond > img { position:static; } .profiles { grid-template-columns:1fr; } .profile { padding-top:0; border-radius:18px; } .portrait { aspect-ratio:1/1; } .profileContent { padding:20px 22px 26px; } .profiles h3 { font-size:23px; } }

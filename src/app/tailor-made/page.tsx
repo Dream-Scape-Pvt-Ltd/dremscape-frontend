@@ -1,0 +1,6 @@
+import JourneyShell from '@/components/journey-shell';
+import InquiryForm from '@/components/inquiry-form';
+
+export const metadata={title:'Tailor-made journeys | Dreamscape Treks',description:'Share your preferred dates, travel style and ideas for a personally planned Nepal journey.'};
+
+export default function Page(){return <JourneyShell page="tailor-made"><section className="container section tailor-page"><div className="tailor-intro"><p className="eyebrow">YOUR JOURNEY, YOUR PACE</p><h1>Make the trail your own.</h1><p>Choose a route as inspiration or start from a place you want to see. Tell us when you want to go, who is travelling and what matters most. Our team will shape a proposal around your plans.</p><div className="tailor-points"><span>01 · Share your idea</span><span>02 · Talk through the route</span><span>03 · Review a personal proposal</span></div></div><div className="tailor-form"><h2>Tell us what you have in mind.</h2><p>Your preferred date is a starting point. This form sends an inquiry, not a confirmed booking.</p><InquiryForm journey="a tailor-made Nepal journey" extended preferences initialMessage="I’d like to plan a tailor-made journey. The places and experiences I’m interested in are: "/></div></section></JourneyShell>}

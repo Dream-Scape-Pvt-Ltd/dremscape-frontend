@@ -23,6 +23,7 @@ export default function Destinations({regions=[]}:{regions?:Region[]}) {
   const [inquiry, setInquiry] = useState<string | null>(null);
   const [trips, setTrips] = useState<Trip[]>([]),
     [loading, setLoading] = useState(true),
+    [demo, setDemo] = useState(false),
     [error, setError] = useState('');
 
   async function load() {
@@ -33,6 +34,7 @@ export default function Destinations({regions=[]}:{regions?:Region[]}) {
       const body = await r.json();
       if (!r.ok) throw new Error(body.error);
       setTrips(body.trips);
+      setDemo(Boolean(body.demo));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unable to load journeys.');
     } finally {
@@ -240,7 +242,7 @@ export default function Destinations({regions=[]}:{regions?:Region[]}) {
               <button className="button green" onClick={() => void load()}>Try again</button>
             </div>
           ) : journeys.length ? (
-            <div className="trip-grid">{journeys.map(t => <JourneyCard key={t.slug} trip={t} />)}</div>
+            <div className="trip-grid">{journeys.map(t => <JourneyCard key={t.slug} trip={t} preview={demo} />)}</div>
           ) : (
             <div className="status">
               <h3>Your trail can start with a conversation.</h3>

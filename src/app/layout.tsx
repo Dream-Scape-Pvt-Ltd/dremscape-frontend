@@ -24,12 +24,25 @@ import './brand-correction.css';
 import './connection-status.css';
 import PageMotion from '@/components/page-motion';
 import BackendStatus from '@/components/backend-status';
+import CookieConsent from '@/components/cookie-consent';
+import './cookie-consent.css';
 import {AuthProvider} from '@/context/AuthContext';
 
 export const metadata: Metadata = {
   metadataBase:new URL(publicSiteUrl()),
   title: 'Dreamscape Treks — Beyond the Horizon',
   description: 'Explore the sacred Himalayas of Nepal. Discover trekking journeys through Everest, Annapurna, Mustang and Manaslu with Dreamscape Treks.',
+  openGraph:{type:'website',siteName:'Dreamscape Treks',title:'Dreamscape Treks — Beyond the Horizon',description:'Explore trekking journeys across Nepal with Dreamscape Treks.',images:[{url:'/opengraph-image',width:1200,height:630,alt:'Dreamscape Treks — Beyond the Horizon'}]},
+  twitter:{card:'summary_large_image',title:'Dreamscape Treks — Beyond the Horizon',description:'Explore trekking journeys across Nepal with Dreamscape Treks.',images:['/opengraph-image']},
+  manifest: '/site.webmanifest',
+  appleWebApp: {capable: true, title: 'Dreamscape', statusBarStyle: 'black-translucent'},
+  icons: {
+    icon: [
+      {url: '/icons/dreamscape-mark.svg', type: 'image/svg+xml'},
+      {url: '/icons/dreamscape-192.png', sizes: '192x192', type: 'image/png'},
+    ],
+    apple: [{url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png'}],
+  },
 };
 
 export default function RootLayout({
@@ -40,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
-        <StructuredData data={{"@context":"https://schema.org","@type":"TravelAgency",name:"Dreamscape Treks",url:publicSiteUrl()}}/><AuthProvider>{children}<PageMotion/><BackendStatus/></AuthProvider>
+        <StructuredData data={{"@context":"https://schema.org","@type":"TravelAgency",name:"Dreamscape Treks",url:publicSiteUrl()}}/><AuthProvider>{children}<PageMotion/><BackendStatus/></AuthProvider><CookieConsent/>
       </body>
     </html>
   );
@@ -54,7 +67,12 @@ import './guides.css';
 import './discovery-navigation.css';
 import './departures.css';
 import './homepage-discovery.css';
+import './trek-page.css';
 
 import './trip-experience.css';
 
 import './visual-repair.css';
+import './trek-snapshot.css';
+import './itinerary-refresh.css';
+// Final catalog and landscape rules live after legacy global styles.
+import './experience-tune.css';

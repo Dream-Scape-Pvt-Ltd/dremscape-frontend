@@ -1,4 +1,5 @@
-import {trips as sampleTrips,type Trip} from './catalog';
+import {previewTrips as sampleTrips,type Trip} from './catalog';
+import {normalizeEditorialTags} from './editorial-tags';
 import {backend, backendConfigured, BackendError} from './backend';
 import {isUuid} from './links';
 
@@ -15,7 +16,7 @@ function publicImage(value: unknown): string | undefined {
 }
 export function normalizeTrip(raw:RawTrip):Trip {
   if (!raw || typeof raw.slug!=='string' || !/^[\w-]+$/.test(raw.slug) || typeof raw.title!=='string' || !Number.isFinite(raw.duration_days) || !Number.isFinite(Number(raw.starting_price_usd))) throw new BackendError('The journey data is incomplete. Please contact the team.');
-  const trip={...raw, destination_name:raw.destination?.name??raw.destination_name, destination_slug:raw.destination?.slug??raw.destination_slug, destination_id:raw.destination?.id??raw.destination_id, category_name:raw.category?.name??raw.category_name, category_slug:raw.category?.slug??raw.category_slug, hero_image_url:publicImage(raw.hero_image_url), gallery_images:Array.isArray(raw.gallery_images)?raw.gallery_images.map(publicImage).filter((image):image is string=>Boolean(image)):[], image:publicImage(raw.hero_image_url)};
+  const trip={...raw, destination_name:raw.destination?.name??raw.destination_name, destination_slug:raw.destination?.slug??raw.destination_slug, destination_id:raw.destination?.id??raw.destination_id, category_name:raw.category?.name??raw.category_name, category_slug:raw.category?.slug??raw.category_slug, editorial_tags:normalizeEditorialTags(raw.editorial_tags), hero_image_url:publicImage(raw.hero_image_url), gallery_images:Array.isArray(raw.gallery_images)?raw.gallery_images.map(publicImage).filter((image):image is string=>Boolean(image)):[], image:publicImage(raw.hero_image_url)};
   if(![trip.destination_name,trip.destination_slug,trip.category_name,trip.category_slug,trip.difficulty_grade].every(v=>typeof v==='string')||raw.starting_price_usd==null||Number(raw.starting_price_usd)<0)throw new BackendError('The journey data is incomplete. Please contact the team.');
   return trip;
 }
@@ -30,9 +31,9 @@ export async function allPages<T>(path:string):Promise<T[]> {
   throw new BackendError('The catalog is too large to load. Please contact the team.');
 }
 export async function listJourneys() {
-  if (!backendConfigured()) return {trips:[] as Trip[], demo:false};
+  if (!backendConfigured()) return {trips:[],demo:false};
   // Follow numbered pages, never an arbitrary URL supplied by an upstream response.
-  return {trips:(await allPages<RawTrip>('trips/')).map(normalizeTrip),demo:false};
+  return {trips:(await allPages<RawTrip>('trips/')).filter(trip=>trip.is_active!==false).map(normalizeTrip),demo:false};
 }
 function sampleJourney(ref:string): Journey | undefined {
   const trip=sampleTrips.find(item=>item.id===ref||item.slug===ref);
@@ -46,6 +47,26 @@ function sampleJourney(ref:string): Journey | undefined {
   };
   type SampleDay=[title:string,overnight:string,description:string];
   const routeCopy:Record<string,{overview:string;days:SampleDay[]}>= {
+    'everest-expedition-preview':{
+      overview:'An Everest expedition concept for the climbing collection. The route, duration, team, permit requirements, safety plan and cost still need to be supplied and approved by Dreamscape. The number of days shown here is only a layout placeholder. This is not a published departure or bookable offer.',
+      days:[],
+    },
+    'annapurna-expedition-preview':{
+      overview:'An Annapurna expedition concept for the climbing collection. The route, duration, team, permit requirements, safety plan and cost still need to be supplied and approved by Dreamscape. The number of days shown here is only a layout placeholder. This is not a published departure or bookable offer.',
+      days:[],
+    },
+    'kathmandu-valley-heritage-day-preview':{
+      overview:'A one-day idea for discovering Kathmandu Valley through its streets, craft traditions and historic places. The precise stops and timing are flexible and will be shaped around your interests.\n\nThis is a design preview, not a confirmed guided tour or quoted offer.',
+      days:[['Explore the valley','','Choose a few heritage stops and leave time to meet local makers or enjoy a relaxed lunch.']],
+    },
+    'chitwan-nature-escape-preview':{
+      overview:'A slower three-day nature break with time for forest surroundings, local culture and guided activities selected with the team. Wildlife sightings are never guaranteed.\n\nThis is an illustrative concept; transport, accommodation and activities need confirmation.',
+      days:[['Travel toward Chitwan','Chitwan','Settle in and talk through the activities that interest you.'],['A day in nature','Chitwan','Explore with a local guide through activities agreed in your final plan.'],['Return journey','Kathmandu','Allow time for the return transfer or onward travel.']],
+    },
+    'nepal-comfort-journey-preview':{
+      overview:'A flexible Nepal journey concept designed around a calmer pace, comfortable stays and a mix of city life and mountain scenery. The route can be adjusted to suit your dates and interests.\n\nThis is a design preview; the team will confirm the services and quote in a personal proposal.',
+      days:[['Arrive and settle in','Kathmandu','Meet the team and review your preferred pace.'],['Kathmandu at your pace','Kathmandu','Choose cultural stops and time to explore independently.'],['Travel toward Pokhara','Pokhara','Move west with room for scenic breaks.'],['A lakeside day','Pokhara','Enjoy an unhurried day shaped around your interests.'],['Mountain views','Pokhara','Plan a gentle viewpoint or another local activity with the team.'],['Return to Kathmandu','Kathmandu','Travel back at a comfortable pace.'],['Departure day','Kathmandu','Leave time for onward travel.']],
+    },
     'upper-mustang':{
       overview:'Follow the Kali Gandaki valley into the wide, sculpted landscape of Upper Mustang. The route moves between red cliffs, old trading villages and the walled town of Lo Manthang. Time on the trail is balanced with time to look closer at the culture that makes this region distinctive.\n\nThis is a sample 12-day outline. Walking stages, permits, transport and accommodation will be confirmed with a Dreamscape guide before booking.',
       days:[
@@ -104,7 +125,9 @@ function sampleJourney(ref:string): Journey | undefined {
   // Reference: https://lovehimalayajourney.com/treks/everest-base-camp-gokyo-cho-la-trek
   const previewElevations:Record<string,number>={Kathmandu:1400,Phakding:2652,'Namche Bazaar':3440,Tengboche:3860,Dingboche:4410,Lobuche:4910,'Gorak Shep':5164,Dzongla:4835,Thagnak:4700,Gokyo:4790,Dole:4200,Lukla:2860};
   const itinerary_days=(content?.days||[]).map(([title,overnight_stay,description],index)=>({day_number:index+1,title,description,overnight_stay,elevation_meters:slug==='everest-base-camp-cho-la'?(previewElevations[overnight_stay]??null):null,is_acclimatization_day:/acclimatization/i.test(title)}));
-  return {...trip,image:slug==='upper-mustang'?'/images/treks/lo-manthang.jpg':trip.image,overview:content?.overview||`A sample outline for ${trip.title}. Ask our team for the latest route plan.`,min_group_size:0,max_group_size:0,best_seasons:[],inclusions:['Local trekking guide','Accommodation along the route','Required local permits','Travel between the planned trail stages'],exclusions:['International flights','Travel insurance','Personal gear and purchases','Tips and extra drinks'],packing_list:['Comfortable, broken-in walking boots','Warm layers and waterproof outerwear','Sun protection','Reusable water bottle'],gallery_images:gallery[slug]||[],itinerary_days,departures:[]};
+  const isTour=/tour|cultur|sightseeing|wildlife|luxury/i.test(`${trip.category_slug} ${trip.category_name}`);
+  const isClimbingPreview=slug==='everest-expedition-preview'||slug==='annapurna-expedition-preview';
+  return {...trip,image:slug==='upper-mustang'?'/images/treks/lo-manthang.jpg':trip.image,overview:content?.overview||`A sample outline for ${trip.title}. Ask our team for the latest route plan.`,min_group_size:0,max_group_size:0,best_seasons:[],inclusions:isClimbingPreview?[]:isTour?['A tailored activity plan agreed before travel','Local support for the arranged experiences',trip.duration_days===1?'Transport as specified in your proposal':'Transport and accommodation as specified in your proposal']:['Local trekking guide','Accommodation along the route','Required local permits','Travel between the planned trail stages'],exclusions:isClimbingPreview?[]:['International flights','Travel insurance','Personal purchases','Tips and extra drinks'],packing_list:isClimbingPreview?[]:isTour?['Comfortable walking shoes','Sun protection','Water bottle']:['Comfortable, broken-in walking boots','Warm layers and waterproof outerwear','Sun protection','Reusable water bottle'],gallery_images:gallery[slug]||[],itinerary_days,departures:[]};
 }
 /** The published guides who lead a trek, as the trip detail returns them. Malformed rows are dropped. */
 function journeyGuides(value:unknown):JourneyGuide[] {
@@ -119,7 +142,7 @@ function journeyGuides(value:unknown):JourneyGuide[] {
 export async function getJourney(ref:string) {
   if(!/^[\w-]+$/.test(ref)) throw new BackendError('Journey not found.',404);
   if(!backendConfigured()) {
-    const sample=sampleJourney(ref);
+    const sample=process.env.NODE_ENV==='development'?sampleJourney(ref):undefined;
     if(sample)return {journey:sample,demo:true};
     throw new BackendError('Journey not found.',404);
   }
@@ -133,14 +156,35 @@ export async function getJourney(ref:string) {
     ]);
   }
   catch(error) {
+    // A preview's old UUID may be bookmarked. Once its route is published in
+    // the CMS, resolve that bookmark by the matching slug instead of showing
+    // the hardcoded sample forever.
+    if(error instanceof BackendError&&error.status===404){
+      const preview=sampleJourney(ref);
+      if(preview&&preview.slug!==ref){
+        try{
+          [raw,departures]=await Promise.all([
+            backend<Journey & RawTrip>(`trips/${encodeURIComponent(preview.slug)}/`),
+            allPages<Departure>(`trips/${encodeURIComponent(preview.slug)}/departures/`),
+          ]);
+        }catch(fallbackError){
+          if(fallbackError instanceof BackendError&&fallbackError.status===404&&process.env.NODE_ENV==='development')return {journey:preview,demo:true};
+          if(process.env.NODE_ENV==='development')return {journey:preview,demo:true};
+          throw fallbackError;
+        }
+      }else if(preview&&process.env.NODE_ENV==='development')return {journey:preview,demo:true};
+      else throw error;
+    }else{
     // Keep known preview routes open while the CMS has no matching record yet.
-    if(error instanceof BackendError && error.status===404) {
+    if(process.env.NODE_ENV==='development') {
       const sample=sampleJourney(ref);
       if(sample)return {journey:sample,demo:true};
     }
     throw error;
+    }
   }
 
+  if(raw.is_active===false)throw new BackendError('Journey not found.',404);
   if(!Array.isArray(raw.itinerary_days)||!Array.isArray(raw.departures)) throw new BackendError('The itinerary response is incomplete.');
   for(const key of ['inclusions','exclusions','best_seasons','packing_list'] as const)if(!Array.isArray(raw[key])||!raw[key].every(v=>typeof v==='string'))throw new BackendError('The itinerary response is incomplete.');
   if(typeof raw.overview!=='string')throw new BackendError('The itinerary response is incomplete.');
@@ -152,7 +196,7 @@ export async function getJourney(ref:string) {
  */
 export async function listRelatedJourneys(current:Trip,limit=3):Promise<Trip[]> {
   if(!backendConfigured()) return [];
-  const page=(query:string)=>backend<{results:RawTrip[]}>(`trips/?${query}`).then(data=>Array.isArray(data.results)?data.results.map(normalizeTrip):[]);
+  const page=(query:string)=>backend<{results:RawTrip[]}>(`trips/?${query}`).then(data=>Array.isArray(data.results)?data.results.filter(trip=>trip.is_active!==false).map(normalizeTrip):[]);
   const [sameRegion,others]=await Promise.all([
     page(`destination=${encodeURIComponent(current.destination_slug)}&page_size=${limit+1}`),
     page(`page_size=${limit*2+1}`),

@@ -71,7 +71,7 @@ body .journey-page .trek-v2 .trek-facts-row dd{margin:0;font-size:17px;font-weig
 body .journey-page .trek-v2 .trek-note{margin:22px 0 0;padding:14px 18px;border-left:3px solid var(--brass);background:#fff;font-size:14px;color:#3d5448}
 
 /* ---- In-page navigation ---- */
-body .journey-page .trek-v2 .trek-jump{position:sticky;top:92px;z-index:5;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:26px 0 0;padding:8px 0;background:var(--glacier)}
+body .journey-page .trek-v2 .trek-jump{position:static;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:26px 0 0;padding:8px 0;background:var(--glacier)}
 body .journey-page .trek-v2 .trek-jump a{flex:none;padding:8px 14px;border-radius:999px;font-size:13.5px;font-weight:600;color:var(--forest)}
 body .journey-page .trek-v2 .trek-jump a:hover,body .journey-page .trek-v2 .trek-jump a:focus-visible{background:#153d2f12}
 
@@ -142,7 +142,7 @@ body .journey-page .trek-v2 .related-treks{margin-top:40px}
   body .journey-page .trek-v2 .trek-cta{display:grid;grid-template-columns:1fr 1fr}
   body .journey-page .trek-v2 .trek-cta .button{min-width:0;padding:12px 10px}
   body .journey-page .trek-v2 .trek-facts-row{grid-template-columns:1fr 1fr}
-  body .journey-page .trek-v2 .trek-jump{top:84px;margin-left:-4px}
+  body .journey-page .trek-v2 .trek-jump{margin-left:-4px}
   .ascent-log li{grid-template-columns:34px minmax(0,1fr);gap:8px 14px}
   .ascent-day{font-size:22px;grid-row:1/3}
   .ascent-meter{grid-column:2;margin-top:4px}

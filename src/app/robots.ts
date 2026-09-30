@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://dreamscapetrek.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://dreamscapetreks.com';
 
   return {
     rules: [
@@ -18,6 +18,9 @@ export default function robots(): MetadataRoute.Robots {
           '/payment',
           '/payment/*',
           '/api/*',
+          '/login',
+          '/register',
+          '/forgot-password',
         ],
       },
     ],

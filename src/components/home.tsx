@@ -5,7 +5,7 @@ import { storyHref } from '@/lib/links';
 import Link from 'next/link';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { asset } from '@/lib/assets';
-import { trips as sampleTrips, type Trip } from '@/lib/catalog';
+import type {Trip} from '@/lib/catalog';
 import { filterHomeTrips } from '@/lib/home-filters';
 import HomeSlideshow from './home-slideshow';
 import JourneySelect from './journey-select';
@@ -17,6 +17,7 @@ import JourneyCard from './journey-card';
 import InquiryForm from './inquiry-form';
 import { journalPosts } from '@/lib/editorial-content';
 import { nepalZones } from '@/lib/nepal-zones';
+import { homepageRegions } from '@/lib/homepage-regions';
 import type { HomeReview } from '@/lib/homepage-reviews';
 
 function Icon({ name = 'heroContext-imgSvg', className = '' }: { name?: string; className?: string }) { return <img className={`icon ${className}`} src={asset(name)} width="18" height="18" alt="" />; }
@@ -47,7 +48,7 @@ export default function Home({ articles = defaultArticles, reviews = [], reviews
 
   async function loadCatalog() {
     setLoading(true); setError('');
-    try { const response = await fetch('/api/trips'); const data = await response.json(); if (!response.ok) throw new Error(data.error); const hasPublishedJourneys = data.trips.length > 0; setCatalog(hasPublishedJourneys ? data.trips : sampleTrips); setDemo(data.demo || !hasPublishedJourneys); }
+    try { const response = await fetch('/api/trips'); const data = await response.json(); if (!response.ok) throw new Error(data.error); setCatalog(data.trips); setDemo(Boolean(data.demo)); }
     catch (e) { setError(e instanceof Error ? e.message : 'Could not load journeys.'); }
     finally { setLoading(false); }
   }
@@ -62,8 +63,8 @@ export default function Home({ articles = defaultArticles, reviews = [], reviews
   }, []);
   useEffect(() => { if (modal) { lastFocus.current = document.activeElement as HTMLElement; dialog.current?.showModal(); document.body.style.overflow = 'hidden'; } else { dialog.current?.close(); document.body.style.overflow = ''; lastFocus.current?.focus(); } return () => { document.body.style.overflow = ''; }; }, [modal]);
   function openInquiry(title = 'Plan your Himalayan journey', message = '') { setModal({ kind: 'inquiry', title, message }); }
-  function search(event: FormEvent) { event.preventDefault(); setFilters({ destination, difficulty, budget }); setSearched(true); document.getElementById('journeys')?.scrollIntoView({ behavior: 'smooth' }); }
-  const visible = filterHomeTrips(catalog, filters, destinationCountries);
+  function search(event: FormEvent) { event.preventDefault(); setFilters({ destination, difficulty, budget: demo ? '' : budget }); setSearched(true); document.getElementById('journeys')?.scrollIntoView({ behavior: 'smooth' }); }
+  const visible = filterHomeTrips(catalog, demo ? { ...filters, budget: '' } : filters, destinationCountries);
   return <>
     <a className="skip-link" href="#main">Skip to content</a>
     <SiteHeader activeSection={activeSection} onPlan={() => openInquiry()} />
@@ -79,27 +80,41 @@ export default function Home({ articles = defaultArticles, reviews = [], reviews
         <form className="search-form" onSubmit={search}>
           <JourneySelect label="Destination" value={destination} onChange={setDestination} options={parseOptions(finderDestinations)} />
           <JourneySelect label="Difficulty" value={difficulty} onChange={setDifficulty} options={parseOptions(finderDifficulties)} />
-          <JourneySelect label="Budget · USD / person" value={budget} onChange={setBudget} options={parseOptions(finderBudgets)} />
+          {!demo && <JourneySelect label="Budget · USD / person" value={budget} onChange={setBudget} options={parseOptions(finderBudgets)} />}
           <button className="button green" type="submit">Find my journey <span aria-hidden="true">↗</span></button>
         </form>
       </section>
       <section className="trust container reveal" aria-label="Why travel with Dreamscape">{[['Dreamscape Treks since 2005', 'Local knowledge and personal connections'], ['Planned around you', 'Thoughtful routes shaped to your pace'], ['People before peaks', 'Respect for our mountain communities'], ['Travel a little lighter', 'Care for the places we call home']].map(([title, text], i) => <div key={title}><span className="trust-icon"><Icon name={`222-3-imgSvg${i || ''}`} /></span><h3>{title}</h3><p>{text}</p></div>)}</section>
+      <section className="home-activities container section" aria-labelledby="home-activities-title">
+        <div className="section-heading"><div><Eyebrow>Choose your kind of journey</Eyebrow><h2 id="home-activities-title">Three ways into the Himalaya.</h2></div><p>Start with the experience that feels right. You can explore the journeys in each collection.</p></div>
+        <div className="home-activity-grid">
+          <Link className="home-activity-card" href="/treks?kind=treks">
+            <Photo name="222-370-imgHimalayanMountainPassTrekkerReflection" alt="A trekker on a high Himalayan trail" />
+            <span className="home-activity-number">01 · ON FOOT</span><div><h3>Trekking</h3><p>Follow mountain trails through changing landscapes, villages and high valleys.</p><span className="home-activity-link">Explore trekking <span aria-hidden="true">↗</span></span></div>
+          </Link>
+          <Link className="home-activity-card" href="/treks?kind=expeditions&amp;climb=peak">
+            <Photo name="222-78-imgAnnapurnaRangeAndHighGlacialLakesNepal" alt="Snow covered Himalayan peaks above a glacial lake" />
+            <span className="home-activity-number">02 · A HIGHER GOAL</span><div><h3>Peak Climbing</h3><p>Explore climbing journeys for travellers ready to take on a mountain summit.</p><span className="home-activity-link">Explore peak climbing <span aria-hidden="true">↗</span></span></div>
+          </Link>
+          <Link className="home-activity-card" href="/treks?kind=expeditions&amp;climb=expedition">
+            <Photo name="222-78-imgNepalEverestBaseCampAndAmaDablamPeak" alt="The high Himalayan landscape of the Everest region" />
+            <span className="home-activity-number">03 · THE BIG MOUNTAINS</span><div><h3>Expeditions</h3><p>Explore ambitious mountain objectives and longer climbing journeys.</p><span className="home-activity-link">Explore expeditions <span aria-hidden="true">↗</span></span></div>
+          </Link>
+        </div>
+      </section>
       <section className="section container" id="journeys"><div className="section-heading reveal"><div><Eyebrow>Handpicked expeditions</Eyebrow><h2>{searched ? 'Find Your Himalayan Journey' : 'Featured Himalayan Journeys'}</h2></div><a className="text-link" href="/treks">View All Journeys <Icon /></a></div>
-        {demo && <p className="catalog-note">Route ideas to help you start dreaming. Itineraries, pricing and departures are confirmed with our team.</p>}
+        {demo && <p className="catalog-note">Route ideas to help you start dreaming. Itineraries, prices and departures still need confirmation from our team.</p>}
         {loading ? <p className="status" role="status">Finding your next adventure…</p> : error ? <div className="status" role="alert"><p>{error}</p><button className="button green" onClick={() => void loadCatalog()}>Try again</button></div> : visible.length === 0 ? <div className="status"><h3>No journeys match these filters yet.</h3><p>Try another region or ask us to tailor a journey for you.</p><button className="button gold" onClick={() => openInquiry('Create a custom journey', 'I’m interested in a personally planned journey.')}>Build My Journey <Icon /></button></div> : <><div className={`trip-grid${searched ? ' trip-grid-results' : ''}`}>{(searched ? visible : visible.slice(0, 4)).map(trip => <JourneyCard key={trip.slug} trip={trip} preview={demo} />)}</div>{!searched && visible.length > 1 && <p className="home-trip-swipe">Swipe to explore the journeys <span aria-hidden="true">→</span></p>}</>}
       </section>
       <UpcomingDepartures />
-      <section className="container section home-regions" id="destinations"><div className="section-heading"><div><Eyebrow>Six ways into the Himalaya</Eyebrow><h2>Find your corner of Nepal.</h2></div><Link className="text-link" href="/destinations/nepal">Explore Nepal <span aria-hidden="true">↗</span></Link></div><div className="home-region-grid">{homepageRegions.map(region => <Link className="home-region-card" key={region.value} href={region.href}><Photo name={region.image} alt={`${region.label} landscape`} /><div><h3>{region.label}</h3><p>{region.description}</p><span aria-hidden="true">↗</span></div></Link>)}</div><div className="home-beyond"><div><p className="eyebrow">BEYOND NEPAL</p><h3>Let the journey take you further.</h3><p>Explore Bhutan, Tibet and India with our team.</p></div><Link className="text-link" href="/destinations/beyond-nepal">Discover beyond Nepal <span aria-hidden="true">↗</span></Link></div></section>
+      <section className="container section home-regions" id="destinations"><div className="section-heading"><div><Eyebrow>Five trekking regions across Nepal</Eyebrow><h2>Find your corner of Nepal.</h2></div><Link className="text-link" href="/destinations/nepal">Explore Nepal <span aria-hidden="true">↗</span></Link></div><div className="home-region-grid">{homepageRegions.map(region => <Link className="home-region-card" key={region.value} href={region.href}><Photo name={region.image} alt={`${region.label} landscape`} /><div><h3>{region.label}</h3><p>{region.description}</p><small>{region.highlights}</small><span aria-hidden="true">↗</span></div></Link>)}</div><div className="home-beyond"><div><p className="eyebrow">BEYOND NEPAL</p><h3>Let the journey take you further.</h3><p>Explore Bhutan, Tibet and India with our team.</p></div><Link className="text-link" href="/destinations/beyond-nepal">Discover beyond Nepal <span aria-hidden="true">↗</span></Link></div></section>
       <section id="about" className="story section">
         <div className="story-wave story-wave-top" aria-hidden="true">
           <svg viewBox="0 0 1440 120" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 0 L1440 0 L1440 42 C1180 78 880 96 520 86 C290 80 130 52 0 32 Z" />
           </svg>
         </div>
-        <div className="story-backdrop" aria-hidden="true">
-          <img src="/images/story-mountain-backdrop.svg" alt="" className="story-backdrop-mountains" />
-          <div className="story-backdrop-glow" />
-        </div>
+        <div className="story-backdrop" aria-hidden="true" />
         <div className="container story-grid">
           <div>
             <Eyebrow>Our story · Since 2005</Eyebrow>
