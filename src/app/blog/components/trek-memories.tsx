@@ -84,7 +84,7 @@ export function StoryPhoto({ id }: { id: string }) {
       <figure className="story-memory">
         <button className="memory-open" onClick={() => setOpen(true)} aria-label={`Enlarge ${photo.title}`}>
           <MemoryImage photo={photo} />
-          <span className="memory-expand" aria-hidden="true">↗</span>
+          <span className="memory-expand" aria-hidden="true">↗︎</span>
         </button>
         <figcaption>
           <span>{photo.title}</span>
@@ -126,7 +126,7 @@ export default function TrekMemories() {
               <MemoryImage photo={p} sizes="(max-width: 560px) 100vw, (max-width: 900px) 50vw, 33vw" />
               <span className="memory-tile-caption">
                 <span><small>{p.group}</small><strong>{p.title}</strong></span>
-                <span aria-hidden="true">↗</span>
+                <span className="ui-arrow" aria-hidden="true" />
               </span>
             </button>
           </MemoryReveal>

@@ -2540,7 +2540,7 @@ function TrekFullDetailEditor({
               rel="noopener noreferrer"
               className={styles.previewPublicBtn}
             >
-              Public View ↗
+              Public View ↗︎
             </Link>
           )}
 

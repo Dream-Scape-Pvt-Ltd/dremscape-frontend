@@ -38,7 +38,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' | 'reset' }) {
           <p className="eyebrow">YOUR JOURNEY CONTINUES</p>
           <h1>{mode === 'register' ? 'A new chapter.' : mode === 'reset' ? 'Find your way back.' : 'Welcome back.'}</h1>
           <p>{mode === 'register' ? 'Create your Dreamscape account to keep your journeys together.' : mode === 'reset' ? 'Enter the email address you used to create your account.' : 'Sign in to see your booking references and current journey status.'}</p>
-          <Link href="/treks" className="text-link">Explore the collection ↗</Link>
+          <Link href="/treks" className="text-link">Explore the collection ↗︎</Link>
         </div>
         <form className="inquiry-form contact-form-panel" onSubmit={submit}>
           <h2>{mode === 'register' ? 'Explore journeys' : mode === 'reset' ? 'Reset password' : 'Sign in'}</h2>
@@ -154,7 +154,7 @@ export default function Account() {
                     <div><dt>Booking total</dt><dd>{money(b.total_amount_usd)}</dd></div>
                     <div><dt>Amount paid</dt><dd>{money(b.amount_paid_usd)}</dd></div>
                   </dl>
-                  <Link href={`/booking/confirmation/${b.booking_reference}`} className="text-link">View booking details ↗</Link>
+                  <Link href={`/booking/confirmation/${b.booking_reference}`} className="text-link">View booking details ↗︎</Link>
                 </article>
               ))}
             </div>

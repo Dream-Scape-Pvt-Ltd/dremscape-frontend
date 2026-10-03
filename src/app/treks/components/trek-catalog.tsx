@@ -155,7 +155,7 @@ export default function TrekCatalog() {
         <span className="eyebrow">A JOURNEY MADE FOR YOU</span>
         <h2>Some trails start<br /><em>with a conversation.</em></h2>
         <p>Share your time, your interests, and the places you keep dreaming about.</p>
-        <Link href="/contact" className="button gold">Let’s plan your journey ↗</Link>
+        <Link href="/contact" className="button gold">Let’s plan your journey ↗︎</Link>
       </section>
     </JourneyShell>
   );

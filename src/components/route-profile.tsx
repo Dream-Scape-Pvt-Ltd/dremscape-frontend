@@ -56,6 +56,6 @@ export default function RouteProfile({points,itineraryLinks=true}:{points:Profil
       <div className={styles.legend}><span><i/>Overnight stay</span><span><i className={styles.restKey}/>Acclimatisation day</span><small>Elevation in metres</small></div>
     </div>
     <div className={styles.days} role="group" aria-label="Choose an itinerary day">{points.map(p=><button key={p.day} type="button" aria-pressed={current.day===p.day} onClick={()=>setSelected(p.day)}><span>Day {p.day}{p.rest&&<i aria-label="Acclimatisation day"/>}</span><strong>{p.stay}</strong><small>{metres(p.elevation)}</small></button>)}</div>
-    <figcaption className={styles.caption}><span>Shows where you sleep each night, rather than the highest point reached during the day.</span>{itineraryLinks&&<a href={`#day-${current.day}`}>View day {current.day} itinerary ↗</a>}</figcaption>
+    <figcaption className={styles.caption}><span>Shows where you sleep each night, rather than the highest point reached during the day.</span>{itineraryLinks&&<a href={`#day-${current.day}`}>View day {current.day} itinerary ↗︎</a>}</figcaption>
   </figure>;
 }

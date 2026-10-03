@@ -28,7 +28,7 @@ export function MemoryViewer({photos,index,onClose,onChange}:{photos:MemoryPhoto
 
 export function StoryPhoto({id}:{id:string}){
   const [open,setOpen]=useState(false);const photo=memoryPhoto(id);
-  return <><figure className="story-memory"><button className="memory-open" onClick={()=>setOpen(true)} aria-label={`Enlarge ${photo.title}`}><MemoryImage photo={photo}/><span className="memory-expand" aria-hidden="true">↗</span></button><figcaption><span>{photo.title}</span><small>FROM THE TREK ARCHIVE</small></figcaption></figure>{open&&<MemoryViewer photos={[photo]} index={0} onClose={()=>setOpen(false)} onChange={()=>{}}/>}</>;
+  return <><figure className="story-memory"><button className="memory-open" onClick={()=>setOpen(true)} aria-label={`Enlarge ${photo.title}`}><MemoryImage photo={photo}/><span className="memory-expand" aria-hidden="true">↗︎</span></button><figcaption><span>{photo.title}</span><small>FROM THE TREK ARCHIVE</small></figcaption></figure>{open&&<MemoryViewer photos={[photo]} index={0} onClose={()=>setOpen(false)} onChange={()=>{}}/>}</>;
 }
 
 export default function TrekMemories(){
@@ -36,7 +36,7 @@ export default function TrekMemories(){
   const filtered=memoryPhotos.filter(p=>filter==='All moments'||p.group===filter);const visible=expanded?filtered:filtered.slice(0,6);
   return <section className="memory-archive container" id="trek-memories"><MemoryReveal><div className="memory-section-heading"><div><p className="eyebrow">THE PHOTOGRAPHS WE KEEP</p><h2>A little closer<br/>to the experience.</h2></div><p>Unposed pauses. Familiar faces. Small things along the way. Open a photograph and spend a moment on the trail.</p></div></MemoryReveal>
     <div className="memory-filters" role="group" aria-label="Memory categories">{['All moments','Shared trails','Along the way','Mountain light'].map(c=><button key={c} aria-pressed={filter===c} onClick={()=>{setFilter(c);setExpanded(false);}}>{c}</button>)}<span aria-live="polite">{filtered.length} photographs</span></div>
-    <div className="memory-grid">{visible.map((p,i)=><MemoryReveal key={p.id}><button className="memory-tile" onClick={()=>setSelected(i)} aria-label={`Open memory: ${p.title}`}><MemoryImage photo={p} sizes="(max-width: 560px) 100vw, (max-width: 900px) 50vw, 33vw"/><span className="memory-tile-caption"><span><small>{p.group}</small><strong>{p.title}</strong></span><span aria-hidden="true">↗</span></span></button></MemoryReveal>)}</div>
+    <div className="memory-grid">{visible.map((p,i)=><MemoryReveal key={p.id}><button className="memory-tile" onClick={()=>setSelected(i)} aria-label={`Open memory: ${p.title}`}><MemoryImage photo={p} sizes="(max-width: 560px) 100vw, (max-width: 900px) 50vw, 33vw"/><span className="memory-tile-caption"><span><small>{p.group}</small><strong>{p.title}</strong></span><span className="ui-arrow" aria-hidden="true" /></span></button></MemoryReveal>)}</div>
     {filtered.length>6&&<div className="memory-more"><button className="button outline-dark" aria-expanded={expanded} onClick={()=>setExpanded(!expanded)}>{expanded?'Show fewer moments':`View all ${filtered.length} photographs`} <span aria-hidden="true">{expanded?'−':'+'}</span></button></div>}
     <p className="memory-source">Photographs from Dreamscape’s past treks. A collection of memories, told through the original images.</p>
     {selected!==null&&<MemoryViewer photos={filtered} index={selected} onChange={setSelected} onClose={()=>setSelected(null)}/>}

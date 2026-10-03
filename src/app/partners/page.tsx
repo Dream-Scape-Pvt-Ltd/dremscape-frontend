@@ -10,7 +10,7 @@ export default async function Page(){const {partner_content:content}=await getSi
   <PageHero eyebrow="TRAVEL AGENCY PARTNERSHIPS" title={content.title} accent={content.accent} description={content.description} image={content.image}/>
 
   <nav className="container partner-index" aria-label="Partnership sections">
-    <a className="text-link" href="/partners/portal">Partner dashboard ↗</a><a href="#who">Who we work with</a><a href="#offer">What we offer</a><a href="#how-it-works">How it works</a><a href="#enquire" className="partner-index-cta">Become a partner ↗</a>
+    <a className="text-link" href="/partners/portal">Partner dashboard ↗︎</a><a href="#who">Who we work with</a><a href="#offer">What we offer</a><a href="#how-it-works">How it works</a><a href="#enquire" className="partner-index-cta">Become a partner ↗︎</a>
   </nav>
 
   <section id="who" className="container section partner-section">

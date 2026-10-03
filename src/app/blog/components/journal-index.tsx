@@ -58,7 +58,7 @@ export default function JournalIndex({ guides }: { guides: Guide[] }) {
                   <p>{g.excerpt}</p><div className="journal-card-previews">{(g.galleryImages?.length?g.galleryImages:g.photoIds?.map(id=>memoryPhotos.find(p=>p.id===id)?.src).filter((src):src is string=>!!src)||[]).slice(0,3).map((src,index)=><img key={`${src}-${index}`} src={src} alt="" loading="lazy"/>)}</div>
                   <span className="journal-card-foot">
                     <span>{g.reading ? `${g.reading} read` : 'Read the story'}</span>
-                    <span>↗</span>
+                    <span>↗︎</span>
                   </span>
                 </section>
               </Link>

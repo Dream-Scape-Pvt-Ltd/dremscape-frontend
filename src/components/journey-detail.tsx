@@ -150,7 +150,7 @@ export default function JourneyDetail({journey:t,demo,related}:{journey:Journey;
 
         {(highest>0||profile.length>0)&&<section id="altitude" className="trek-altitude" aria-labelledby="altitude-heading">
           <p className="eyebrow">YOUR ROUTE, AT A GLANCE</p><h2 id="altitude-heading">Altitude by day</h2>
-          <p>See where you stay each night and how the route changes in elevation.</p>{demo&&profile.length>0&&<p className="altitude-preview-note">Approximate preview elevations, to be confirmed with your final itinerary. <a href="https://lovehimalayajourney.com/treks/everest-base-camp-gokyo-cho-la-trek" target="_blank" rel="noopener noreferrer">Elevation reference ↗</a></p>}
+          <p>See where you stay each night and how the route changes in elevation.</p>{demo&&profile.length>0&&<p className="altitude-preview-note">Approximate preview elevations, to be confirmed with your final itinerary. <a href="https://lovehimalayajourney.com/treks/everest-base-camp-gokyo-cho-la-trek" target="_blank" rel="noopener noreferrer">Elevation reference ↗︎</a></p>}
           {profile.length?<RouteProfile points={profile}/>:<p className="quiet-panel">Daily altitudes will appear here when the detailed route is confirmed. Ask our team for the current elevation profile.</p>}
           {profile.length>0&&profile.length<days.length&&<p className="trek-note">Altitudes are available for {profile.length} of {days.length} days. Unlisted nights are not plotted.</p>}
         </section>}

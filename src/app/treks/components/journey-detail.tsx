@@ -137,7 +137,7 @@ export default function JourneyDetail({ journey: t, related }: { journey: Journe
               ) : (
                 <div className="quiet-panel">
                   <p>The detailed itinerary is being prepared. Ask the team for the current route and daily walking plan.</p>
-                  <button className="text-link" onClick={() => setInquiry(true)}>Ask for the itinerary ↗</button>
+                  <button className="text-link" onClick={() => setInquiry(true)}>Ask for the itinerary ↗︎</button>
                 </div>
               )}
             </section>
@@ -192,9 +192,9 @@ export default function JourneyDetail({ journey: t, related }: { journey: Journe
                           <small>per person</small>
                         </div>
                         {open ? (
-                          <Link className="button green" href={`/booking?trek=${t.slug}&departure=${d.id}`}>Choose date ↗</Link>
+                          <Link className="button green" href={`/booking?trek=${t.slug}&departure=${d.id}`}>Choose date ↗︎</Link>
                         ) : waitlist ? (
-                          <Link className="button outline-dark" href={`/booking?trek=${t.slug}&departure=${d.id}`}>Join waitlist ↗</Link>
+                          <Link className="button outline-dark" href={`/booking?trek=${t.slug}&departure=${d.id}`}>Join waitlist ↗︎</Link>
                         ) : (
                           <span className="button disabled" aria-disabled="true">Unavailable</span>
                         )}

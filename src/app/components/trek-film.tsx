@@ -120,7 +120,7 @@ export default function TrekFilm({ onClose, onExplore }: { onClose: () => void; 
         )}
         <div className="film-footer">
           <div>
-            <a className="film-channel" href="https://www.youtube.com/@Dreamscapetreks" target="_blank" rel="noopener noreferrer">Dreamscape channel ↗</a>
+            <a className="film-channel" href="https://www.youtube.com/@Dreamscapetreks" target="_blank" rel="noopener noreferrer">Dreamscape channel ↗︎</a>
             <strong>Your journey begins with a little curiosity.</strong>
             <p>
               {filmUrl && !videoError
@@ -129,7 +129,7 @@ export default function TrekFilm({ onClose, onExplore }: { onClose: () => void; 
             </p>
           </div>
           <button className="button gold" onClick={onExplore}>
-            Find My Trek <span aria-hidden="true">↗</span>
+            Find My Trek <span className="ui-arrow" aria-hidden="true" />
           </button>
         </div>
       </div>
