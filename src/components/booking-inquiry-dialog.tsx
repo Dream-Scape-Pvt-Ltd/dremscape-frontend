@@ -74,7 +74,7 @@ export default function BookingInquiryDialog({journey,departure,onClose}:{journe
         </fieldset>
         <p className="booking-inquiry-estimate">Estimated total <strong>{money(Number(departure.price_usd)*trekkers)}</strong> <small>({trekkers} × {money(departure.price_usd)})</small></p>
         {error&&<p className="form-error" role="alert">{error}</p>}
-        <button className="button gold" disabled={busy}>{busy?'Sending…':'Send booking request ↗'}</button>
+        <button className="button gold" disabled={busy}>{busy?'Sending…':'Send booking request ↗︎'}</button>
         <small className="form-footnote">No payment now. We&rsquo;ll confirm availability and the next steps with you.</small>
       </form>}
     </div>

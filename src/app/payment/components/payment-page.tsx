@@ -98,7 +98,7 @@ export default function PaymentPage({ reference = '', confirmation = false }: { 
               </div>
             )}
             <div className="payment-unavailable">
-              <span aria-hidden="true">↗</span>
+              <span className="ui-arrow" aria-hidden="true" />
               <h2>Let’s arrange the next step.</h2>
               <p>Online payment is not available on this website yet. Contact the team with your booking reference for confirmed payment instructions.</p>
               <p>No card details are collected or charges made on this page.</p>
@@ -109,7 +109,7 @@ export default function PaymentPage({ reference = '', confirmation = false }: { 
             <p className="eyebrow">A PERSON TO TALK TO</p>
             <h2>A question?<br /><em>We’re a hello away.</em></h2>
             <ContactChannels />
-            <Link href="/terms-conditions" className="text-link">Read the booking notes ↗</Link>
+            <Link href="/terms-conditions" className="text-link">Read the booking notes ↗︎</Link>
           </aside>
         </div>
       </section>

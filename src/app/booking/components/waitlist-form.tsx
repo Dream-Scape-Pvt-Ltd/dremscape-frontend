@@ -75,7 +75,7 @@ export default function WaitlistForm({ journey, departure }: { journey: Journey;
           <p>{dateLabel(departure.start_date)} to {dateLabel(departure.end_date)} · {entry.num_travelers} {entry.num_travelers === 1 ? 'traveller' : 'travellers'}</p>
           <p>This departure is full. If a place is released we will email you with a time-limited link to complete your booking, in the order the list was joined.</p>
           <div className="button-row">
-            <Link className="button gold" href={`/treks/${journey.slug}`}>Other dates on this trek ↗</Link>
+            <Link className="button gold" href={`/treks/${journey.slug}`}>Other dates on this trek ↗︎</Link>
             <Link className="button outline-dark" href="/contact">Talk to the team</Link>
           </div>
         </section>

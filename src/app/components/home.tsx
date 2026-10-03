@@ -355,7 +355,7 @@ export default function Home({heroImage,heroAlt,destinations=defaultDestinations
             <Eyebrow>The people behind the journeys</Eyebrow>
             <h2>Every Journey Leaves a Story.</h2>
             <p className="review-home-copy">The views bring us here. The experiences we share are what stay with us. Explore published traveller stories, or add a memory of your own.</p>
-            <Link href="/reviews" className="button green">Read Traveller Stories ↗</Link>
+            <Link href="/reviews" className="button green">Read Traveller Stories ↗︎</Link>
           </div>
         </section>
 
@@ -365,7 +365,7 @@ export default function Home({heroImage,heroAlt,destinations=defaultDestinations
               <Eyebrow>From our past treks</Eyebrow>
               <h2>Some trails stay with you.</h2>
             </div>
-            <Link className="text-link" href="/blog">Explore the journal ↗</Link>
+            <Link className="text-link" href="/blog">Explore the journal ↗︎</Link>
           </div>
           <div className="article-grid">
             {articles.map(article => (

@@ -175,7 +175,7 @@ export default function Destinations({regions=[]}:{regions?:Region[]}) {
                       <span className="sanctuary-tag">{r.tag}</span>
                       <div>
                         <span>REGION {String(regions.indexOf(r) + 1).padStart(2, '0')}</span>
-                        <h3><Link href={`/destinations/${r.slug}`}>{r.name} ↗</Link></h3>
+                        <h3><Link href={`/destinations/${r.slug}`}>{r.name} ↗︎</Link></h3>
                       </div>
                     </div>
                     <div className="sanctuary-body">

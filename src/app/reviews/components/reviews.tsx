@@ -156,7 +156,7 @@ export default function Reviews() {
           {trek && (
             <div className="write-review">
               <button className="button green" aria-expanded={write} onClick={() => setWrite(!write)}>
-                {write ? 'Close review form' : 'Share your experience ↗'}
+                {write ? 'Close review form' : 'Share your experience ↗︎'}
               </button>
               {write && (
                 <form className="inquiry-form contact-form-panel" onSubmit={submit}>

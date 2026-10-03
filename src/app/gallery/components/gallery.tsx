@@ -55,7 +55,7 @@ export default function Gallery() {
             <span>
               <small>{p.group}</small>
               <strong>{p.title}</strong>
-              <span aria-hidden="true">↗</span>
+              <span className="ui-arrow" aria-hidden="true" />
             </span>
           </button>
         ))}

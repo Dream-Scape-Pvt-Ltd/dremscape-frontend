@@ -37,6 +37,6 @@ export default async function DestinationPage({id,providedDestinations}:{id:stri
   </section>
   {facts.length>0&&<section className="section region-introduction"><h2>About {r.short}</h2><dl className="region-fact-sheet">{facts.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>}
   {gallery.length>0&&<section className="section region-photos"><h2>Photos from {r.short}</h2><DestinationGallery name={r.name} images={[r.image,...gallery]}/></section>}
-  {related.length>0&&<section className="section other-regions"><h2>{isCountry(r)?`Places to visit in ${r.name}`:`More places in ${r.country?.replaceAll('_',' ').toLowerCase()}`}</h2><div>{related.map(x=><Link key={x.slug} href={destinationHref(x.id,x.slug)}><span>{x.name}</span><span aria-hidden="true">↗</span></Link>)}</div></section>}
+  {related.length>0&&<section className="section other-regions"><h2>{isCountry(r)?`Places to visit in ${r.name}`:`More places in ${r.country?.replaceAll('_',' ').toLowerCase()}`}</h2><div>{related.map(x=><Link key={x.slug} href={destinationHref(x.id,x.slug)}><span>{x.name}</span><span className="ui-arrow" aria-hidden="true" /></Link>)}</div></section>}
  </div></JourneyShell>;
 }

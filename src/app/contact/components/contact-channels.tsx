@@ -10,21 +10,21 @@ export default function ContactChannels() {
           <strong>{company.email}</strong>
           <span>For plans, questions and the details.</span>
         </span>
-        <span aria-hidden="true">↗</span>
+        <span className="ui-arrow" aria-hidden="true" />
       </a>
       {company.whatsappUrl ? (
         <a className="contact-channel whatsapp-channel" href={company.whatsappUrl} target="_blank" rel="noopener noreferrer">
-          <span className="channel-icon" aria-hidden="true">↗</span>
+          <span className="channel-icon" aria-hidden="true">↗︎</span>
           <span>
             <small>LET’S TALK ON WHATSAPP</small>
             <strong>{company.whatsapp}</strong>
             <span>Start a conversation with the team.</span>
           </span>
-          <span aria-hidden="true">↗</span>
+          <span className="ui-arrow" aria-hidden="true" />
         </a>
       ) : (
         <div className="contact-channel whatsapp-channel">
-          <span className="channel-icon" aria-hidden="true">↗</span>
+          <span className="channel-icon" aria-hidden="true">↗︎</span>
           <span>
             <small>LET’S TALK ON WHATSAPP</small>
             <strong>+977 98X XXX XXXX</strong>

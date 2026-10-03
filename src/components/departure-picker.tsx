@@ -22,10 +22,10 @@ export default function DeparturePicker({title,departures,onChoose,onPlan,onClos
         <span className="departure-dates"><strong>{dateLabel(d.start_date)}</strong><small>to {dateLabel(d.end_date)}</small></span>
         <span className="departure-status">{d.is_guaranteed&&<em className="departure-guaranteed">Guaranteed</em>}<small className={few?'departure-few':''}>{d.available_seats} {d.available_seats===1?'seat':'seats'} left</small></span>
         <span className="departure-price"><strong>{money(d.price_usd)}</strong><small>per person</small></span>
-        <span className="departure-select" aria-hidden="true">Select ↗</span>
+        <span className="departure-select" aria-hidden="true">Select ↗︎</span>
       </button></li>;})}</ul></section>)}</div>
       :<div className="quiet-panel departure-picker-empty"><p>There are no bookable dates for this trek yet. Tell us when you hope to travel and we’ll arrange a departure or a private trip.</p></div>}
-      <div className="departure-picker-foot"><span>{departures.length?'None of these dates work?':'Travel on your own dates'}</span><button type="button" className="button outline-dark" onClick={onPlan}>Plan my trip instead ↗</button></div>
+      <div className="departure-picker-foot"><span>{departures.length?'None of these dates work?':'Travel on your own dates'}</span><button type="button" className="button outline-dark" onClick={onPlan}>Plan my trip instead ↗︎</button></div>
     </div>
   </dialog>;
 }
