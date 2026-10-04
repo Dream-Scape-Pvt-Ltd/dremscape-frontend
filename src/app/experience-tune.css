@@ -116,3 +116,5 @@ html body .home-discovery .home-activities .section-heading>p{max-width:390px;ma
 
 .journey-page .catalog-status-heading{font-size:17px;font-weight:800;line-height:1.22;letter-spacing:-.025em;margin:0}
 body .contact-form-panel :is(input,textarea):focus-visible{outline:2px solid #245d42;outline-offset:2px}
+
+body .catalog-filter .catalog-primary-region .field-label{color:#617766}
