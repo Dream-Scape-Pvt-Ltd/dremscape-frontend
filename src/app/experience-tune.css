@@ -118,3 +118,8 @@ html body .home-discovery .home-activities .section-heading>p{max-width:390px;ma
 body .contact-form-panel :is(input,textarea):focus-visible{outline:2px solid #245d42;outline-offset:2px}
 
 body .catalog-filter .catalog-primary-region .field-label{color:#617766}
+@media(max-width:600px){
+  body .complete-footer .complete-footer-grid a:not(:has(img)){min-height:24px;padding-block:4px;margin-block:-1px}
+  .complete-footer .footer-bottom nav :is(a,summary,button){display:inline-flex;align-items:center;min-height:24px;padding-block:4px;margin-block:-4px}
+  .auth-links a,.departure-note a{display:inline-flex;align-items:center;min-height:24px;padding-block:4px;margin-block:-4px}
+}
