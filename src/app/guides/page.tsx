@@ -39,7 +39,7 @@ async function GuidesList(){
     </header>
     <section className="container guides-list" aria-label="Trekking guides">
       {guides===null?<div className="status" role="alert"><p>Guide profiles can’t be loaded right now. Refresh the page in a moment.</p></div>
-      :guides.length===0?<div className="quiet-panel guides-empty"><h2>Guide profiles are on their way.</h2><p>Ask the team who will lead your trek, and we’ll introduce you.</p><Link href="/contact" className="button gold">Contact the team</Link></div>
+      :guides.length===0?<div className="quiet-panel guides-empty"><h2>Guide profiles are on their way.</h2><p>Ask the team who will lead your trek, and we’ll introduce you.</p><Link href="/contact" className="button gold">Plan my journey</Link></div>
       :<ul className="guide-grid">{guides.map(g=><li key={g.slug}><article className="guide-card">
         <Link href={guideHref(g.id)} className="guide-card-link"><TrekGuidePortrait name={g.name} photo={g.photo}/><h2>{g.name}</h2></Link>
         {g.role&&<p className="guide-role">{g.role}</p>}

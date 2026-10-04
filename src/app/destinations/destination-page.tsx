@@ -33,7 +33,7 @@ export default async function DestinationPage({id,providedDestinations}:{id:stri
  const gallery=r.galleryImages||[];
  return <JourneyShell page="destinations"><PageHero crumbs={crumbs} eyebrow={(r.country||'Destination').replaceAll('_',' ')} title={r.name} accent={r.title||undefined} description={r.description||undefined} image={r.image}/><div className="container">
   <section className="section destination-journeys-section" id="journeys" aria-label={`Treks and expeditions in ${r.name}`}><div className="section-heading"><div><h2>Treks and expeditions in {r.short}</h2></div><Link href="/treks" className="text-link">Explore all journeys</Link></div>
-   {!catalog?<div className="status" role="alert"><p>The journey collection is temporarily unavailable. Refresh the page in a moment, or ask the team directly.</p><Link href="/contact" className="button green">Ask the team</Link></div>:<DestinationJourneys trips={trips} place={r.short} preview={catalog.demo}/>}
+   {!catalog?<div className="status" role="alert"><p>The journey collection is temporarily unavailable. Refresh the page in a moment, or ask the team directly.</p><Link href="/contact" className="button green">Plan my journey</Link></div>:<DestinationJourneys trips={trips} place={r.short} preview={catalog.demo}/>}
   </section>
   {facts.length>0&&<section className="section region-introduction"><h2>About {r.short}</h2><dl className="region-fact-sheet">{facts.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>}
   {gallery.length>0&&<section className="section region-photos"><h2>Photos from {r.short}</h2><DestinationGallery name={r.name} images={[r.image,...gallery]}/></section>}

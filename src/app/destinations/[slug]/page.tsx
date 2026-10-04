@@ -17,7 +17,7 @@ export default async function Page({params}:{params:Promise<{slug:string}>}){
   if(!destination){
     const country=countryPages[slug];
     if(!country)notFound();
-    return <JourneyShell page="destinations"><section className="beyond-nepal container"><Breadcrumbs items={[{label:'Destinations',href:'/destinations'},{label:'Beyond Nepal',href:'/destinations/beyond-nepal'},{label:country}]}/><p className="eyebrow">BEYOND NEPAL</p><h1>{country}</h1><p>The places and journeys for {country} cannot be shown right now. They will appear here when the CMS is available and the team has published them.</p><div className="button-row"><Link href="/destinations/beyond-nepal" className="button green">Explore other places</Link><Link href="/contact" className="button gold">Ask the team</Link></div></section></JourneyShell>;
+    return <JourneyShell page="destinations"><section className="beyond-nepal container"><Breadcrumbs items={[{label:'Destinations',href:'/destinations'},{label:'Beyond Nepal',href:'/destinations/beyond-nepal'},{label:country}]}/><p className="eyebrow">BEYOND NEPAL</p><h1>{country}</h1><p>The places and journeys for {country} cannot be shown right now. They will appear here when the CMS is available and the team has published them.</p><div className="button-row"><Link href="/destinations/beyond-nepal" className="button green">Explore other places</Link><Link href="/contact" className="button gold">Plan my journey</Link></div></section></JourneyShell>;
   }
   permanentRedirect(destinationHref(destination.id,destination.slug));
 }
