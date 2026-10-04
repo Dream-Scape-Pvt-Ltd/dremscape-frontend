@@ -42,6 +42,7 @@ body .header.site-navigation.apple-nav[data-page] .search-link[aria-expanded=tru
 .apple-nav .nav-search-field input{min-width:0;width:100%;border:0;background:transparent;color:var(--apple-ink);font:inherit;font-size:clamp(18px,2.2vw,28px);font-weight:550;letter-spacing:-.04em;outline:none;border-radius:4px}
 .apple-nav .nav-search-field input::placeholder{color:var(--apple-muted);opacity:.8}
 .apple-nav .nav-search-field:focus-within{border-color:var(--apple-accent)}
+.apple-nav .nav-search-field:has(input:focus-visible){outline:2px solid var(--apple-accent);outline-offset:4px}
 .apple-nav .nav-search-field button{flex-shrink:0;border:1px solid var(--apple-edge);border-radius:10px;background:var(--apple-button);color:var(--apple-ink);padding:12px 16px;font:inherit;font-size:12px;cursor:pointer;transition:background .2s,transform .2s}
 .apple-nav .nav-search-field button:hover{background:var(--apple-hover);transform:translateX(2px)}
 .apple-nav .nav-search-suggestions{margin-top:22px}.apple-nav .nav-search-suggestions p{color:var(--apple-muted);font-size:10px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px}
