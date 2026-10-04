@@ -4,10 +4,10 @@ import FooterLandscape from './footer-landscape';
 import {asset} from '@/lib/assets';
 import {useCompany} from './navigation-context';
 
-export default function SiteFooter(){
+export default function SiteFooter({compact=false}:{compact?:boolean}){
   const company=useCompany();
   return <>
-    <section className="organization-badges" aria-labelledby="organization-badges-title">
+    {!compact&&<section className="organization-badges" aria-labelledby="organization-badges-title">
       <div className="container">
         <div className="organization-badges-heading"><p className="eyebrow">NEPAL · TOURISM & CONSERVATION</p><h2 id="organization-badges-title">Organizations across Nepal’s tourism landscape.</h2></div>
         <div className="organization-badges-grid">
@@ -18,8 +18,8 @@ export default function SiteFooter(){
           <div className="organization-badge"><img className="organization-logo organization-logo-taan" src="/images/organizations/taan.jpg" alt="Trekking Agencies’ Association of Nepal logo" width="900" height="1241"/><span><strong>Trekking Agencies’ Association of Nepal</strong><small>Trekking industry</small></span></div>
         </div>
       </div>
-    </section>
-    <FooterLandscape/>
+    </section>}
+    <FooterLandscape compact={compact}/>
     <footer className="complete-footer">
       <div className="container">
         <div className="complete-footer-grid">

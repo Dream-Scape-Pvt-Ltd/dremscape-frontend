@@ -162,6 +162,13 @@ html body .home-discovery .home-hero .hero-shade{
 .home-slideshow .home-slide:nth-child(2){object-position:50% 61%}
 .home-slideshow .home-slide:nth-child(3){object-position:46% 58%}
 .home-slideshow .home-slide:nth-child(4){object-position:52% 58%}
+@media(min-width:601px){
+  body .footer-landscape-compact img{
+    height:clamp(280px,28vw,400px);
+    object-fit:cover;
+    object-position:center 18%;
+  }
+}
 @media(max-width:600px){
   html body .home-discovery .home-hero .hero-shade{
     background:radial-gradient(ellipse 82% 28% at 50% 48%,#071c20da 0%,#071c2099 68%,transparent 100%),
