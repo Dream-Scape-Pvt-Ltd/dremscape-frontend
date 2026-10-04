@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-label="Illustrative street map around the Thamel office area">
+  <rect width="900" height="560" fill="#e8efe9"/>
+  <g fill="#d4e2d5">
+    <path d="M0 0h275l-46 159L0 172zM337 0h244l-53 135-245 56zM640 0h260v135l-291 51zM0 218l219-12-31 153L0 385zM277 229l247-54-38 180-237 20zM592 228l308-53v175l-349 42zM0 432l188-29 125 157H0zM247 412l239-20 78 168H360zM565 431l335-38v167H621z"/>
+  </g>
+  <g fill="none" stroke="#fffdf7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M-30 197 241 181 621 204 930 147" stroke-width="28"/>
+    <path d="M210-20 252 207 219 391 350 590" stroke-width="24"/>
+    <path d="M607-30 546 195 515 386 605 590" stroke-width="22"/>
+    <path d="M-20 409 215 382 520 377 930 365" stroke-width="25"/>
+    <path d="M321-20 305 128 72 291" stroke-width="10"/>
+    <path d="M757-20 730 172 839 304 791 590" stroke-width="11"/>
+    <path d="M362 206 378 374 457 580" stroke-width="9"/>
+  </g>
+  <g fill="none" stroke="#b5c9b9" stroke-width="2" opacity=".65">
+    <path d="M-30 197 241 181 621 204 930 147M210-20 252 207 219 391 350 590M607-30 546 195 515 386 605 590M-20 409 215 382 520 377 930 365"/>
+  </g>
+  <circle cx="495" cy="285" r="56" fill="#c9dcca" opacity=".7"/>
+  <circle cx="495" cy="285" r="31" fill="#174a38"/>
+  <circle cx="495" cy="285" r="11" fill="#fffdf7"/>
+  <path d="M495 342 465 300h60z" fill="#174a38"/>
+  <g fill="#557566" font-family="Arial,sans-serif" font-size="14" font-weight="600" letter-spacing="2">
+    <text x="64" y="82">THAMEL AREA</text>
+    <text x="668" y="498">KATHMANDU</text>
+  </g>
+</svg>

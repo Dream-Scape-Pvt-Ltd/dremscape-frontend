@@ -160,6 +160,13 @@ body footer.complete-footer{background:linear-gradient(180deg,#01110b 0%,#09291e
 .home-slideshow .home-slide:nth-child(3){object-position:46% 58%}
 .home-slideshow .home-slide:nth-child(4){object-position:52% 58%}
 
+/* Give the office panel a quiet map preview while its live map is unopened. */
+html body .location-map-preview{display:flex;align-items:flex-end;justify-content:flex-start;padding:22px;text-align:left}
+html body .location-map-preview>img{inset:0;width:100%;height:100%;object-fit:cover;opacity:1}
+html body .location-map-preview>div{max-width:290px;padding:18px 20px;border:1px solid #ffffff;background:#fffffff0;border-radius:17px;box-shadow:0 8px 28px #153d2f18}
+html body .location-map-preview .eyebrow{justify-content:flex-start;color:#a28653}
+html body .location-map-preview p:not(.eyebrow){margin:8px 0 15px}
+
 /* Let the headings carry most sections; reserve eyebrow labels for key moments. */
 .home-discovery> :not(.home-hero):not(.story):not(.home-plan) .eyebrow,
 .journey-page .contact-form-panel>.eyebrow,
