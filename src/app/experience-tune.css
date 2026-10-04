@@ -162,6 +162,20 @@ html body .home-discovery .home-hero .hero-shade{
 .home-slideshow .home-slide:nth-child(2){object-position:50% 61%}
 .home-slideshow .home-slide:nth-child(3){object-position:46% 58%}
 .home-slideshow .home-slide:nth-child(4){object-position:52% 58%}
+
+/* Use the site's type family for editorial emphasis as well as body copy. */
+html body .dest-hero h1 em,
+html body .journey-page h1 em,
+html body .journey-page h2 em,
+html body .dest-page h1 em,
+html body .dest-page h2 em,
+html body .story h2 em,
+html body .contact-photo>span,
+html body .complete-footer .footer-signature{
+  font-family:'Plus Jakarta Sans Variable',sans-serif!important;
+  font-style:italic;
+  font-weight:450;
+}
 @media(min-width:601px){
   body .footer-landscape-compact img{
     height:clamp(280px,28vw,400px);
