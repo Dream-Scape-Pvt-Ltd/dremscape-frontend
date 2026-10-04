@@ -26,8 +26,9 @@ function Eyebrow({ children }: { children: ReactNode }) { return <p className="e
 const FALLBACK_PHOTO = '/images/trek-memories/mountain-amphitheatre.jpg';
 function Photo({ name, alt, className = '' }: { name?: string; alt: string; className?: string }) { return <img src={asset(name?.trim() || FALLBACK_PHOTO)} alt={alt} className={className} loading="lazy" />; }
 const defaultArticles = journalPosts.map(p => ({ ...p, tag: p.category, date: p.reading + ' read' }));
+type HomeCatalog={trips:Trip[];demo:boolean;error?:string};
 
-export default function Home({ articles = defaultArticles, reviews = [], reviewsUnavailable = false, heroCaption, heroLocation, heroTitle = "Beyond the Horizon.", heroDescription = "Nepal treks, shaped around you. Explore the Himalaya with a team rooted here.", heroEyebrow = "Local journeys · Since 2005", heroImage, heroImageAlt, destinationCountries = { everest: "NEPAL", annapurna: "NEPAL", manaslu: "NEPAL" }, finderDestinations = '|Anywhere\nnepal|Nepal\nbeyond-nepal|Beyond Nepal', finderDifficulties = '|Any difficulty\neasy|Easy\nnormal|Normal\ndifficult|Difficult\nextreme|Extreme', finderBudgets = '|Any budget\nunder-1500|Under $1,500\n1500-2500|$1,500 – $2,500\nover-2500|Above $2,500' }: { articles?: { id: string; slug: string; title: string; image: string; tag: string; date: string; excerpt: string }[]; reviews?: HomeReview[]; reviewsUnavailable?: boolean; heroTitle?: string; heroDescription?: string; heroEyebrow?: string; heroImage?: string; heroImageAlt?: string; heroCaption?: string; heroLocation?: string; destinationCountries?: Record<string, string>; finderDestinations?: string; finderDifficulties?: string; finderBudgets?: string }) {
+export default function Home({ articles = defaultArticles, reviews = [], reviewsUnavailable = false, initialCatalog, heroCaption, heroLocation, heroTitle = "Beyond the Horizon.", heroDescription = "Nepal treks, shaped around you. Explore the Himalaya with a team rooted here.", heroEyebrow = "Local journeys · Since 2005", heroImage, heroImageAlt, destinationCountries = { everest: "NEPAL", annapurna: "NEPAL", manaslu: "NEPAL" }, finderDestinations = '|Anywhere\nnepal|Nepal\nbeyond-nepal|Beyond Nepal', finderDifficulties = '|Any difficulty\neasy|Easy\nnormal|Normal\ndifficult|Difficult\nextreme|Extreme', finderBudgets = '|Any budget\nunder-1500|Under $1,500\n1500-2500|$1,500 – $2,500\nover-2500|Above $2,500' }: { articles?: { id: string; slug: string; title: string; image: string; tag: string; date: string; excerpt: string }[]; reviews?: HomeReview[]; reviewsUnavailable?: boolean; initialCatalog: HomeCatalog; heroTitle?: string; heroDescription?: string; heroEyebrow?: string; heroImage?: string; heroImageAlt?: string; heroCaption?: string; heroLocation?: string; destinationCountries?: Record<string, string>; finderDestinations?: string; finderDifficulties?: string; finderBudgets?: string }) {
 
   const [filmOpen, setFilmOpen] = useState(false);
 
@@ -35,10 +36,10 @@ export default function Home({ articles = defaultArticles, reviews = [], reviews
   const [destination, setDestination] = useState('');
   const [difficulty, setDifficulty] = useState('');
   const [budget, setBudget] = useState('');
-  const [catalog, setCatalog] = useState<Trip[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [demo, setDemo] = useState(true);
+  const [catalog, setCatalog] = useState<Trip[]>(initialCatalog.trips);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(initialCatalog.error??'');
+  const [demo, setDemo] = useState(initialCatalog.demo);
   const [filters, setFilters] = useState({ destination: '', difficulty: '', budget: '' });
   const [searched, setSearched] = useState(false);
   const [modal, setModal] = useState<{ kind: 'inquiry' | 'article' | 'info'; title: string; message?: string } | null>(null);
@@ -53,7 +54,7 @@ export default function Home({ articles = defaultArticles, reviews = [], reviews
     finally { setLoading(false); }
   }
   useEffect(() => {
-    void loadCatalog(); const onScroll = () => {
+    const onScroll = () => {
 
       const sections = ['home', 'journeys', 'upcoming-departures', 'destinations', 'about', 'traveller-stories', 'journal', 'contact'];
       const current = sections.filter(id => (document.getElementById(id)?.getBoundingClientRect().top ?? Infinity) <= 180).at(-1);
