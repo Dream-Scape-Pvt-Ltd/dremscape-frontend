@@ -38,7 +38,7 @@ export default function CookieConsent(){
 
   return <>
     {ready&&(choice===null||settingsOpen)&&<aside className="cookie-consent" aria-label="Cookie preferences">
-      <div><strong>Choose your cookies</strong><p>Essential storage keeps your preferences. With your permission, we can also measure visits to improve the site. Analytics stays off unless you allow it. <Link href="/policies/cookie-policy">Cookie policy</Link></p></div>
+      <div><strong>Choose your cookies</strong><p className="cookie-consent-desktop">Essential storage keeps your preferences. With your permission, we can also measure visits to improve the site. Analytics stays off unless you allow it. <Link href="/policies/cookie-policy">Cookie policy</Link></p><p className="cookie-consent-mobile">Essential cookies save your choice. Analytics is off unless you allow it. <Link href="/policies/cookie-policy">Cookie policy</Link></p></div>
       <div className="cookie-consent-actions"><button type="button" onClick={()=>save('essential')}>Essential only</button><button type="button" className="cookie-consent-allow" onClick={()=>save('analytics')}>Allow analytics</button></div>
     </aside>}
     {ready&&choice==='analytics'&&validAnalyticsId&&<>
