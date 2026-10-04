@@ -154,11 +154,7 @@ body footer.complete-footer{background:linear-gradient(180deg,#01110b 0%,#09291e
   html body .destination-collections .collection-card{height:clamp(330px,22vw,390px)}
 }
 
-/* Keep the centre-set hero copy readable as each photograph changes. */
-html body .home-discovery .home-hero .hero-shade{
-  background:radial-gradient(ellipse 43% 29% at 50% 49%,#071c20c7 0%,#071c2080 66%,transparent 100%),
-    linear-gradient(180deg,#081a2330 0%,#081a2350 40%,#081a2350 65%,#081a2340 100%)!important;
-}
+/* Keep slideshow subjects clear of the centre-set copy. */
 .home-slideshow .home-slide:nth-child(1){object-position:53% 58%}
 .home-slideshow .home-slide:nth-child(2){object-position:50% 61%}
 .home-slideshow .home-slide:nth-child(3){object-position:46% 58%}
@@ -177,18 +173,7 @@ html body .complete-footer .footer-signature{
   font-style:italic;
   font-weight:450;
 }
-@media(min-width:601px){
-  body .footer-landscape-compact img{
-    height:clamp(280px,28vw,400px);
-    object-fit:cover;
-    object-position:center 18%;
-  }
-}
 @media(max-width:600px){
-  html body .home-discovery .home-hero .hero-shade{
-    background:radial-gradient(ellipse 82% 28% at 50% 48%,#071c20da 0%,#071c2099 68%,transparent 100%),
-      linear-gradient(180deg,#081a2330 0%,#081a2350 40%,#081a2350 65%,#081a2340 100%)!important;
-  }
   .home-slideshow .home-slide:nth-child(1){object-position:42% 61%}
   .home-slideshow .home-slide:nth-child(2){object-position:53% 61%}
   .home-slideshow .home-slide:nth-child(3){object-position:43% 61%}
