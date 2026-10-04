@@ -7,7 +7,7 @@ Open `/admin` directly and sign in with a backend ADMIN account. The public Staf
 - **Destinations**: add or edit names, countries, photographs, introductory copy, highlights and travel style. NEPAL entries appear in Nepal; other countries appear in Beyond Nepal.
 - **Blog studio**: change story introduction, cover, gallery and article content; publish or unpublish.
 - **Treks**: existing backend trip editor manages itinerary, images, prices and departures. The current local database has no published trips; add verified trips before launch.
-- **Brand artwork**: the supplied footer remains a vector in `public/images/dreamscape-landscape-vector.svg`. Brand illustration and decorative linework stay in source control.
+- **Brand artwork**: the footer uses the supplied vector in `public/images/dreamscape-landscape-final.svg`, with one stray pale sky path removed. Brand illustration and decorative linework stay in source control.
 - **Our Story**: supplied company introduction is in `src/content/about.json`. This text remains source-controlled; it is not yet a CMS field.
 
 Changes to CMS fields appear on refresh. The local JSON location is only a fallback when the CMS cannot be reached. Update both address and map query to move the map. The current pin is a Hotel Avalon landmark, not a verified office entrance.

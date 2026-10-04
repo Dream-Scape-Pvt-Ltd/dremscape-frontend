@@ -134,8 +134,8 @@ body:has(.header[data-page="contact"]) .footer-landscape{
   --landscape-surface:#f4f0df;
   background:linear-gradient(180deg,#f4f0df 0%,#e8efeb 60%,#114035 100%);
 }
-body .footer-landscape img{mix-blend-mode:normal}
-body footer.complete-footer{background:linear-gradient(180deg,#114035 0%,#09291e 110px)!important}
+body .footer-landscape img{mix-blend-mode:multiply}
+body footer.complete-footer{background:linear-gradient(180deg,#01110b 0%,#09291e 150px)!important}
 
 /* Let large monitors show more of the photography and card grids. */
 @media(min-width:1500px){
