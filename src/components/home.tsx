@@ -19,12 +19,12 @@ import { journalPosts } from '@/lib/editorial-content';
 import { nepalZones } from '@/lib/nepal-zones';
 import { homepageRegions } from '@/lib/homepage-regions';
 import type { HomeReview } from '@/lib/homepage-reviews';
+import {FALLBACK_PHOTO} from '@/lib/trek-images';
 
 function Icon({ name = 'heroContext-imgSvg', className = '' }: { name?: string; className?: string }) { return <img className={`icon ${className}`} src={asset(name)} width="18" height="18" alt="" />; }
 function Eyebrow({ children }: { children: ReactNode }) { return <p className="eyebrow"><span />{children}</p>; }
 // CMS content can arrive without an image (e.g. a journal post with no cover); show a house photo instead of failing the page.
-const FALLBACK_PHOTO = '/images/trek-memories/mountain-amphitheatre.jpg';
-function Photo({ name, alt, className = '' }: { name?: string; alt: string; className?: string }) { return <img src={asset(name?.trim() || FALLBACK_PHOTO)} alt={alt} className={className} loading="lazy"  width="512" height="279"/>; }
+function Photo({ name, alt, className = '' }: { name?: string; alt: string; className?: string }) { return <img src={asset(name?.trim() || FALLBACK_PHOTO)} alt={alt} className={className} loading="lazy" width="512" height="279" onError={event=>{const image=event.currentTarget;if(!image.src.endsWith(FALLBACK_PHOTO))image.src=FALLBACK_PHOTO;}}/>; }
 const defaultArticles = journalPosts.map(p => ({ ...p, tag: p.category, date: p.reading + ' read' }));
 type HomeCatalog={trips:Trip[];demo:boolean;error?:string};
 
