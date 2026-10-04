@@ -16,8 +16,10 @@ import DeparturePicker from './departure-picker';
 import RouteProfile,{profilePoints} from './route-profile';
 import Breadcrumbs from './breadcrumbs';
 import TrekGuidePortrait from './trek-guide-portrait';
+import {fallbackTrekImage} from '@/lib/trek-images';
 
 const PHOTO_INTERVAL=6500;
+const HOUSE_PHOTO='/images/trek-memories/mountain-amphitheatre.jpg';
 const highlightDescriptions:Record<string,string>={
   'Walled City':'Walk into Lo Manthang and take time with its lanes, courtyards and mountain setting.',
   Caves:'See the sculpted cliffs and cave landscape that give Mustang its singular character.',
@@ -47,7 +49,10 @@ export default function JourneyDetail({journey:t,demo,related}:{journey:Journey;
   const [paused,setPaused]=useState(false);
   const [hovering,setHovering]=useState(false);
   const reducedMotion=useReducedMotion();
-  const photos=useMemo(()=>Array.from(new Set([t.image,...(t.gallery_images||[])].filter((value):value is string=>Boolean(value)))),[t.image,t.gallery_images]);
+  const photos=useMemo(()=>{
+    const provided=Array.from(new Set([t.image,...(t.gallery_images||[])].filter((value):value is string=>Boolean(value))));
+    return provided.length?provided:[fallbackTrekImage(t.slug,t.destination_slug)];
+  },[t.image,t.gallery_images,t.slug,t.destination_slug]);
   const selectedPhoto=photos[Math.min(activePhoto,photos.length-1)];
   const credit=selectedPhoto?photoCredits[selectedPhoto]:undefined;
   const playing=photos.length>1&&!paused&&!hovering&&!reducedMotion;
@@ -91,7 +96,7 @@ export default function JourneyDetail({journey:t,demo,related}:{journey:Journey;
       <div className="container journey-media-shell" onMouseEnter={()=>setHovering(true)} onMouseLeave={()=>setHovering(false)}>
         <section className={`trek-hero journey-stage ${!selectedPhoto?'trek-hero-plain':''}`} aria-label={`${t.title} photographs`}>
           <AnimatePresence initial={false}>
-            {selectedPhoto&&<motion.img key={selectedPhoto} src={asset(selectedPhoto)} alt={`${demo?'Illustrative image for ':''}${t.title}, photograph ${activePhoto+1} of ${photos.length}`} width="1200" height="800" initial={reducedMotion?false:{opacity:0,scale:1.035}} animate={{opacity:1,scale:1}} exit={reducedMotion?undefined:{opacity:0}} transition={{duration:reducedMotion?0:.85,ease:[.2,.75,.2,1]}} fetchPriority={activePhoto===0?'high':undefined}/>}
+            {selectedPhoto&&<motion.img key={selectedPhoto} src={asset(selectedPhoto)} alt={`${demo?'Illustrative image for ':''}${t.title}, photograph ${activePhoto+1} of ${photos.length}`} width="1200" height="800" initial={reducedMotion?false:{opacity:0,scale:1.035}} animate={{opacity:1,scale:1}} exit={reducedMotion?undefined:{opacity:0}} transition={{duration:reducedMotion?0:.85,ease:[.2,.75,.2,1]}} fetchPriority={activePhoto===0?'high':undefined} onError={event=>{const image=event.currentTarget;const next=image.dataset.fallback==='region'?HOUSE_PHOTO:fallbackTrekImage(t.slug,t.destination_slug);if(image.dataset.fallback==='house')return;image.dataset.fallback=next===HOUSE_PHOTO?'house':image.dataset.fallback==='region'?'house':'region';image.src=asset(next);}}/>}
           </AnimatePresence>
           <div className="journey-stage-content"><span className="journey-stage-badge">DREAMSCAPE · {t.destination_name.toUpperCase()}</span><div className="journey-stage-foot"><div><small>THE TRAIL IN PICTURES</small><strong>{credit?.caption||t.title}</strong></div>{photos.length>1&&<div className="journey-stage-controls"><button type="button" onClick={()=>movePhoto(-1)} aria-label="Previous trek photo">←</button><span>{String(activePhoto+1).padStart(2,'0')} / {String(photos.length).padStart(2,'0')}</span><button type="button" onClick={()=>movePhoto(1)} aria-label="Next trek photo">→</button></div>}</div></div>
           {playing&&<div key={selectedPhoto} className="journey-stage-progress" aria-hidden="true"/>}
