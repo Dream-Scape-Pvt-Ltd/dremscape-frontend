@@ -4,7 +4,7 @@ import PartnerInquiryForm from '@/components/partner-inquiry-form';
 import {getSiteSettings} from '@/lib/site-settings';
 import {companyFrom,contactFields} from '@/lib/company';
 
-export const metadata={title:'Partner with us | Dreamscape — B2B partnerships',description:'Travel agencies, agents and group organisers: you bring the travellers, Dreamscape Treks runs the journey in Nepal and the Himalaya.'};
+export const metadata={title:'Partner with us | Dreamscape Treks',description:'Travel agencies, agents and group organisers: you bring the travellers, Dreamscape Treks runs the journey in Nepal and the Himalaya.'};
 
 export default async function Page(){const settings=await getSiteSettings();const content=settings.partner_content;const company=companyFrom(contactFields(settings)); const {partners,offers,steps}=content; return <JourneyShell page="partners">
   <PageHero eyebrow="TRAVEL AGENCY PARTNERSHIPS" title={content.title} accent={content.accent} description={content.description} image={content.image}/>

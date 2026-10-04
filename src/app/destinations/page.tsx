@@ -5,7 +5,7 @@ import JourneyShell from '@/components/journey-shell';
 import {notFound} from 'next/navigation';
 import {isUuid} from '@/lib/links';
 import DestinationPage,{destinationMetadata} from './destination-page';
-const collectionsMetadata:Metadata={title:'Destinations in Nepal — Dreamscape Treks',description:'Find your Himalayan region. Explore Everest and Khumbu, Annapurna and Mustang, Manaslu and Tsum Valley, and Dolpo with Dreamscape Treks.'};
+const collectionsMetadata:Metadata={title:'Destinations in Nepal | Dreamscape Treks',description:'Find your Himalayan region. Explore Everest and Khumbu, Annapurna and Mustang, Manaslu and Tsum Valley, and Dolpo with Dreamscape Treks.'};
 type Props={searchParams:Promise<{id?:string|string[]}>};
 
 export async function generateMetadata({searchParams}:Props):Promise<Metadata>{

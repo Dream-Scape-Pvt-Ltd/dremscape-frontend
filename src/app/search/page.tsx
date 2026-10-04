@@ -3,7 +3,7 @@ import JourneyShell from '@/components/journey-shell';
 import SearchExperience from '@/components/search-experience';
 import {runSiteSearch} from '@/lib/site-search';
 
-export const metadata={title:'Search | Dreamscape Treks'};
+export const metadata={title:'Search | Dreamscape Treks',description:'Search Dreamscape Treks journeys, destinations and journal stories.'};
 
 export default async function Page({searchParams}:{searchParams:Promise<{q?:string}>}){
  await connection();

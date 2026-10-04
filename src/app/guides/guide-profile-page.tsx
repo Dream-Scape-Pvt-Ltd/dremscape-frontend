@@ -14,7 +14,7 @@ import type {Metadata} from 'next';
 const load=cache(getTrekGuide);
 
 export async function guideMetadata(id:string):Promise<Metadata>{
-  try{const g=await load(id);return {title:`${g.name} | Dreamscape guides`,description:g.bio.slice(0,155)||`${g.name}, trekking guide with Dreamscape Treks.`,alternates:{canonical:guideHref(g.id)}};}
+  try{const g=await load(id);return {title:`${g.name} | Dreamscape Treks`,description:g.bio.slice(0,155)||`${g.name}, trekking guide with Dreamscape Treks.`,alternates:{canonical:guideHref(g.id)}};}
   catch{return {title:'Guide | Dreamscape Treks'};}
 }
 

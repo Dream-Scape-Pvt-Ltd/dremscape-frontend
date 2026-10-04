@@ -16,7 +16,7 @@ const isCountry=(r:Region)=>!!r.country&&normalize(r.slug)===normalize(r.country
 
 export async function destinationMetadata(id:string):Promise<Metadata>{
  const region=(await listDestinationContent()).find(r=>r.id===id);
- return {title:region?`${region.name} treks & expeditions | Dreamscape`:'Destination | Dreamscape',description:region?.description||undefined,alternates:region?{canonical:destinationHref(region.id,region.slug)}:undefined};
+ return {title:region?`${region.name} treks & expeditions | Dreamscape Treks`:'Destination | Dreamscape Treks',description:region?.description||undefined,alternates:region?{canonical:destinationHref(region.id,region.slug)}:undefined};
 }
 /** A destination's page, shown at /destinations?id=<uuid>. */
 export default async function DestinationPage({id,providedDestinations}:{id:string;providedDestinations?:Region[]}){

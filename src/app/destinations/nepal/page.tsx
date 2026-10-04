@@ -1,6 +1,7 @@
 import {getSiteSettings} from '@/lib/site-settings';
 import Destinations from '@/components/destinations';
 import {listDestinationContent} from '@/lib/destination-content';
+export const metadata={title:'Trekking regions of Nepal | Dreamscape Treks',description:'Explore Nepal’s trekking regions, from the eastern Himalaya to the far west, and find journeys shaped around each place.'};
 export default async function Page(){
   const settings=await getSiteSettings();
   const nepal=(await listDestinationContent()).filter(r=>r.country==='NEPAL');

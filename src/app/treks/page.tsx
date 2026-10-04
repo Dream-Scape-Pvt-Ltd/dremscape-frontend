@@ -7,7 +7,7 @@ import {nepalZones} from '@/lib/nepal-zones';
 import TrekDetailPage,{trekMetadata} from './trek-detail-page';
 
 type Props={searchParams:Promise<{id?:string|string[];kind?:string;zone?:string;region?:string;tour?:string;climb?:string;country?:string}>};
-const catalogMetadata:Metadata={title:'Find your trek | Dreamscape — Beyond the Horizon',description:'Explore Dreamscape journeys in Nepal. Filter by region, duration and difficulty to find your trail.'};
+const catalogMetadata:Metadata={title:'Find your trek | Dreamscape Treks',description:'Explore Dreamscape journeys in Nepal. Filter by region, duration and difficulty to find your trail.'};
 
 export async function generateMetadata({searchParams}:Props):Promise<Metadata>{
   const {id,kind,zone,climb,country}=await searchParams;

@@ -16,7 +16,7 @@ import type {Metadata} from 'next';
 
 /** One request per render: metadata and the page share the fetched article. */
 const load=cache(getGuide);
-export async function storyMetadata(id:string):Promise<Metadata>{try{const g=await load(id);return {title:`${g.title} | Dreamscape journal`,description:g.excerpt,alternates:{canonical:storyHref(g.id)}};}catch{return {title:'Journal | Dreamscape'};}}
+export async function storyMetadata(id:string):Promise<Metadata>{try{const g=await load(id);return {title:`${g.title} | Dreamscape Treks`,description:g.excerpt,alternates:{canonical:storyHref(g.id)}};}catch{return {title:'Journal | Dreamscape Treks'};}}
 
 // Render a conservative Markdown subset as React text; CMS HTML is never executed.
 // Inside a section the section heading is the h2, so body headings step down to h3.

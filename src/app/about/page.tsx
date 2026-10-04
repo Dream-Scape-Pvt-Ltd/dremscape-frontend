@@ -5,7 +5,7 @@ import ContactMap from '@/components/contact-map';
 import MemoryCarousel from '@/components/memory-carousel';
 import {getSiteSettings} from '@/lib/site-settings';
 import styles from './story.module.css';
-export const metadata={title:'Our story | Dreamscape — Beyond the Horizon',description:'Meet the Nepal-based people behind Dreamscape Treks and learn how they plan thoughtful journeys through the Himalaya.'};
+export const metadata={title:'Our story | Dreamscape Treks',description:'Meet the Nepal-based people behind Dreamscape Treks and learn how they plan thoughtful journeys through the Himalaya.'};
 function Paragraphs({items}:{items:string[]}) {return <>{items.map((text,index)=><p key={index}>{text}</p>)}</>;}
 export default async function Page(){const settings=await getSiteSettings();const about=settings.company_content;
 const principles=about.principles;const responsibilities=about.responsibilities;
