@@ -106,13 +106,13 @@ export const journalPosts=[
   }
 ] as const;
 export const galleryPhotos=[
- {image:'heroContext-imgHimalayanAlpineSunriseWithPrayerFlagsAndSnowPeaks',title:'A horizon worth pausing for',group:'Landscapes',alt:'Prayer flags beside snowy Himalayan peaks at sunrise'},
- {image:'151-209-imgGokyoRiSacredEmeraldLakes',title:'A different kind of blue',group:'Landscapes',alt:'Blue-green lakes below rocky Himalayan slopes'},
- {image:'222-370-imgTibetanPrayerFlagsFlyingOnMountainRidge',title:'Written in the wind',group:'On the trail',alt:'Prayer flags fluttering along a mountain ridge'},
- {image:'222-242-imgUpperMustangLoManthangWalledCityRedCliffs',title:'The colours of Mustang',group:'Culture',alt:'Red cliffs and settlement in the Mustang landscape'},
- {image:'222-370-imgTrekkersSmilingWithHimalayanSnowPeaksBackground',title:'Better when shared',group:'On the trail',alt:'Trekkers together with snowy mountains behind them'},
- {image:'151-31-imgManasluAndTsumValleySanctuary',title:'The quieter horizon',group:'Landscapes',alt:'Himalayan valley framed by snowy peaks'},
- {image:'222-465-imgAncientSkyCavesAndGompasInMustangNepal',title:'A story in the stone',group:'Culture',alt:'Cliffside caves and traditional buildings in Mustang'},
- {image:'151-209-imgKalaPattharSunrise5545M',title:'Before the day begins',group:'Landscapes',alt:'Sunrise light falling across Himalayan peaks'},
- {image:'222-370-imgHimalayanMountainPassTrekkerReflection',title:'One step, then another',group:'On the trail',alt:'Trekker on a rocky mountain pass'},
+ {image:'/images/trek-memories/sunlit-summits.jpg',title:'Light across the skyline',group:'Landscapes',alt:'Sunlit snow peaks above a shadowed valley under a blue sky'},
+ {image:'/images/trek-memories/together-in-the-mountains.jpg',title:'Better when shared',group:'On the trail',alt:'A trekking group standing beneath snow-covered mountains'},
+ {image:'/images/trek-memories/prayer-flags-and-friends.jpg',title:'A moment at the top',group:'On the trail',alt:'Trekkers gathered beside a viewpoint marker under colourful prayer flags'},
+ {image:'/images/trek-memories/mountain-teahouse.jpg',title:'A door along the trail',group:'Along the way',alt:'A blue-trimmed mountain building beside an outdoor table'},
+ {image:'/images/trek-memories/village-street.jpg',title:'A village beneath the peaks',group:'Along the way',alt:'Colourful village buildings below snowy mountains'},
+ {image:'/images/trek-memories/forest-footsteps.jpg',title:'Into the green',group:'On the trail',alt:'Trekkers walking a rocky path through dense forest'},
+ {image:'/images/trek-memories/last-light.jpg',title:'A little longer in the light',group:'Landscapes',alt:'Pink evening light touching a mountain summit above dark ridges'},
+ {image:'/images/trek-memories/blue-flowers.jpg',title:'Small discoveries',group:'Along the way',alt:'Small blue flowers growing among dry leaves beside the trail'},
+ {image:'/images/trek-memories/mountain-path.jpg',title:'The next bend',group:'On the trail',alt:'A walker on a dry hillside path below a bright snow-covered peak'},
 ] as const;

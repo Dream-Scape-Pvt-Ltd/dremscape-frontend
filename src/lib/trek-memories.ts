@@ -163,6 +163,87 @@ export const memoryPhotos:MemoryPhoto[]=([
     "src": "/images/trek-memories/sunlit-summits.jpg",
     "width": 2048,
     "height": 1536
+  },
+  {
+    "id": "rocky-outcrop",
+    "title": "Across the boulders",
+    "alt": "Walkers standing among large rocks below a bare mountain slope.",
+    "group": "Shared trails",
+    "src": "/images/trek-memories/rocky-outcrop.jpg",
+    "width": 1536,
+    "height": 2048
+  },
+  {
+    "id": "sunlit-boulder-trail",
+    "title": "Into the bright high valley",
+    "alt": "A hiker walking among boulders toward snowy mountains in bright sunlight.",
+    "group": "Shared trails",
+    "src": "/images/trek-memories/sunlit-boulder-trail.jpg",
+    "width": 1536,
+    "height": 2048
+  },
+  {
+    "id": "animal-skull",
+    "title": "A detail beside the path",
+    "alt": "A sun-bleached animal skull lying on rocks beside a trail.",
+    "group": "Along the way",
+    "src": "/images/trek-memories/animal-skull.jpg",
+    "width": 1536,
+    "height": 2048
+  },
+  {
+    "id": "nightfall-over-valley",
+    "title": "After the daylight",
+    "alt": "Snow-covered peaks catching faint light above a dark valley at night.",
+    "group": "Mountain light",
+    "src": "/images/trek-memories/nightfall-over-valley.jpg",
+    "width": 2048,
+    "height": 1536
+  },
+  {
+    "id": "open-hillside-walkers",
+    "title": "An open hillside",
+    "alt": "Two hikers on a dry hillside path beneath a snowy mountain range.",
+    "group": "Shared trails",
+    "src": "/images/trek-memories/open-hillside-walkers.jpg",
+    "width": 1536,
+    "height": 2048
+  },
+  {
+    "id": "clouds-over-ridge",
+    "title": "When clouds come through",
+    "alt": "Clouds drifting above a brown mountain ridge and shadowed valley.",
+    "group": "Mountain light",
+    "src": "/images/trek-memories/clouds-over-ridge.jpg",
+    "width": 1536,
+    "height": 2048
+  },
+  {
+    "id": "kyanjin-ri-viewpoint",
+    "title": "A high point to remember",
+    "alt": "A painted Kyanjin Ri viewpoint marker with snowy mountains behind it.",
+    "group": "Along the way",
+    "src": "/images/trek-memories/kyanjin-ri-viewpoint.jpg",
+    "width": 1536,
+    "height": 2048
+  },
+  {
+    "id": "kyanjin-peak-marker",
+    "title": "A marker above the valley",
+    "alt": "A painted Kyanjin Peak marker on a rock with snowy mountains behind it.",
+    "group": "Along the way",
+    "src": "/images/trek-memories/kyanjin-peak-marker.jpg",
+    "width": 1536,
+    "height": 2048
+  },
+  {
+    "id": "sea-buckthorn-sign",
+    "title": "A local stop along the way",
+    "alt": "A colourful trail-side sign advertising local sea buckthorn juice.",
+    "group": "Along the way",
+    "src": "/images/trek-memories/sea-buckthorn-sign.jpg",
+    "width": 2048,
+    "height": 1536
   }
 ] as MemoryPhoto[]).map(photo=>({...photo,src:siteImage(photo.src)}));
 export function memoryPhoto(id:string):MemoryPhoto {const photo=memoryPhotos.find(p=>p.id===id);if(!photo)throw new Error('Unknown archive photo: '+id);return photo;}

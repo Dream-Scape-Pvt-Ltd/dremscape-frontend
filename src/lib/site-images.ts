@@ -9,6 +9,9 @@ const backendOrigin = (() => {
 const SITE_IMAGE = /^\/images\/(treks|blog|team|trek-memories)\/(.+)$/;
 
 export function siteImage(src: string): string {
+  // The supplied trek archive is packaged with the frontend, so its photos
+  // must not depend on a running backend or a signed media redirect.
+  if (src.startsWith('/images/trek-memories/')) return src;
   const match = backendOrigin ? SITE_IMAGE.exec(src) : null;
   return match ? `${backendOrigin}/media/site/${match[1]}/${match[2]}` : src;
 }
