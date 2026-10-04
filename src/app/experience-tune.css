@@ -123,3 +123,32 @@ body .catalog-filter .catalog-primary-region .field-label{color:#617766}
   .complete-footer .footer-bottom nav :is(a,summary,button){display:inline-flex;align-items:center;min-height:24px;padding-block:4px;margin-block:-4px}
   .auth-links a,.departure-note a{display:inline-flex;align-items:center;min-height:24px;padding-block:4px;margin-block:-4px}
 }
+
+/* Continue the organizations section into the transparent mountain sky. */
+body .organization-badges{
+  background:radial-gradient(ellipse 42% 58% at 82% 24%,#efdda97a,transparent 100%),
+    linear-gradient(180deg,#f5f8ef 0%,#f3f3e7 66%,#f4f0df 100%);
+}
+body .footer-landscape,
+body:has(.header[data-page="contact"]) .footer-landscape{
+  --landscape-surface:#f4f0df;
+  background:linear-gradient(180deg,#f4f0df 0%,#e8efeb 60%,#114035 100%);
+}
+body .footer-landscape img{mix-blend-mode:normal}
+body footer.complete-footer{background:linear-gradient(180deg,#114035 0%,#09291e 110px)!important}
+
+/* Let large monitors show more of the photography and card grids. */
+@media(min-width:1500px){
+  html body .home-discovery .container,
+  html body .journey-page .container,
+  html body .dest-page .container,
+  html body .organization-badges .container,
+  html body .complete-footer .container,
+  html body .header .header-inner{
+    max-width:1600px;
+    padding-left:clamp(48px,3.6vw,70px);
+    padding-right:clamp(48px,3.6vw,70px);
+  }
+  html body .destination-collections .collection-grid{max-width:none}
+  html body .destination-collections .collection-card{height:clamp(330px,22vw,390px)}
+}
