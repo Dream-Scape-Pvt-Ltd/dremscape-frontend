@@ -160,6 +160,13 @@ body footer.complete-footer{background:linear-gradient(180deg,#01110b 0%,#09291e
 .home-slideshow .home-slide:nth-child(3){object-position:46% 58%}
 .home-slideshow .home-slide:nth-child(4){object-position:52% 58%}
 
+/* Let the headings carry most sections; reserve eyebrow labels for key moments. */
+.home-discovery> :not(.home-hero):not(.story):not(.home-plan) .eyebrow,
+.journey-page .contact-form-panel>.eyebrow,
+.journey-page .contact-map-copy .eyebrow{display:none}
+html body .home-discovery .home-plan .eyebrow,
+html body .journey-page .contact-intro .eyebrow{color:#a28653}
+
 /* Use the site's type family for editorial emphasis as well as body copy. */
 html body .dest-hero h1 em,
 html body .journey-page h1 em,
