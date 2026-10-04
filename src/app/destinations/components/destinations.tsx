@@ -171,7 +171,7 @@ export default function Destinations({regions=[]}:{regions?:Region[]}) {
                 {visible.map(r => (
                   <article className="sanctuary-card" key={r.slug}>
                     <div className="sanctuary-image">
-                      <img src={asset(r.image)} alt={`Mountain landscape of ${r.name}`} loading="lazy" />
+                      <img src={asset(r.image)} alt={`Mountain landscape of ${r.name}`} loading="lazy"  width="512" height="279"/>
                       <span className="sanctuary-tag">{r.tag}</span>
                       <div>
                         <span>REGION {String(regions.indexOf(r) + 1).padStart(2, '0')}</span>
@@ -207,11 +207,11 @@ export default function Destinations({regions=[]}:{regions?:Region[]}) {
           <div className="container">
             <div className="story-photos">
               <figure>
-                <img src={asset('151-209-imgKalaPattharSunrise5545M')} alt="Sunrise from Kala Patthar" loading="lazy" />
+                <img src={asset('151-209-imgKalaPattharSunrise5545M')} alt="Sunrise from Kala Patthar" loading="lazy"  width="512" height="279"/>
                 <figcaption>The mornings you never forget.</figcaption>
               </figure>
               <figure>
-                <img src={asset('151-209-imgGokyoRiSacredEmeraldLakes')} alt="The blue lakes below Gokyo Ri" loading="lazy" />
+                <img src={asset('151-209-imgGokyoRiSacredEmeraldLakes')} alt="The blue lakes below Gokyo Ri" loading="lazy"  width="512" height="279"/>
                 <figcaption>A different kind of blue.</figcaption>
               </figure>
             </div>

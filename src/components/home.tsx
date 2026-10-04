@@ -24,7 +24,7 @@ function Icon({ name = 'heroContext-imgSvg', className = '' }: { name?: string; 
 function Eyebrow({ children }: { children: ReactNode }) { return <p className="eyebrow"><span />{children}</p>; }
 // CMS content can arrive without an image (e.g. a journal post with no cover); show a house photo instead of failing the page.
 const FALLBACK_PHOTO = '/images/trek-memories/mountain-amphitheatre.jpg';
-function Photo({ name, alt, className = '' }: { name?: string; alt: string; className?: string }) { return <img src={asset(name?.trim() || FALLBACK_PHOTO)} alt={alt} className={className} loading="lazy" />; }
+function Photo({ name, alt, className = '' }: { name?: string; alt: string; className?: string }) { return <img src={asset(name?.trim() || FALLBACK_PHOTO)} alt={alt} className={className} loading="lazy"  width="512" height="279"/>; }
 const defaultArticles = journalPosts.map(p => ({ ...p, tag: p.category, date: p.reading + ' read' }));
 type HomeCatalog={trips:Trip[];demo:boolean;error?:string};
 

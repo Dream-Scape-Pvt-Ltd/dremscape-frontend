@@ -51,7 +51,7 @@ export default function Gallery() {
             onClick={() => setSelected(p.index)}
             aria-label={`View ${p.title}`}
           >
-            <img src={asset(p.image)} alt={p.title} loading="lazy" />
+            <img src={asset(p.image)} alt={p.title} loading="lazy"  width="512" height="279"/>
             <span>
               <small>{p.group}</small>
               <strong>{p.title}</strong>
@@ -87,7 +87,7 @@ export default function Gallery() {
             <button className="gallery-close" aria-label="Close photo" onClick={() => setSelected(null)}>
               ×
             </button>
-            <img src={asset(galleryPhotos[selected].image)} alt={galleryPhotos[selected].title} />
+            <img src={asset(galleryPhotos[selected].image)} alt={galleryPhotos[selected].title}  width="512" height="279"/>
             <div className="gallery-dialog-foot">
               <button aria-label="Previous photo" onClick={() => step(-1)}>←</button>
               <p id="gallery-caption">{galleryPhotos[selected].title}</p>

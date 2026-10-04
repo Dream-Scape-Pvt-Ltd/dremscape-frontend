@@ -47,7 +47,7 @@ export default function JourneyDetail({ journey: t, related }: { journey: Journe
   return (
     <JourneyShell>
       <section className="trek-hero">
-        <img src={t.image ? asset(t.image) : fallbackTrekImage(t.slug, t.destination_slug)} alt={t.title} fetchPriority="high" />
+        <img src={t.image ? asset(t.image) : fallbackTrekImage(t.slug, t.destination_slug)} alt={t.title} fetchPriority="high"  width="512" height="279"/>
         <div className="container">
           <nav className="breadcrumbs" aria-label="Breadcrumb">
             <Link href="/">Home</Link>
@@ -108,7 +108,7 @@ export default function JourneyDetail({ journey: t, related }: { journey: Journe
                       src={asset(image)}
                       alt={`${t.title} gallery image ${index + 1}`}
                       loading="lazy"
-                    />
+                     width="512" height="279"/>
                   ))}
                 </div>
               </section>

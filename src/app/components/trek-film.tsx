@@ -83,7 +83,7 @@ export default function TrekFilm({ onClose, onExplore }: { onClose: () => void; 
                 className={`film-scene ${scene === index ? 'current' : ''}`}
                 src={asset(item.image)}
                 alt=""
-              />
+               width="512" height="279"/>
             ))}
             <div className="film-vignette" />
             <div className="film-topline">

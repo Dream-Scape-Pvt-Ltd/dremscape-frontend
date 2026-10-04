@@ -56,7 +56,7 @@ export default function JournalIndex({ guides }: { guides: Guide[] }) {
                 <section>
                   <p className="eyebrow">{g.category.replaceAll('_', ' ')}</p>
                   <h2>{g.title}</h2>
-                  <p>{g.excerpt}</p><div className="journal-card-previews">{(g.galleryImages?.length?g.galleryImages:g.photoIds?.map(id=>memoryPhotos.find(p=>p.id===id)?.src).filter((src):src is string=>!!src)||[]).slice(0,3).map((src,index)=><img key={`${src}-${index}`} src={src} alt="" loading="lazy"/>)}</div>
+                  <p>{g.excerpt}</p><div className="journal-card-previews">{(g.galleryImages?.length?g.galleryImages:g.photoIds?.map(id=>memoryPhotos.find(p=>p.id===id)?.src).filter((src):src is string=>!!src)||[]).slice(0,3).map((src,index)=><img key={`${src}-${index}`} src={src} alt="" loading="lazy" width="512" height="279"/>)}</div>
                   <span className="journal-card-foot">
                     <span>{g.reading ? `${g.reading} read` : 'Read the story'}</span>
                     <span>↗︎</span>

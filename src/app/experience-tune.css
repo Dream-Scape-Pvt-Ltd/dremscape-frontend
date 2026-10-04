@@ -110,3 +110,6 @@ html body .home-discovery .home-activities .section-heading>p{max-width:390px;ma
 /* CSS-masked SVG keeps diagonal arrows as brand-coloured lines on iOS, never emoji. */
 .ui-arrow{display:inline-block;width:1em;height:1em;flex:0 0 1em;background:currentColor;vertical-align:-.12em;-webkit-mask:url('/icons/arrow-up-right.svg') center / contain no-repeat;mask:url('/icons/arrow-up-right.svg') center / contain no-repeat}
 .home-activity-link .ui-arrow{color:#fff}
+
+/* Let dimensioned grid images keep their existing container width on narrow screens. */
+.editorial-hero.has-photo>img,.about-image-story>img{min-width:0;max-width:100%}

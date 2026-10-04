@@ -20,7 +20,7 @@ function Eyebrow({ children }: { children: ReactNode }) {
   return <p className="eyebrow"><span />{children}</p>;
 }
 function Photo({ name, alt, className = '' }: { name: string; alt: string; className?: string }) {
-  return <img src={asset(name)} alt={alt} className={className} loading="lazy" />;
+  return <img src={asset(name)} alt={alt} className={className} loading="lazy"  width="512" height="279"/>;
 }
 
 const defaultDestinations = [
@@ -350,7 +350,7 @@ export default function Home({heroImage,heroAlt,destinations=defaultDestinations
         </section>
 
         <section className="testimonials section">
-          <img className="testimonial-landscape" src="/images/mountain-landscape-illustration.svg" alt="" aria-hidden="true" />
+          <img className="testimonial-landscape" src="/images/mountain-landscape-illustration.svg" alt="" aria-hidden="true"  width="1920" height="450"/>
           <div className="container reveal">
             <Eyebrow>The people behind the journeys</Eyebrow>
             <h2>Every Journey Leaves a Story.</h2>

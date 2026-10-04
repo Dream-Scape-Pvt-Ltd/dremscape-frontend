@@ -62,7 +62,7 @@ export default function TrekCatalog() {
   return (
     <JourneyShell>
       <section className="catalog-hero">
-        <img src={asset('heroContext-imgHimalayanAlpineSunriseWithPrayerFlagsAndSnowPeaks')} alt="Prayer flags beneath the Himalayan peaks" fetchPriority="high" />
+        <img src={asset('heroContext-imgHimalayanAlpineSunriseWithPrayerFlagsAndSnowPeaks')} alt="Prayer flags beneath the Himalayan peaks" fetchPriority="high"  width="512" height="279"/>
         <div className="container">
           <p className="eyebrow">NEPAL, ONE FOOTSTEP AT A TIME</p>
           <h1>Your trail.<br /><em>Your kind of extraordinary.</em></h1>

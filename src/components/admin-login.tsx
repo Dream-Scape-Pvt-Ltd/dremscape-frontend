@@ -31,7 +31,7 @@ export default function AdminLogin({backgroundImage='/images/admin-login-backgro
     }catch(reason){setError(reason instanceof Error?reason.message:'Unable to sign in. Please try again.');setBusy(false);}
   }
   return <main className="admin-login-screen">
-    <div className="admin-login-landscape" aria-hidden="true"><img src={backgroundImage} alt="" /></div>
+    <div className="admin-login-landscape" aria-hidden="true"><img src={backgroundImage} alt=""  width="1672" height="940"/></div>
     <header className="admin-login-header">
       <Link href="/" aria-label="Dreamscape home"><img src={asset('222-694-imgLinkBrandLogoDreamscapeTreks')} alt="Dreamscape Treks" width="208" height="72"/></Link>
       <Link href="/" className="admin-login-back"><span aria-hidden="true">←</span> Back to website</Link>

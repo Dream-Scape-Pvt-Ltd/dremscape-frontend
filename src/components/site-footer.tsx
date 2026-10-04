@@ -11,11 +11,11 @@ export default function SiteFooter(){
       <div className="container">
         <div className="organization-badges-heading"><p className="eyebrow">NEPAL · TOURISM & CONSERVATION</p><h2 id="organization-badges-title">Organizations across Nepal’s tourism landscape.</h2></div>
         <div className="organization-badges-grid">
-          <div className="organization-badge"><img className="organization-logo organization-logo-dot" src="/images/organizations/department-of-tourism-emblem.png" alt="Government of Nepal emblem"/><span><strong>Department of Tourism</strong><small>Government of Nepal</small></span></div>
-          <div className="organization-badge"><img className="organization-logo" src="/images/organizations/ntb.jpg" alt="Nepal Tourism Board logo"/><span><strong>Nepal Tourism Board</strong><small>Tourism promotion</small></span></div>
-          <div className="organization-badge"><img className="organization-logo organization-logo-nma" src="/images/organizations/nma.png" alt="Nepal Mountaineering Association logo"/><span><strong>Nepal Mountaineering Association</strong><small>Mountaineering</small></span></div>
-          <div className="organization-badge"><img className="organization-logo organization-logo-keep" src="/images/organizations/keep.png" alt="Kathmandu Environmental Education Project logo"/><span><strong>Kathmandu Environmental Education Project</strong><small>Environment & education</small></span></div>
-          <div className="organization-badge"><img className="organization-logo organization-logo-taan" src="/images/organizations/taan.jpg" alt="Trekking Agencies’ Association of Nepal logo"/><span><strong>Trekking Agencies’ Association of Nepal</strong><small>Trekking industry</small></span></div>
+          <div className="organization-badge"><img className="organization-logo organization-logo-dot" src="/images/organizations/department-of-tourism-emblem.png" alt="Government of Nepal emblem" width="160" height="135"/><span><strong>Department of Tourism</strong><small>Government of Nepal</small></span></div>
+          <div className="organization-badge"><img className="organization-logo" src="/images/organizations/ntb.jpg" alt="Nepal Tourism Board logo" width="2212" height="2250"/><span><strong>Nepal Tourism Board</strong><small>Tourism promotion</small></span></div>
+          <div className="organization-badge"><img className="organization-logo organization-logo-nma" src="/images/organizations/nma.png" alt="Nepal Mountaineering Association logo" width="651" height="109"/><span><strong>Nepal Mountaineering Association</strong><small>Mountaineering</small></span></div>
+          <div className="organization-badge"><img className="organization-logo organization-logo-keep" src="/images/organizations/keep.png" alt="Kathmandu Environmental Education Project logo" width="800" height="309"/><span><strong>Kathmandu Environmental Education Project</strong><small>Environment & education</small></span></div>
+          <div className="organization-badge"><img className="organization-logo organization-logo-taan" src="/images/organizations/taan.jpg" alt="Trekking Agencies’ Association of Nepal logo" width="900" height="1241"/><span><strong>Trekking Agencies’ Association of Nepal</strong><small>Trekking industry</small></span></div>
         </div>
       </div>
     </section>
