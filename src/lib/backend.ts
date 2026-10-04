@@ -3,13 +3,40 @@ import {NextResponse} from 'next/server';
 export class BackendError extends Error {
   constructor(message: string, public status = 502, public fields?: unknown) { super(message); }
 }
-// Public reads that may use the caller's cache setting; everything else is always fetched fresh.
-const cacheablePaths=['content/site-settings/','destinations/nav-menus/'];
+// Only explicitly opted-in, anonymous public reads can enter Next's data cache.
+const publicReadPaths=['content/site-settings/','content/guides/','content/trek-guides/','destinations/','trips/'];
+export function publicReadCache(...tags:string[]){return {next:{revalidate:60,tags}};}
+export function publicReadTags(path:string):string[]{
+  if(path.startsWith('trips/'))return path.includes('/departures/')?['journeys','departures']:path.includes('/reviews/')?['reviews']:['journeys'];
+  if(path.startsWith('destinations/activity-categories/'))return ['categories'];
+  if(path.startsWith('destinations/nav-menus/'))return ['navigation'];
+  if(path.startsWith('destinations/'))return ['destinations'];
+  if(path.startsWith('content/trek-guides/'))return ['guides'];
+  if(path.startsWith('content/guides/'))return ['guides'];
+  return ['website-settings'];
+}
+async function invalidatePublicRead(path:string,method:string){
+  if(method==='GET')return;
+  if(path.endsWith('/view/')||path.includes('/media/'))return;
+  let tags:string[]=[];
+  if(path.startsWith('trips/'))tags=path.includes('/departures/')?['departures']:path.includes('/reviews/')?['reviews']:['journeys','departures','reviews'];
+  else if(path.startsWith('destinations/activity-categories/'))tags=['categories','journeys'];
+  else if(path.startsWith('destinations/nav-menus/'))tags=['navigation'];
+  else if(path.startsWith('destinations/'))tags=['destinations','journeys'];
+  else if(path.startsWith('content/trek-guides/'))tags=['guides','journeys'];
+  else if(path.startsWith('content/guides/'))tags=['guides'];
+  else if(path.startsWith('content/site-settings/'))tags=['website-settings'];
+  if(!tags.length)return;
+  const {revalidateTag}=await import('next/cache');
+  for(const tag of tags)revalidateTag(tag,{expire:0});
+}
 // Every call reaches the API from this server's single IP. The shared token tells the
 // backend this is the frontend: page reads skip its per-IP rate limit, and writes
 // (logins, inquiries…) carry the visitor's IP so they are limited per visitor.
 // Reading request headers is skipped for GETs so pages can stay statically rendered.
 async function addInternalHeaders(headers: Headers, method: string) {
+  const frontendKey=process.env.FRONTEND_INTERNAL_KEY;
+  if(frontendKey)headers.set('X-Frontend-Key',frontendKey);
   const token = process.env.INTERNAL_API_TOKEN;
   if (!token) return;
   headers.set('X-Internal-Token', token);
@@ -32,16 +59,18 @@ export async function backend<T>(path: string, options: RequestInit & {next?:{re
   await addInternalHeaders(headers, options.method || 'GET');
   let response: Response;
   try {
-    const cacheablePublicRead=cacheablePaths.includes(path)&&!headers.has('Authorization')&&(options.method||'GET')==='GET';
-    response = await fetch(`${base}/${path}`, {...options, headers, cache:cacheablePublicRead?options.cache||'no-store':'no-store', signal:AbortSignal.timeout(30000), redirect:'error'});
+    const method=(options.method||'GET').toUpperCase();
+    const cacheablePublicRead=method==='GET'&&Boolean(options.next?.revalidate)&&publicReadPaths.some(prefix=>path.startsWith(prefix))&&!headers.has('Authorization')&&!headers.has('X-Booking-Token')&&!headers.has('Cookie');
+    response = await fetch(`${base}/${path}`, {...options, next:cacheablePublicRead?options.next:undefined, cache:cacheablePublicRead?options.cache||'force-cache':'no-store', headers, signal:AbortSignal.timeout(30000), redirect:'error'});
   } catch { throw new BackendError(options.method === 'POST' ? 'We could not confirm whether your request was saved. Please contact the team before trying again.' : 'The service is temporarily unavailable. Please try again.'); }
-  if (response.ok && response.status === 204) return {} as T;
+  if (response.ok && response.status === 204){await invalidatePublicRead(path,(options.method||'GET').toUpperCase());return {} as T;}
   const body = await response.json().catch(() => null);
   if (!response.ok || body?.success === false) {
     const unavailable=options.method==='POST'?'We could not confirm whether your request was saved. Please contact the team before trying again.':'The service is temporarily unavailable. Please try again later.';
     throw new BackendError(response.status >= 500 ? unavailable : body?.error?.message || 'The request could not be completed.', response.ok ? 502 : response.status, response.status<500?body?.error?.details:undefined);
   }
   if (body?.success !== true) throw new BackendError('The server returned an unexpected response. We could not confirm the result.');
+  await invalidatePublicRead(path,(options.method||'GET').toUpperCase());
   return (body.data ?? {success: true}) as T;
 }
 export function apiError(error: unknown) {

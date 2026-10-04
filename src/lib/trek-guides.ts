@@ -1,5 +1,5 @@
 import {connection} from 'next/server';
-import {backend,backendConfigured,BackendError} from './backend';
+import {backend,backendConfigured,BackendError,publicReadCache} from './backend';
 import {allPages} from './journeys';
 import type {Trip} from './catalog';
 import {isUuid} from './links';
@@ -70,5 +70,5 @@ export async function listTrekGuides():Promise<TrekGuideSummary[]>{
 export async function getTrekGuide(ref:string):Promise<TrekGuide>{
   if(!SLUG.test(ref)||!backendConfigured())throw new BackendError('Guide not found.',404);
   await connection();
-  return adaptGuide(await backend<ApiGuide>(`content/trek-guides/${encodeURIComponent(ref)}/`));
+  return adaptGuide(await backend<ApiGuide>(`content/trek-guides/${encodeURIComponent(ref)}/`,publicReadCache('guides')));
 }

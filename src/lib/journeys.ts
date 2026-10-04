@@ -1,6 +1,6 @@
 import {previewTrips as sampleTrips,type Trip} from './catalog';
 import {normalizeEditorialTags} from './editorial-tags';
-import {backend, backendConfigured, BackendError} from './backend';
+import {backend, backendConfigured, BackendError, publicReadCache, publicReadTags} from './backend';
 import {isUuid} from './links';
 
 export type AvailabilityState='AVAILABLE'|'FEW_SEATS_LEFT'|'SOLD_OUT'|'WAITLIST'|'CANCELLED';
@@ -23,7 +23,7 @@ export function normalizeTrip(raw:RawTrip):Trip {
 export async function allPages<T>(path:string):Promise<T[]> {
   const items:T[]=[];
   for(let page=1;page<=100;page++) {
-    const data=await backend<{results:T[];next:string|null}>(`${path}?page_size=100&page=${page}`);
+    const data=await backend<{results:T[];next:string|null}>(`${path}?page_size=100&page=${page}`,publicReadCache(...publicReadTags(path)));
     if(!Array.isArray(data.results))throw new BackendError('The catalog response is incomplete.');
     items.push(...data.results);
     if(!data.next)return items;
@@ -151,7 +151,7 @@ export async function getJourney(ref:string) {
   let raw:Journey & RawTrip, departures:Departure[];
   try {
     [raw,departures]=await Promise.all([
-      backend<Journey & RawTrip>(`trips/${encodeURIComponent(ref)}/`),
+      backend<Journey & RawTrip>(`trips/${encodeURIComponent(ref)}/`,publicReadCache('journeys')),
       allPages<Departure>(`trips/${encodeURIComponent(ref)}/departures/`),
     ]);
   }
@@ -164,7 +164,7 @@ export async function getJourney(ref:string) {
       if(preview&&preview.slug!==ref){
         try{
           [raw,departures]=await Promise.all([
-            backend<Journey & RawTrip>(`trips/${encodeURIComponent(preview.slug)}/`),
+            backend<Journey & RawTrip>(`trips/${encodeURIComponent(preview.slug)}/`,publicReadCache('journeys')),
             allPages<Departure>(`trips/${encodeURIComponent(preview.slug)}/departures/`),
           ]);
         }catch(fallbackError){
@@ -196,7 +196,7 @@ export async function getJourney(ref:string) {
  */
 export async function listRelatedJourneys(current:Trip,limit=3):Promise<Trip[]> {
   if(!backendConfigured()) return [];
-  const page=(query:string)=>backend<{results:RawTrip[]}>(`trips/?${query}`).then(data=>Array.isArray(data.results)?data.results.filter(trip=>trip.is_active!==false).map(normalizeTrip):[]);
+  const page=(query:string)=>backend<{results:RawTrip[]}>(`trips/?${query}`,publicReadCache('journeys')).then(data=>Array.isArray(data.results)?data.results.filter(trip=>trip.is_active!==false).map(normalizeTrip):[]);
   const [sameRegion,others]=await Promise.all([
     page(`destination=${encodeURIComponent(current.destination_slug)}&page_size=${limit+1}`),
     page(`page_size=${limit*2+1}`),

@@ -32,6 +32,21 @@ async function rejectsWith(promise: Promise<unknown>, status: number, message?: 
 test.beforeEach(() => { process.env.BACKEND_API_URL = 'http://django.test/api/v1/'; });
 test.afterEach(() => { globalThis.fetch = realFetch; });
 
+test('only opted-in public reads use the data cache and the frontend key stays server-side', async () => {
+  process.env.FRONTEND_INTERNAL_KEY = 'test-server-key';
+  try {
+    const calls = stubFetch(() => json({success: true, data: {results: []}}));
+    await backend('trips/?page=1', {next: {revalidate: 60, tags: ['journeys']}});
+    await backend('trips/?page=1', {headers: {Authorization: 'Bearer private'}, next: {revalidate: 60, tags: ['journeys']}});
+    await backend('bookings/', {next: {revalidate: 60, tags: ['journeys']}});
+    assert.equal(calls[0].init.cache, 'force-cache');
+    assert.deepEqual((calls[0].init as RequestInit & {next?: unknown}).next, {revalidate: 60, tags: ['journeys']});
+    assert.equal(calls[1].init.cache, 'no-store');
+    assert.equal(calls[2].init.cache, 'no-store');
+    for (const call of calls) assert.equal(new Headers(call.init.headers).get('X-Frontend-Key'), 'test-server-key');
+  } finally { delete process.env.FRONTEND_INTERNAL_KEY; }
+});
+
 test('backend unwraps the Django envelope and joins the base URL once', async () => {
   const calls = stubFetch(() => json({success: true, data: {count: 1}}));
   assert.deepEqual(await backend('inquiries/crm/funnel/'), {count: 1});

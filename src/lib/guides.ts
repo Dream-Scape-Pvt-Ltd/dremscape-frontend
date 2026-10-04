@@ -1,4 +1,4 @@
-import {backend,backendConfigured,BackendError} from './backend';
+import {backend,backendConfigured,BackendError,publicReadCache} from './backend';
 import {allPages} from './journeys';
 import {journalPosts} from './editorial-content';
 import {asset} from './assets';
@@ -25,4 +25,4 @@ function adapt(g:ApiGuide):Guide {
 }
 export async function listGuides():Promise<Guide[]>{if(!backendConfigured())return localGuides;return (await allPages<ApiGuide>('content/guides/')).map(adapt);}
 /** An article by id (current addresses) or slug (old links being redirected); the backend accepts both. */
-export async function getGuide(ref:string):Promise<Guide>{if(!/^[\w-]+$/.test(ref))throw new BackendError('Article not found.',404);if(!backendConfigured()){const local=localGuides.find(g=>g.id===ref||g.slug===ref);if(local)return local;throw new BackendError('Article not found.',404);}return adapt(await backend<ApiGuide>(`content/guides/${ref}/`));}
+export async function getGuide(ref:string):Promise<Guide>{if(!/^[\w-]+$/.test(ref))throw new BackendError('Article not found.',404);if(!backendConfigured()){const local=localGuides.find(g=>g.id===ref||g.slug===ref);if(local)return local;throw new BackendError('Article not found.',404);}return adapt(await backend<ApiGuide>(`content/guides/${ref}/`,publicReadCache('guides')));}
