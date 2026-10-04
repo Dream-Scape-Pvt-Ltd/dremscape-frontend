@@ -1,4 +1,5 @@
 'use client';
+import UiArrow from '@/components/ui-arrow';
 import {useState,type FormEvent} from 'react';
 import {errorText} from '@/lib/format';
 import PhoneField from '@/components/phone-field';
@@ -67,7 +68,7 @@ export default function PartnerInquiryForm() {
       <label><span>Tell us about your business <small>(optional)</small></span><textarea name="message" rows={4} maxLength={3500} placeholder="Where your travellers come from, the kind of trips they want, anything you’d like to discuss…"/></label>
     </fieldset>
     {error&&<p className="form-error" role="alert">{error}</p>}
-    <button className="button gold" disabled={busy}>{busy?'Sending…':'Start the conversation ↗︎'}</button>
+    <button className="button gold" disabled={busy}>{busy?'Sending…':<>Start the conversation <UiArrow/></>}</button>
     <small className="form-footnote">No commitment. We’ll get in touch to discuss terms that suit your business.</small>
   </form>;
 }

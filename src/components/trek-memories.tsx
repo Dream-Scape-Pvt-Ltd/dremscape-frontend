@@ -1,4 +1,5 @@
 'use client';
+import UiArrow from '@/components/ui-arrow';
 
 import Image from 'next/image';
 import {useEffect,useRef,useState,type ReactNode} from 'react';
@@ -22,13 +23,13 @@ export function MemoryViewer({photos,index,onClose,onChange}:{photos:MemoryPhoto
   return <dialog ref={dialog} className="memory-viewer" aria-labelledby="memory-viewer-title" onCancel={onClose} onClick={e=>{if(e.target===e.currentTarget)onClose();}} onKeyDown={e=>{if(e.key==='ArrowRight'){e.preventDefault();step(1);}if(e.key==='ArrowLeft'){e.preventDefault();step(-1);}}}>
     <div className="memory-viewer-top"><span>DREAMSCAPE / TREK MEMORIES</span><button aria-label="Close memory" onClick={onClose}>Close <span aria-hidden="true">×</span></button></div>
     <img key={photo.id} className="memory-viewer-image" src={photo.src} alt={photo.alt} width={photo.width} height={photo.height}/>
-    <div className="memory-viewer-bottom"><button aria-label="Previous memory" disabled={photos.length<2} onClick={()=>step(-1)}>←</button><div aria-live="polite"><p id="memory-viewer-title">{photo.title}</p><small>{String(index+1).padStart(2,'0')} / {photos.length} · From past treks</small></div><button aria-label="Next memory" disabled={photos.length<2} onClick={()=>step(1)}>→</button></div>
+    <div className="memory-viewer-bottom"><button aria-label="Previous memory" disabled={photos.length<2} onClick={()=>step(-1)}>←</button><div aria-live="polite"><p id="memory-viewer-title">{photo.title}</p><small>{String(index+1).padStart(2,'0')} / {photos.length} · From past treks</small></div><button aria-label="Next memory" disabled={photos.length<2} onClick={()=>step(1)}><UiArrow/></button></div>
   </dialog>;
 }
 
 export function StoryPhoto({id}:{id:string}){
   const [open,setOpen]=useState(false);const photo=memoryPhoto(id);
-  return <><figure className="story-memory"><button className="memory-open" onClick={()=>setOpen(true)} aria-label={`Enlarge ${photo.title}`}><MemoryImage photo={photo}/><span className="memory-expand" aria-hidden="true">↗︎</span></button><figcaption><span>{photo.title}</span><small>FROM THE TREK ARCHIVE</small></figcaption></figure>{open&&<MemoryViewer photos={[photo]} index={0} onClose={()=>setOpen(false)} onChange={()=>{}}/>}</>;
+  return <><figure className="story-memory"><button className="memory-open" onClick={()=>setOpen(true)} aria-label={`Enlarge ${photo.title}`}><MemoryImage photo={photo}/><span className="memory-expand" aria-hidden="true"><UiArrow/></span></button><figcaption><span>{photo.title}</span><small>FROM THE TREK ARCHIVE</small></figcaption></figure>{open&&<MemoryViewer photos={[photo]} index={0} onClose={()=>setOpen(false)} onChange={()=>{}}/>}</>;
 }
 
 export default function TrekMemories(){

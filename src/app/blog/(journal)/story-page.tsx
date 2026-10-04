@@ -1,3 +1,4 @@
+import UiArrow from '@/components/ui-arrow';
 import StructuredData from '@/components/structured-data';
 import {absolutePublicUrl} from '@/lib/structured-data';
 import {asset} from '@/lib/assets';
@@ -33,7 +34,7 @@ function Markdown({text,nested=false}:{text:string;nested?:boolean}){
 
 const chapter=(i:number)=>String(i+1).padStart(2,'0');
 
-function Endnote(){return <div className="article-endnote"><span>BEYOND THE HORIZON</span><Link href="/blog">More from the journal ↗︎</Link></div>;}
+function Endnote(){return <div className="article-endnote"><span>BEYOND THE HORIZON</span><Link href="/blog">More from the journal <UiArrow/></Link></div>;}
 
 /** Sectioned posts from the blog studio: each section's text and photo side by side, alternating sides. */
 function StorySections({sections}:{sections:NonNullable<Guide['sections']>}){
@@ -58,7 +59,7 @@ function StorySections({sections}:{sections:NonNullable<Guide['sections']>}){
 /** Older and archive posts: the reading column with a sticky "In this story" side list. */
 function ClassicReading({g}:{g:Guide}){
   return <div className="article-reading container">
-    <aside><p className="eyebrow">IN THIS STORY</p>{g.sections?.map((s,i)=><a key={i} href={`#chapter-${i}`}>{s.title}</a>)}<Link href="/contact" className="article-aside-cta">Have a journey in mind?<br/>Let’s talk ↗︎</Link></aside>
+    <aside><p className="eyebrow">IN THIS STORY</p>{g.sections?.map((s,i)=><a key={i} href={`#chapter-${i}`}>{s.title}</a>)}<Link href="/contact" className="article-aside-cta">Have a journey in mind?<br/>Let’s talk <UiArrow/></Link></aside>
     <div className="article-prose">
       {g.sections?g.sections.map((s,i)=><MemoryReveal key={i}><section id={`chapter-${i}`}><span className="chapter-number">{chapter(i)}</span><h2>{s.title}</h2><Markdown text={s.body} nested/>{g.photoIds?.[i]&&<StoryPhoto id={g.photoIds[i]}/>}</section></MemoryReveal>):<Markdown text={g.markdown||'This article’s text is not available yet.'}/>}
       <Endnote/>

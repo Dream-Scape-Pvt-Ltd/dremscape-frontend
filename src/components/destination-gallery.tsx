@@ -1,4 +1,5 @@
 'use client';
+import UiArrow from '@/components/ui-arrow';
 
 import {useEffect,useMemo,useState} from 'react';
 import {AnimatePresence,motion,useReducedMotion} from 'motion/react';
@@ -23,7 +24,7 @@ export default function DestinationGallery({name,images}:{name:string;images:str
       <AnimatePresence initial={false}>
         <motion.img key={current} src={asset(current)} alt={`A view of ${name}, photo ${active+1} of ${photos.length}`} width="1200" height="800" initial={reducedMotion?false:{opacity:0}} animate={{opacity:1}} exit={reducedMotion?undefined:{opacity:0}} transition={{duration:reducedMotion?0:.65}} loading="lazy"/>
       </AnimatePresence>
-      {photos.length>1&&<div className="destination-gallery-controls"><span>{String(active+1).padStart(2,'0')} / {String(photos.length).padStart(2,'0')}</span><button type="button" onClick={()=>setActive(index=>(index+photos.length-1)%photos.length)} aria-label="Previous destination photo">←</button><button type="button" onClick={()=>setActive(index=>(index+1)%photos.length)} aria-label="Next destination photo">→</button></div>}
+      {photos.length>1&&<div className="destination-gallery-controls"><span>{String(active+1).padStart(2,'0')} / {String(photos.length).padStart(2,'0')}</span><button type="button" onClick={()=>setActive(index=>(index+photos.length-1)%photos.length)} aria-label="Previous destination photo">←</button><button type="button" onClick={()=>setActive(index=>(index+1)%photos.length)} aria-label="Next destination photo"><UiArrow/></button></div>}
     </div>
     {photos.length>1&&<div className="destination-gallery-rail" role="group" aria-label="Choose a destination photo">{photos.map((photo,index)=><button key={photo} type="button" aria-label={`Show photo ${index+1}`} aria-pressed={active===index} onClick={()=>{setActive(index);setPaused(true);}}><img src={asset(photo)} alt="" loading="lazy" width="160" height="100"/></button>)}</div>}
   </div>;

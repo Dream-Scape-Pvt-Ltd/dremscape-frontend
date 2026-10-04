@@ -1,4 +1,5 @@
 'use client';
+import UiArrow from '@/components/ui-arrow';
 
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -50,7 +51,7 @@ export default function SiteHeader({ page = 'home', onPlan }: { page?: string; a
         <div className="nav-mega-intro"><p>{group.eyebrow}</p><h2>{group.title}</h2><span>{group.intro}</span><Link href={group.href} onClick={closeNavigation}>{group.allLabel} <span className="ui-arrow" aria-hidden="true" /></Link></div>
         <div className="nav-mega-links">{group.items.map(item=><Link key={item.label} href={item.href} onClick={closeNavigation}><strong>{item.label}<span className="ui-arrow" aria-hidden="true" /></strong><small>{item.description}</small></Link>)}</div>
         <img className="nav-mega-photo" src={panelPhoto(group.image)} alt="" width="320" height="240" loading="lazy"/>
-        <div className="nav-mega-foot"><Link href="/departures" onClick={closeNavigation}>Upcoming departures →</Link><Link href="/blog" onClick={closeNavigation}>Journal & travel notes →</Link></div>
+        <div className="nav-mega-foot"><Link href="/departures" onClick={closeNavigation}>Upcoming departures <UiArrow/></Link><Link href="/blog" onClick={closeNavigation}>Journal & travel notes <UiArrow/></Link></div>
       </div>
     </div>)}<Link href="/blog" aria-current={page==='journal'?'page':undefined} onClick={closeNavigation}>Journal</Link><Link href="/contact" aria-current={page==='contact'?'page':undefined} onClick={closeNavigation}>Contact</Link></nav>
     <div className="header-actions"><button ref={searchButton} type="button" className="search-link" aria-label={searchOpen ? 'Close journey search' : 'Search journeys'} aria-controls="journey-search" aria-expanded={searchOpen} onClick={() => { closeNavigation(); setSearchOpen(!searchOpen); }}><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">{searchOpen ? <path d="m6 6 12 12M6 18 18 6" /> : <><circle cx="10.8" cy="10.8" r="6.7" /><path d="m16 16 4.5 4.5" /></>}</svg></button><button className="button header-cta" onClick={() => { closeNavigation(); setSearchOpen(false); onPlan(); }}>Plan my journey <span className="ui-arrow" aria-hidden="true" /></button><button ref={menuButton} className="menu-toggle" aria-controls="main-navigation" aria-expanded={menu} aria-label={menu ? 'Close menu' : 'Open menu'} onClick={() => { setSearchOpen(false); setOpenGroup(null); setMenu(!menu); }}><span className="menu-lines" aria-hidden="true"><i /><i /></span></button></div>
@@ -59,11 +60,11 @@ export default function SiteHeader({ page = 'home', onPlan }: { page?: string; a
       <div className="nav-search-clip"><div className="nav-search-content">
         <form action="/search" method="get" role="search" aria-label="Find a Dreamscape journey">
           <label htmlFor="nav-search-input">Where will your next story begin?</label>
-          <div className="nav-search-field"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.7" /><path d="m16 16 4.5 4.5" /></svg><input ref={searchInput} id="nav-search-input" name="q" type="search" autoComplete="off" placeholder="Search treks, expeditions or destinations" value={query} onChange={e => setQuery(e.target.value)} /><button type="submit" aria-label="Find journeys"><span>Explore</span> ↗︎</button></div>
+          <div className="nav-search-field"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.7" /><path d="m16 16 4.5 4.5" /></svg><input ref={searchInput} id="nav-search-input" name="q" type="search" autoComplete="off" placeholder="Search treks, expeditions or destinations" value={query} onChange={e => setQuery(e.target.value)} /><button type="submit" aria-label="Find journeys"><span>Explore</span> <UiArrow/></button></div>
         </form>
         {term.length < 2 ? <div className="nav-search-suggestions"><p>Browse by category or place</p><div>{inspiration.map((item, index) => <a key={item.label} href={item.href} style={{ animationDelay: `${index * 45}ms` }}>{item.label}<span className="ui-arrow" aria-hidden="true" /></a>)}</div></div>
           : <div className="nav-search-results" aria-live="polite" aria-busy={searching}>{hits.length ? <ul>{hits.map(hit => <li key={hit.href}><a href={hit.href} onClick={() => setSearchOpen(false)}>{hit.image ? <img src={hit.image} alt="" width="56" height="42" loading="lazy" /> : <span className="nav-search-thumb" aria-hidden="true" />}<span className="nav-search-hit"><small>{hitLabel[hit.type]}</small><strong>{hit.title}</strong><span>{hit.meta}</span></span></a></li>)}</ul> : <p className="nav-search-hint">{searching ? 'Searching…' : <>No match for “{term}” yet. Try a region, a trek name or “12 days”.</>}</p>}</div>}
-        <a className="nav-search-all" href={term.length >= 2 ? `/search?q=${encodeURIComponent(term)}` : '/treks'}>{term.length >= 2 ? <>See all results for “{term}”</> : 'Browse all journeys'} <span aria-hidden="true">→</span></a>
+        <a className="nav-search-all" href={term.length >= 2 ? `/search?q=${encodeURIComponent(term)}` : '/treks'}>{term.length >= 2 ? <>See all results for “{term}”</> : 'Browse all journeys'} <span aria-hidden="true"><UiArrow/></span></a>
       </div></div>
     </div></header>;
 }

@@ -1,4 +1,5 @@
 'use client';
+import UiArrow from '@/components/ui-arrow';
 import { useState, useEffect, useRef } from 'react';
 import { galleryPhotos } from '@/lib/editorial-content';
 import { asset } from '@/lib/assets';
@@ -91,7 +92,7 @@ export default function Gallery() {
             <div className="gallery-dialog-foot">
               <button aria-label="Previous photo" onClick={() => step(-1)}>←</button>
               <p id="gallery-caption">{galleryPhotos[selected].title}</p>
-              <button aria-label="Next photo" onClick={() => step(1)}>→</button>
+              <button aria-label="Next photo" onClick={() => step(1)}><UiArrow/></button>
             </div>
           </>
         )}

@@ -1,4 +1,5 @@
 'use client';
+import UiArrow from '@/components/ui-arrow';
 import Link from 'next/link';
 import { useState, useEffect, type FormEvent } from 'react';
 import JourneyShell from '@/components/journey-shell';
@@ -109,7 +110,7 @@ export default function PaymentPage({ reference = '', confirmation = false }: { 
             <p className="eyebrow">A PERSON TO TALK TO</p>
             <h2>A question?<br /><em>We’re a hello away.</em></h2>
             <ContactChannels />
-            <Link href="/terms-conditions" className="text-link">Read the booking notes ↗︎</Link>
+            <Link href="/terms-conditions" className="text-link">Read the booking notes <UiArrow/></Link>
           </aside>
         </div>
       </section>

@@ -1,4 +1,5 @@
 'use client';
+import UiArrow from '@/components/ui-arrow';
 import {useEffect,useState} from 'react';
 
 export default function LocationMap({query,area}:{query:string;area:string}){
@@ -13,7 +14,7 @@ export default function LocationMap({query,area}:{query:string;area:string}){
   },[state,encoded]);
   return <div className="location-map-interactive">
     {(state==='embedding'||state==='loaded')&&<iframe title={`Map of ${query}`} src={`https://maps.google.com/maps?q=${encoded}&z=16&output=embed`} referrerPolicy="no-referrer-when-downgrade" onLoad={()=>setState('loaded')} onError={()=>setState('failed')} allowFullScreen/>}
-    {state!=='loaded'&&<div className="location-map-preview"><div><span className="location-pin" aria-hidden="true">↗︎</span><p className="eyebrow">YOUR JOURNEY STARTS HERE</p><h3>{area}</h3><p>{state==='failed'?'The map could not load here. Open Google Maps for directions.':'A first conversation, before the first step.'}</p>{state==='idle'?<button className="button green" onClick={()=>setState('loading')}>View interactive map ↗︎</button>:state==='loading'||state==='embedding'?<p role="status">Loading map…</p>:<a className="button green" href={`https://www.google.com/maps/search/?api=1&query=${encoded}`} target="_blank" rel="noopener noreferrer">Open Google Maps ↗︎</a>}</div></div>}
-    {state==='loaded'&&<a className="map-open-link" href={`https://www.google.com/maps/search/?api=1&query=${encoded}`} target="_blank" rel="noopener noreferrer">Open larger map ↗︎</a>}
+    {state!=='loaded'&&<div className="location-map-preview"><div><span className="location-pin" aria-hidden="true"><UiArrow/></span><p className="eyebrow">YOUR JOURNEY STARTS HERE</p><h3>{area}</h3><p>{state==='failed'?'The map could not load here. Open Google Maps for directions.':'A first conversation, before the first step.'}</p>{state==='idle'?<button className="button green" onClick={()=>setState('loading')}>View interactive map <UiArrow/></button>:state==='loading'||state==='embedding'?<p role="status">Loading map…</p>:<a className="button green" href={`https://www.google.com/maps/search/?api=1&query=${encoded}`} target="_blank" rel="noopener noreferrer">Open Google Maps <UiArrow external/></a>}</div></div>}
+    {state==='loaded'&&<a className="map-open-link" href={`https://www.google.com/maps/search/?api=1&query=${encoded}`} target="_blank" rel="noopener noreferrer">Open larger map <UiArrow external/></a>}
   </div>;
 }

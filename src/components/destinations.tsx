@@ -1,4 +1,5 @@
 'use client';
+import UiArrow from '@/components/ui-arrow';
 import Link from 'next/link';
 import {destinationHref} from '@/lib/links';
 import {useEffect,useState} from 'react';
@@ -15,7 +16,7 @@ import InquiryDialog from './inquiry-dialog';
 import DestinationScope from './destination-scope';
 import Breadcrumbs from './breadcrumbs';
 
-function Arrow(){return <img className="icon" src={asset('heroContext-imgSvg')} alt="" width="18" height="18"/>;}
+function Arrow(){return <UiArrow/>;}
 export default function Destinations({regions=defaultRegions,journeyDestinations,cover,title,description}:{regions?:readonly Region[];/** Destinations whose journeys are listed; defaults to the regions shown. */journeyDestinations?:string[];cover?:string;title?:string;description?:string}){
   const [zone,setZone]=useState(''),[region,setRegion]=useState(''),[search,setSearch]=useState('');
   const [inquiry,setInquiry]=useState<string|null>(null);
@@ -43,15 +44,15 @@ export default function Destinations({regions=defaultRegions,journeyDestinations
                 <p className="nepal-region-highlights"><strong>Highlights</strong> · {area.highlights.join(' · ')}</p>
                 {photoNote&&<p className="nepal-region-photo-note">{photoNote}</p>}
                 {areas.length>0&&<p>{areas.map(r=>r.name).join(' · ')}</p>}
-                <ul className="nepal-region-areas" aria-label={`${area.label} trekking areas`}>{area.areas.map(subregion=><li key={subregion.label}><Link href={`/treks?kind=treks&zone=${area.value}&q=${encodeURIComponent(subregion.query)}`}>{subregion.label}<span aria-hidden="true"> ↗︎</span></Link></li>)}</ul>
-                <Link className="text-link" href={`/treks?kind=treks&zone=${area.value}`}>Explore {area.short} treks ↗︎</Link>
+                <ul className="nepal-region-areas" aria-label={`${area.label} trekking areas`}>{area.areas.map(subregion=><li key={subregion.label}><Link href={`/treks?kind=treks&zone=${area.value}&q=${encodeURIComponent(subregion.query)}`}>{subregion.label}<span aria-hidden="true"> <UiArrow/></span></Link></li>)}</ul>
+                <Link className="text-link" href={`/treks?kind=treks&zone=${area.value}`}>Explore {area.short} treks <UiArrow/></Link>
               </div>
             </article>;
           })}</div>
         </section>
         <section className="region-finder" id="region-finder" aria-label="Find a destination"><div className="finder-title"><h2>Find your area</h2></div><div className="region-controls"><JourneySelect label="Nepal area" value={zone} onChange={value=>{setZone(value);setRegion('');}} options={[{value:'',label:'Across Nepal',detail:'Explore every area'},...nepalZones.map(area=>({value:area.value,label:area.label,detail:area.routes}))]}/><JourneySelect label="Trekking area" value={region} onChange={setRegion} options={[{value:'',label:'All trekking areas'},...regions.filter(r=>!zone||zoneForPlace(`${r.slug} ${r.name}`)===zone).map(r=>({value:r.slug,label:r.name,detail:r.style,image:asset(r.image)}))]}/><label className="region-search"><span className="field-label">Something in mind?</span><input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Try Gokyo or Mustang" aria-label="Search destinations"/></label></div></section>
         <section className="sanctuaries section"><div className="sanctuary-heading"><h2>{zone?nepalZones.find(area=>area.value===zone)?.label:'Explore Nepal by area'}</h2></div><div className="region-results"><p aria-live="polite">{visible.length} {visible.length===1?'trekking area':'trekking areas'} to explore</p>{(zone||region||search)&&<button className="text-link" onClick={reset}>Clear filters ×</button>}</div>
-          {visible.length?<div className="sanctuary-grid">{visible.map(r=><article className="sanctuary-card" key={r.slug}><div className="sanctuary-image"><img src={asset(r.image)} alt={`Mountain landscape of ${r.name}`} loading="lazy" width="512" height="279"/><span className="sanctuary-tag">{r.tag}</span><div><span>{nepalZones.find(area=>area.value===zoneForPlace(`${r.slug} ${r.name}`))?.label||'NEPAL'}</span><h3><Link href={destinationHref(r.id)}>{r.name} ↗︎</Link></h3></div></div><div className="sanctuary-body">{r.title&&<h4>{r.title}</h4>}{r.description&&<p>{r.description}</p>}{(r.style||r.base)&&<dl>{r.style&&<div><dt>Trail character</dt><dd>{r.style}</dd></div>}{r.base&&<div><dt>Along the way</dt><dd>{r.base}</dd></div>}</dl>}<div className="sanctuary-action">{r.highlights&&<span>{r.highlights}</span>}<Link href={destinationHref(r.id)}>See treks and expeditions <Arrow/></Link></div></div></article>)}</div>:<div className="status"><h3>{zone?'No published destination in this area yet.':'No areas match just yet.'}</h3><p>{zone?'Our team can plan a route here while the destination guide is being prepared.':'Try another area or a broader search.'}</p><div className="button-row"><button className="button green" onClick={reset}>Explore all Nepal</button>{zone&&<Link className="button gold" href={`/treks?kind=treks&zone=${zone}`}>Browse journeys ↗︎</Link>}</div></div>}
+          {visible.length?<div className="sanctuary-grid">{visible.map(r=><article className="sanctuary-card" key={r.slug}><div className="sanctuary-image"><img src={asset(r.image)} alt={`Mountain landscape of ${r.name}`} loading="lazy" width="512" height="279"/><span className="sanctuary-tag">{r.tag}</span><div><span>{nepalZones.find(area=>area.value===zoneForPlace(`${r.slug} ${r.name}`))?.label||'NEPAL'}</span><h3><Link href={destinationHref(r.id)}>{r.name} <UiArrow/></Link></h3></div></div><div className="sanctuary-body">{r.title&&<h4>{r.title}</h4>}{r.description&&<p>{r.description}</p>}{(r.style||r.base)&&<dl>{r.style&&<div><dt>Trail character</dt><dd>{r.style}</dd></div>}{r.base&&<div><dt>Along the way</dt><dd>{r.base}</dd></div>}</dl>}<div className="sanctuary-action">{r.highlights&&<span>{r.highlights}</span>}<Link href={destinationHref(r.id)}>See treks and expeditions <Arrow/></Link></div></div></article>)}</div>:<div className="status"><h3>{zone?'No published destination in this area yet.':'No areas match just yet.'}</h3><p>{zone?'Our team can plan a route here while the destination guide is being prepared.':'Try another area or a broader search.'}</p><div className="button-row"><button className="button green" onClick={reset}>Explore all Nepal</button>{zone&&<Link className="button gold" href={`/treks?kind=treks&zone=${zone}`}>Browse journeys <UiArrow/></Link>}</div></div>}
         </section>
       </div>
       

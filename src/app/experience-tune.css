@@ -108,7 +108,8 @@ html body .home-discovery .home-activities .section-heading>p{max-width:390px;ma
 @media(prefers-reduced-motion:reduce){.home-activity-card,.home-activity-card>img{transition:none}.home-activity-card:hover{transform:none}}
 
 /* CSS-masked SVG keeps diagonal arrows as brand-coloured lines on iOS, never emoji. */
-.ui-arrow{display:inline-block;width:1em;height:1em;flex:0 0 1em;background:currentColor;vertical-align:-.12em;-webkit-mask:url('/icons/arrow-up-right.svg') center / contain no-repeat;mask:url('/icons/arrow-up-right.svg') center / contain no-repeat}
+.ui-arrow{display:inline-block;width:1em;height:1em;flex:0 0 1em;background:currentColor;vertical-align:-.12em;-webkit-mask:url('/icons/arrow-right.svg') center / contain no-repeat;mask:url('/icons/arrow-right.svg') center / contain no-repeat}
+.ui-arrow-external{-webkit-mask-image:url('/icons/arrow-up-right.svg');mask-image:url('/icons/arrow-up-right.svg')}
 .home-activity-link .ui-arrow{color:#fff}
 
 /* Let dimensioned grid images keep their existing container width on narrow screens. */

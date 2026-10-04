@@ -1,4 +1,5 @@
 'use client';
+import UiArrow from '@/components/ui-arrow';
 
 import Image from 'next/image';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
@@ -70,7 +71,7 @@ export function MemoryViewer({ photos, index, onClose, onChange }: { photos: Mem
           <p id="memory-viewer-title">{photo.title}</p>
           <small>{String(index + 1).padStart(2, '0')} / {photos.length} · From past treks</small>
         </div>
-        <button aria-label="Next memory" disabled={photos.length < 2} onClick={() => step(1)}>→</button>
+        <button aria-label="Next memory" disabled={photos.length < 2} onClick={() => step(1)}><UiArrow/></button>
       </div>
     </dialog>
   );
@@ -84,7 +85,7 @@ export function StoryPhoto({ id }: { id: string }) {
       <figure className="story-memory">
         <button className="memory-open" onClick={() => setOpen(true)} aria-label={`Enlarge ${photo.title}`}>
           <MemoryImage photo={photo} />
-          <span className="memory-expand" aria-hidden="true">↗︎</span>
+          <span className="memory-expand" aria-hidden="true"><UiArrow/></span>
         </button>
         <figcaption>
           <span>{photo.title}</span>

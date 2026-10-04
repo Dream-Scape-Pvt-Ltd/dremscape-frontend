@@ -1,4 +1,5 @@
 'use client';
+import UiArrow from '@/components/ui-arrow';
 import Link from 'next/link';
 import { useState } from 'react';
 import Image from 'next/image';
@@ -59,7 +60,7 @@ export default function JournalIndex({ guides }: { guides: Guide[] }) {
                   <p>{g.excerpt}</p><div className="journal-card-previews">{(g.galleryImages?.length?g.galleryImages:g.photoIds?.map(id=>memoryPhotos.find(p=>p.id===id)?.src).filter((src):src is string=>!!src)||[]).slice(0,3).map((src,index)=><img key={`${src}-${index}`} src={src} alt="" loading="lazy" width="512" height="279"/>)}</div>
                   <span className="journal-card-foot">
                     <span>{g.reading ? `${g.reading} read` : 'Read the story'}</span>
-                    <span>↗︎</span>
+                    <span><UiArrow/></span>
                   </span>
                 </section>
               </Link>
