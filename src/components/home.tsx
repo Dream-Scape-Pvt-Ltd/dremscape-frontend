@@ -92,15 +92,15 @@ export default function Home({ articles = defaultArticles, reviews = [], reviews
         <div className="home-activity-grid">
           <Link className="home-activity-card" href="/treks?kind=treks">
             <Photo name="222-370-imgHimalayanMountainPassTrekkerReflection" alt="A trekker on a high Himalayan trail" />
-            <span className="home-activity-number">01 · ON FOOT</span><div><h3>Trekking</h3><p>Follow mountain trails through changing landscapes, villages and high valleys.</p><span className="home-activity-link">Explore trekking <span className="ui-arrow" aria-hidden="true" /></span></div>
+            <span className="home-activity-number">On foot</span><div><h3>Trekking</h3><p>Follow mountain trails through changing landscapes, villages and high valleys.</p><span className="home-activity-link">Explore trekking <span className="ui-arrow" aria-hidden="true" /></span></div>
           </Link>
           <Link className="home-activity-card" href="/treks?kind=expeditions&amp;climb=peak">
             <Photo name="222-78-imgAnnapurnaRangeAndHighGlacialLakesNepal" alt="Snow covered Himalayan peaks above a glacial lake" />
-            <span className="home-activity-number">02 · A HIGHER GOAL</span><div><h3>Peak Climbing</h3><p>Explore climbing journeys for travellers ready to take on a mountain summit.</p><span className="home-activity-link">Explore peak climbing <span className="ui-arrow" aria-hidden="true" /></span></div>
+            <span className="home-activity-number">A higher goal</span><div><h3>Peak Climbing</h3><p>Explore climbing journeys for travellers ready to take on a mountain summit.</p><span className="home-activity-link">Explore peak climbing <span className="ui-arrow" aria-hidden="true" /></span></div>
           </Link>
           <Link className="home-activity-card" href="/treks?kind=expeditions&amp;climb=expedition">
             <Photo name="222-78-imgNepalEverestBaseCampAndAmaDablamPeak" alt="The high Himalayan landscape of the Everest region" />
-            <span className="home-activity-number">03 · THE BIG MOUNTAINS</span><div><h3>Expeditions</h3><p>Explore ambitious mountain objectives and longer climbing journeys.</p><span className="home-activity-link">Explore expeditions <span className="ui-arrow" aria-hidden="true" /></span></div>
+            <span className="home-activity-number">The big mountains</span><div><h3>Expeditions</h3><p>Explore ambitious mountain objectives and longer climbing journeys.</p><span className="home-activity-link">Explore expeditions <span className="ui-arrow" aria-hidden="true" /></span></div>
           </Link>
         </div>
       </section>
