@@ -188,6 +188,18 @@ html body .home-activities>.section-heading>p,
 html body .memory-stories .memory-section-heading>p,
 html body .memory-archive .memory-section-heading>p{max-width:60ch;margin:0}
 
+/* Balance the five association marks as three above two on phones. */
+@media(max-width:650px){
+  html body .organization-badges-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+  html body .organization-badge{grid-column:span 2;border-right:1px solid #e4e9e0!important}
+  html body .organization-badge:nth-child(3){border-right:0!important}
+  html body .organization-badge:nth-child(n+3){border-top:1px solid #e4e9e0}
+  html body .organization-badge:nth-child(3){border-top:0}
+  html body .organization-badge:nth-child(4),
+  html body .organization-badge:nth-child(5){grid-column:span 3}
+  html body .organization-badge:nth-child(5){border-right:0!important}
+}
+
 /* Let the headings carry most sections; reserve eyebrow labels for key moments. */
 .home-discovery> :not(.home-hero):not(.story):not(.home-plan) .eyebrow,
 .journey-page .contact-form-panel>.eyebrow,
