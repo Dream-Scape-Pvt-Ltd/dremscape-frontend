@@ -71,13 +71,14 @@ export default function JourneyDetail({journey:t,demo,related}:{journey:Journey;
   useEffect(()=>{if(!playing||reducedMotion)return;const timer=window.setTimeout(()=>setActivePhoto(index=>(index+1)%photos.length),PHOTO_INTERVAL);return()=>window.clearTimeout(timer);},[activePhoto,playing,photos.length,reducedMotion]);
   function movePhoto(step:number){setActivePhoto(index=>(index+step+photos.length)%photos.length);}
 
+  const accommodation=demo?'Local lodges · draft':t.accommodation_type?.trim()||Array.from(new Set(t.itinerary_days.map(day=>day.accommodation_type?.trim()).filter((value):value is string=>Boolean(value)))).join(' + ');
   const facts=[
     ['DURATION',`${t.duration_days} days`],
     ['REGION',t.destination_name],
     ['HIGHEST POINT',t.altitude_max_meters?`${t.altitude_max_meters.toLocaleString()} m`:'Ask the team'],
     ['DIFFICULTY',difficulty(t.difficulty_grade)],
     ['GROUP SIZE',demo?'Flexible · ask us':t.min_group_size&&t.max_group_size?`${t.min_group_size}–${t.max_group_size} travellers`:'Ask the team'],
-    ['ACCOMMODATION',demo?'Local lodges · draft':'See itinerary'],
+    ...(accommodation?[['ACCOMMODATION',accommodation]]:[]),
   ];
 
   // The two ways forward, shown under the trek facts and again after the itinerary.
