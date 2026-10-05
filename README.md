@@ -6,14 +6,14 @@ Next.js App Router, React, TypeScript and Tailwind CSS. The responsive homepage 
 
 ## Run locally
 
-Requires Node.js 20.9 or newer (tested on Node 24).
+Requires Node.js 20.9 or newer (tested on Node 24). After a fresh clone, copy `.env.example` to `.env.local`, set `BACKEND_API_URL` to your Django API, and keep secrets such as `FRONTEND_INTERNAL_KEY` server-only.
 
 ```powershell
-npm install
+npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:3000. Edit `src/components/home.tsx` for the page and `src/app/globals.css` for styling and motion.
+Open http://127.0.0.1:3000. Clone and start the separate [Django backend](https://github.com/Dream-Scape-Pvt-Ltd/dreamscape-backend) when you need live catalogue, accounts, or admin data. The current backend limitations and remaining integration checks are in [BACKEND-STATUS.md](BACKEND-STATUS.md). The exported brand logos are preserved in `design-assets/logo-export/`.
 
 ## Connect your friend's Django backend
 
@@ -27,17 +27,17 @@ Restart Next.js after changing the environment. Browser requests go through the 
 
 - `GET /api/trips` calls Django `GET /api/v1/trips/?page_size=100` and unwraps the standard success/pagination envelope. All numbered result pages are loaded with a 100-page guard.
 - `POST /api/inquiries` sends `full_name`, `email`, `message`, `inquiry_type: GENERAL` and `lead_source: website` to Django. It reports success only after the backend confirms the saved inquiry.
-- With no backend URL, journeys are explicitly labelled sample data. Inquiries return an honest unavailable message; nothing is saved or sent.
-- The backend's trip list has no image field. Live trips display their destination instead of an unrelated photo. Add a media URL to the backend contract to support live card images.
+- With no backend URL, the published catalogue is empty. Design previews, where present, remain explicitly labelled and cannot become live offers. Inquiries return an unavailable message; nothing is saved or sent.
+- Trip cards and detail pages use CMS media when supplied and a local fallback when an image is missing or fails to load.
 - Region, category and duration filters work locally. Season and party size are planning preferences carried into journey inquiries, not availability checks.
 
 ## Included
 
-The homepage now uses a prominent “Beyond the Horizon” hero, custom keyboard-accessible journey pickers (arrows, Home/End, type-to-select, Escape), a warmer editorial palette, and an Explore Treks film modal.
+The homepage uses a “Beyond the Horizon” hero, custom keyboard-accessible journey pickers (arrows, Home/End, type-to-select, Escape), the forest-green editorial palette, and an “A glimpse of Nepal” film panel.
 
 ### Dreamscape YouTube film
 
-“Explore Treks” looks up the latest public, embeddable upload from `@Dreamscapetreks` when `YOUTUBE_API_KEY` is configured. Set `YOUTUBE_CHANNEL_ID` if you want to use the channel ID instead of the default handle. If the channel has no eligible upload or the API is not configured, the modal shows the CMS-managed preview title, description and thumbnail and links to the channel. Keep the preview copy accurate until the channel has a public video.
+“A glimpse of Nepal” looks up the latest public, embeddable upload from `@Dreamscapetreks` when `YOUTUBE_API_KEY` is configured. Set `YOUTUBE_CHANNEL_ID` if you want to use the channel ID instead of the default handle. If the channel has no eligible upload or the API is not configured, the panel shows the site-settings preview title, description and thumbnail and links to the channel. Keep the preview copy accurate until the channel has a public video.
 
 Homepage sections, responsive header/mobile menu, journey filters and empty/error states, trip detail pages, inquiry forms, keyboard-accessible native dialogs, entrance/reveal/hover animations and reduced-motion support. Assets come from the provided Figma file; source URLs are recorded in `scripts/figma-assets.json`.
 
@@ -45,7 +45,7 @@ Homepage sections, responsive header/mobile menu, journey filters and empty/erro
 
 - Figma refused the storytelling section's design-context request due to its Starter plan quota. That section uses its available text/layout metadata and already-exported collage images; review it against the original.
 - Public pages, articles, gallery and staff dashboard are implemented. The shared footer links to every main section. The dashboard requires a real staff account and connected Django service.
-- Email is dreamscapetrek@gmail.com and WhatsApp is +977 9761424745. Both can be overridden with `NEXT_PUBLIC_COMPANY_EMAIL` and `NEXT_PUBLIC_COMPANY_WHATSAPP` in `.env.local`; the phone value must include its country code. Shared defaults live in `src/lib/company.ts`.
+- The default public email is `info@dreamscapetreks.com`. The contact page shows a non-clickable WhatsApp placeholder until the company number is saved in admin Settings → Contact. Public contact defaults can be supplied through environment variables; the number must include its country code. Shared contact values live in `src/lib/company.ts`.
 - Journal includes three original articles and can show published backend guides. Reviews use published backend records and moderation; no fake testimonials are displayed. The former newsletter form now links to the journal.
 - Privacy and booking terms pages contain website notes marked as pending company approval. Review these and the curated editorial copy before publication.
 - Booking lookup/payment pages show backend-authorized records. Payment processing remains unavailable because the supplied backend has no registered payment routes. No card details are collected.
