@@ -180,6 +180,14 @@ html body .location-map-preview p:not(.eyebrow){margin:8px 0 15px}
   .journey-detail-page .itinerary-day-card h3{font-size:17px}
 }
 
+/* Read section introductions in the same column as their headings. */
+html body .home-activities>.section-heading,
+html body .memory-stories .memory-section-heading,
+html body .memory-archive .memory-section-heading{flex-direction:column;align-items:flex-start;gap:11px}
+html body .home-activities>.section-heading>p,
+html body .memory-stories .memory-section-heading>p,
+html body .memory-archive .memory-section-heading>p{max-width:60ch;margin:0}
+
 /* Let the headings carry most sections; reserve eyebrow labels for key moments. */
 .home-discovery> :not(.home-hero):not(.story):not(.home-plan) .eyebrow,
 .journey-page .contact-form-panel>.eyebrow,
