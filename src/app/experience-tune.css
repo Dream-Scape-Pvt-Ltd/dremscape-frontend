@@ -188,6 +188,15 @@ html body .complete-footer .footer-signature{
   font-weight:450;
 }
 @media(max-width:600px){
+  html body .home-discovery .home-region-grid{grid-template-columns:1fr;gap:14px}
+  html body .home-discovery .home-region-card,
+  html body .home-discovery .home-region-card:last-child{grid-column:auto;display:block}
+  html body .home-discovery .home-region-card>img{width:100%;height:auto;aspect-ratio:16/9}
+  html body .home-discovery .home-region-card>div{padding:16px 40px 18px 16px}
+  html body .home-discovery .home-region-card h3{min-height:0;font-size:18px;padding-right:0}
+  html body .home-discovery .home-region-card p{font-size:12px}
+  html body .home-discovery .home-region-card small{font-size:10px}
+  html body .home-discovery .home-region-card>div>span{right:16px;top:17px}
   .home-slideshow .home-slide:nth-child(1){object-position:42% 61%}
   .home-slideshow .home-slide:nth-child(2){object-position:53% 61%}
   .home-slideshow .home-slide:nth-child(3){object-position:43% 61%}
