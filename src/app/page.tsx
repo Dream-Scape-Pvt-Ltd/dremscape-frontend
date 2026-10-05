@@ -16,7 +16,7 @@ export default async function Page(){
   const countryById=new Map(regions.map(region=>[region.id,region.country]));
   const countryBySlug=new Map(regions.map(region=>[region.slug,region.country]));
   const initialCatalog={...catalog,trips:catalog.trips.map(trip=>({...trip,destination_country:countryById.get(trip.destination_id||'')||countryBySlug.get(trip.destination_slug)||trip.destination_country}))};
-  return <Home heroTitle={settings.home_title} heroDescription={settings.home_description} heroEyebrow={settings.home_eyebrow} heroImage={settings.home_image_url} heroImageAlt={settings.home_image_alt}
+  return <Home heroTitle={settings.home_title} heroDescription={settings.home_description} heroEyebrow={settings.home_eyebrow} heroImage={settings.home_image_url} heroImageAlt={settings.home_image_alt} companyTitle={settings.company_title} companyAccent={settings.company_accent}
     initialCatalog={initialCatalog}
     finderDestinations={settings.home_filter_destinations}
     finderDifficulties={settings.home_filter_difficulties}

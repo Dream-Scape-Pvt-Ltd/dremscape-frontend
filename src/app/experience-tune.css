@@ -235,3 +235,62 @@ html body .complete-footer .footer-signature{
   .home-slideshow .home-slide:nth-child(3){object-position:43% 61%}
   .home-slideshow .home-slide:nth-child(4){object-position:54% 61%}
 }
+
+/* Keep the story and footer surfaces cool; reserve gold for small brand accents. */
+html body .home-discovery .story-backdrop{
+  background:radial-gradient(ellipse 65% 75% at 86% 76%,rgba(123,174,148,.16),transparent 72%),
+    linear-gradient(125deg,#0c3024 0%,#164a37 61%,#1d4b39 100%);
+}
+body .organization-badges{
+  background:linear-gradient(180deg,#f7faf6 0%,#eff5ef 66%,#eaf1ec 100%);
+}
+body .footer-landscape,
+body:has(.header[data-page="contact"]) .footer-landscape{
+  --landscape-surface:#eaf1ec;
+  background:linear-gradient(180deg,#eaf1ec 0%,#e4ece8 60%,#114035 100%);
+}
+
+/* A future CMS number activates the link; the contact placeholder is intentionally inert. */
+.contact-channel.whatsapp-placeholder{border-style:dashed;background:#f8fbf9;color:#335848}
+.contact-channel.whatsapp-placeholder:hover{transform:none;translate:none;box-shadow:none}
+.whatsapp-placeholder .channel-icon{background:#e9f1eb}
+
+/* A quieter, media-first treatment for the Nepal film and its entry point. */
+html body .home-hero .explore-link{
+  gap:11px;padding:6px 17px 6px 6px;border:1px solid #ffffff80;border-radius:999px;
+  background:#0b302b70;backdrop-filter:blur(10px);box-shadow:0 8px 24px #071c2230;
+  transition:background .2s,border-color .2s,transform .2s;
+}
+html body .home-hero .explore-link:hover{background:#0b302b9c;border-color:#fff;transform:translateY(-2px)}
+html body .home-hero .explore-link .play{width:43px;height:43px;background:#ffffffed;border:0;color:#173d2f;box-shadow:0 2px 10px #061b1930}
+html body .home-hero .explore-link:hover .play{background:#fff;box-shadow:0 2px 10px #061b1930}
+.film-dialog{padding:0;overflow:hidden;border:1px solid #ffffff40;border-radius:27px;background:#081e18;box-shadow:0 36px 100px #0009}
+.film-dialog::backdrop{background:#071914dc;backdrop-filter:blur(11px)}
+.film-preview{border-radius:0;min-height:330px}
+.film-preview-shade{background:linear-gradient(90deg,#071710ae 0%,#0717104f 43%,transparent 78%),linear-gradient(0deg,#071710b4 0%,transparent 55%)}
+.film-preview-kicker{top:32px;left:clamp(25px,5vw,64px);color:#fff;font-size:10px;letter-spacing:.13em}
+.film-preview-copy{bottom:clamp(28px,4vw,48px)}
+.film-preview-copy>span{color:#dce9df;letter-spacing:.12em}
+.film-preview-copy h2{font-weight:700;font-size:clamp(28px,3.5vw,43px)}
+.film-preview-play{width:70px;height:70px;border:1px solid #fff;background:#fffffff0;color:#103b2c;box-shadow:0 14px 35px #061b1940}
+.film-preview-play:hover{background:#fff;transform:translateY(-50%) scale(1.05)}
+.film-close{top:22px;right:22px;background:#fffffff0!important;color:#123d2d!important;border-color:#ffffff!important;box-shadow:0 8px 24px #061b1938}
+.film-dialog .film-footer{padding:24px clamp(25px,4vw,48px);border-top:1px solid #ffffff24;background:#081e18!important}
+.film-dialog .film-footer strong{font-size:14px}
+.film-dialog .film-footer p{margin:3px 0 7px}
+.film-dialog .film-footer .button{background:#f4f7f2;color:#123d2d;box-shadow:none}
+.film-dialog .film-footer .button:hover{background:#fff}
+@media(max-width:600px){
+  html body .home-hero .explore-link{padding:5px 13px 5px 5px}
+  html body .home-hero .explore-link .play{width:37px;height:37px}
+  .film-dialog{border-radius:19px}
+  .film-dialog .film-shell{padding-top:0}
+  .film-preview{min-height:360px}
+  .film-preview-shade{background:linear-gradient(0deg,#071710e8 0%,#07171046 55%,#07171018 100%)}
+  .film-preview-kicker{top:20px;left:22px;font-size:9px}
+  .film-preview-play{width:57px;height:57px;top:35%;right:22px}
+  .film-preview-copy{bottom:25px}
+  .film-close{top:8px;right:8px}
+  .film-dialog .film-footer{padding:20px}
+}
+@media(prefers-reduced-motion:reduce){html body .home-hero .explore-link{transition:none}}

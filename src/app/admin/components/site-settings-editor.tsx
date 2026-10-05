@@ -12,11 +12,12 @@ const fields = [
   ['home_image_url','Homepage photo URL (blank uses the original)'],
   ['home_image_alt','Homepage photo description'],
   ['journal_title','Journal headline'],['journal_description','Journal introduction'],
+  ['featured_video_title','A glimpse of Nepal title'],['featured_video_description','A glimpse of Nepal description'],['featured_video_thumbnail','A glimpse of Nepal cover image URL'],
   ['featured_story_slug','Featured published story slug'],
 ] as const;
-const textareas=['home_description','gallery_description','journal_description'];
-const optional=['home_image_url','featured_story_slug'];
-const maxLength:Record<string,number>={home_image_url:500,journal_title:120,home_image_alt:250,featured_story_slug:255,journal_description:400};
+const textareas=['home_description','gallery_description','journal_description','featured_video_description'];
+const optional=['home_image_url','featured_story_slug','featured_video_thumbnail'];
+const maxLength:Record<string,number>={home_image_url:500,journal_title:120,home_image_alt:250,featured_story_slug:255,journal_description:400,featured_video_title:180,featured_video_description:500,featured_video_thumbnail:500};
 
 /** Admin → Settings → Website content: homepage, company, partner, gallery and journal copy. */
 export default function SiteSettingsEditor({site}:{site:SiteSettingsState}) {
@@ -36,7 +37,7 @@ export default function SiteSettingsEditor({site}:{site:SiteSettingsState}) {
   }
   return <form onSubmit={save} className={styles.form}><fieldset disabled={busy}>
     <div className={styles.grid}>
-      {fields.map(([key,label])=><label className={`${styles.field} ${['home_image_url','journal_description'].includes(key)?styles.fieldWide:''}`} key={key}>
+      {fields.map(([key,label])=><label className={`${styles.field} ${['home_image_url','journal_description','featured_video_description'].includes(key)?styles.fieldWide:''}`} key={key}>
         {label}
         {textareas.includes(key)
           ? <textarea name={key} rows={3} maxLength={maxLength[key]||500} value={String(data[key])} onChange={event=>change({...data,[key]:event.target.value})}/>
