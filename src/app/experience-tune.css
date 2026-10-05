@@ -167,6 +167,19 @@ html body .location-map-preview>div{max-width:290px;padding:18px 20px;border:1px
 html body .location-map-preview .eyebrow{justify-content:flex-start;color:#a28653}
 html body .location-map-preview p:not(.eyebrow){margin:8px 0 15px}
 
+/* Give each day room to read and avoid the two-card orphan row on desktop. */
+@media(min-width:901px){
+  .journey-detail-page .itinerary-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .journey-detail-page .itinerary-day-card{grid-column:span 2}
+  .journey-detail-page .itinerary-day-card:nth-last-child(2):nth-child(3n+1),
+  .journey-detail-page .itinerary-day-card:last-child:nth-child(3n+2){grid-column:span 3}
+}
+@media(max-width:599px){
+  .journey-detail-page .itinerary-grid{grid-template-columns:1fr;gap:12px}
+  .journey-detail-page .itinerary-day-card{padding:19px}
+  .journey-detail-page .itinerary-day-card h3{font-size:17px}
+}
+
 /* Let the headings carry most sections; reserve eyebrow labels for key moments. */
 .home-discovery> :not(.home-hero):not(.story):not(.home-plan) .eyebrow,
 .journey-page .contact-form-panel>.eyebrow,
