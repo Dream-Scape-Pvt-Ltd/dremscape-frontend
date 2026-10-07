@@ -27,6 +27,12 @@ export default function BookingInquiryDialog({journey,departure,onClose}:{journe
     setBusy(true);setError('');
     const input=Object.fromEntries(new FormData(event.currentTarget)) as Record<string,string>;
     if(!input.phone_dial_code){setError('Please select your country code.');setBusy(false);return;}
+    const digits=(input.phone||'').replace(/\D/g,'');
+    if(!input.phone||digits.length<6||digits.length>15||!/^[0-9\s\-()+]+$/.test(input.phone)){
+      setError('Please enter a valid phone number (6 to 15 digits).');
+      setBusy(false);
+      return;
+    }
     const phone=`${input.phone_dial_code} ${input.phone}`.trim();
     const note=input.note?.trim();
     const message=`Booking request: ${journey.title}, ${dates}, ${trekkers} trekker${trekkers===1?'':'s'}.${note?`\n\n${note}`:''}`;

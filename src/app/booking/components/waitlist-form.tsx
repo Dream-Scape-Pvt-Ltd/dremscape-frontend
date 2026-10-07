@@ -29,10 +29,18 @@ export default function WaitlistForm({ journey, departure }: { journey: Journey;
     const form = new FormData(e.currentTarget);
     const customerPhone = form.get('customer_phone') as string;
     const customerDialCode = form.get('customer_phone_dial_code') as string;
-    if (customerPhone && !customerDialCode) {
-      setError('Please select your country code.');
-      setBusy(false);
-      return;
+    if (customerPhone) {
+      if (!customerDialCode) {
+        setError('Please select your country code.');
+        setBusy(false);
+        return;
+      }
+      const digits = customerPhone.replace(/\D/g, '');
+      if (digits.length < 6 || digits.length > 15 || !/^[0-9\s\-()+]+$/.test(customerPhone)) {
+        setError('Please enter a valid phone number (6 to 15 digits).');
+        setBusy(false);
+        return;
+      }
     }
     const phone = [customerDialCode, customerPhone].filter(Boolean).join(' ').trim();
     try {

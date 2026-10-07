@@ -133,7 +133,19 @@ export default function PhoneField({ name, label, required, optionalHint }: { na
           {country ? <><Flag iso2={country.iso2} /><span>+{country.dial}</span></> : <span>Code</span>}
           <span className={`select-chevron ${open ? 'up' : ''}`} aria-hidden="true" />
         </button>
-        <input id={`${id}-number`} name={name} type="tel" required={required} maxLength={50} autoComplete="tel" inputMode="tel" placeholder="98…" />
+        <input
+          id={`${id}-number`}
+          name={name}
+          type="tel"
+          required={required}
+          minLength={6}
+          maxLength={25}
+          autoComplete="tel"
+          inputMode="tel"
+          pattern="[0-9\s\-\(\)\+]{6,25}"
+          title="Please enter a valid phone number (6 to 15 digits)"
+          placeholder="98…"
+        />
         <input type="hidden" name={`${name}_dial_code`} value={country ? `+${country.dial}` : ''} />
       </div>
       {open &&

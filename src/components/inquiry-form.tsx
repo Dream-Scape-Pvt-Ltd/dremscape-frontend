@@ -10,7 +10,47 @@ export default function InquiryForm({journey='',tripId,extended=false,preference
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[reference,setReference]=useState('');
   const [style,setStyle]=useState(''),[party,setParty]=useState('');
   const isPrivate=style==='PRIVATE',hasKids=style==='FAMILY_KIDS'||(isPrivate&&party==='FAMILY');
-  async function submit(event:FormEvent<HTMLFormElement>){event.preventDefault();if(busy)return;setBusy(true);setError('');const input=Object.fromEntries([...new FormData(event.currentTarget)].filter(([,value])=>value!==''))as Record<string,string>;if(input.phone&&!input.phone_dial_code){setError('Please select your country code.');setBusy(false);return;}const{phone_dial_code,...rest}=input;const phone=[phone_dial_code,rest.phone].filter(Boolean).join(' ').trim();try{const r=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...rest,...(phone?{phone}:{}),trip:tripId})});const body=await r.json();if(!r.ok||body.success!==true||!body.reference)throw new Error(errorText(body));setReference(body.reference);}catch(e){setError(e instanceof Error?e.message:'Delivery could not be confirmed. Please contact the team before resubmitting.');}finally{setBusy(false);}}
+  async function submit(event:FormEvent<HTMLFormElement>){
+    event.preventDefault();
+    if(busy)return;
+    setBusy(true);
+    setError('');
+    const input=Object.fromEntries([...new FormData(event.currentTarget)].filter(([,value])=>value!==''))as Record<string,string>;
+    if(input.phone){
+      if(!input.phone_dial_code){
+        setError('Please select your country code.');
+        setBusy(false);
+        return;
+      }
+      const digits=input.phone.replace(/\D/g,'');
+      if(digits.length<6||digits.length>15||!/^[0-9\s\-()+]+$/.test(input.phone)){
+        setError('Please enter a valid phone number (6 to 15 digits).');
+        setBusy(false);
+        return;
+      }
+    }
+    if(input.group_size){
+      const size=Number(input.group_size);
+      const minSize=isPrivate&&party&&party!=='SOLO'?2:1;
+      if(!Number.isInteger(size)||size<minSize||size>100){
+        setError(`Please enter a valid number of travellers (${minSize}–100).`);
+        setBusy(false);
+        return;
+      }
+    }
+    const{phone_dial_code,...rest}=input;
+    const phone=[phone_dial_code,rest.phone].filter(Boolean).join(' ').trim();
+    try{
+      const r=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...rest,...(phone?{phone}:{}),trip:tripId})});
+      const body=await r.json();
+      if(!r.ok||body.success!==true||!body.reference)throw new Error(errorText(body));
+      setReference(body.reference);
+    }catch(e){
+      setError(e instanceof Error?e.message:'Delivery could not be confirmed. Please contact the team before resubmitting.');
+    }finally{
+      setBusy(false);
+    }
+  }
   if(reference)return <div className="form-success" role="status"><h3>Your inquiry is with the team.</h3><p>Reference: <strong>{reference}</strong></p><p>Keep this reference for your conversation. This is an inquiry, not a confirmed booking.</p></div>;
   const travellers=isPrivate?party&&party!=='SOLO'&&<label>{party==='FAMILY'?'Family size':'Group size'} <small>(optional)</small><input name="group_size" type="number" min={2} max={100} inputMode="numeric"/></label>:<label>Travellers <small>(optional)</small><input name="group_size" type="number" min={1} max={100} inputMode="numeric"/></label>;
   return <form className="inquiry-form" onSubmit={submit}><p>Tell us a little about your plans{journey?` for ${journey}`:''}.</p><fieldset disabled={busy}><label className="inquiry-honeypot" aria-hidden="true">Website<input name="website" autoComplete="off" tabIndex={-1}/></label><label>Your name<input name="full_name" autoComplete="name" required maxLength={150}/></label><div className="form-columns"><label>Email address<input name="email" autoComplete="email" type="email" required maxLength={254}/></label><PhoneField name="phone" label="Phone / WhatsApp" optionalHint/></div>{extended&&<div className="form-columns"><label>Preferred start date <small>(optional)</small><input name="preferred_dates" type="date"/></label>{travellers}</div>}
