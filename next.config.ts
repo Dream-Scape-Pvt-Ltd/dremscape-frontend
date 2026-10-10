@@ -7,9 +7,19 @@ const backendOrigin = new URL(
   process.env.NEXT_PUBLIC_API_URL || process.env.BACKEND_API_URL || "http://127.0.0.1:8000/api/v1",
 ).origin;
 
+const securityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+];
+
 const nextConfig: NextConfig = {
   async headers() {
-    return process.env.NODE_ENV === "production" ? [{source:"/:path*",headers:[{key:"Strict-Transport-Security",value:"max-age=31536000"}]}] : [];
+    const headers = process.env.NODE_ENV === "production"
+      ? [...securityHeaders, { key: "Strict-Transport-Security", value: "max-age=31536000" }]
+      : securityHeaders;
+    return [{ source: "/:path*", headers }];
   },
   images: {
     formats: ["image/avif", "image/webp"],

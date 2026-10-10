@@ -26,7 +26,6 @@ import PageMotion from '@/components/page-motion';
 import BackendStatus from '@/components/backend-status';
 import CookieConsent from '@/components/cookie-consent';
 import './cookie-consent.css';
-import {AuthProvider} from '@/context/AuthContext';
 import {NavigationProvider} from '@/components/navigation-context';
 import {getNavigation} from '@/lib/menu-items-server';
 import {getPublicSiteSettings} from '@/lib/site-settings';
@@ -59,7 +58,7 @@ export default async function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
-        <StructuredData data={{"@context":"https://schema.org","@type":"TravelAgency",name:"Dreamscape Treks",url:publicSiteUrl()}}/><AuthProvider><NavigationProvider chrome={chrome}>{children}<PageMotion/><BackendStatus/></NavigationProvider></AuthProvider><CookieConsent/>
+        <StructuredData data={{"@context":"https://schema.org","@type":"TravelAgency",name:"Dreamscape Treks",url:publicSiteUrl()}}/><NavigationProvider chrome={chrome}>{children}<PageMotion/><BackendStatus/></NavigationProvider><CookieConsent/>
       </body>
     </html>
   );
