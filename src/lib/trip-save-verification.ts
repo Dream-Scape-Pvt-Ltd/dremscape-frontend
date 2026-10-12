@@ -1,11 +1,17 @@
 /** Compare the trip editor's submitted facts with a fresh CMS read after save. */
 const numbers=new Set(['duration_days','starting_price_usd','single_supplement_usd','altitude_max_meters','min_group_size','max_group_size']);
-const itineraryFields=['day_number','title','description','overnight_stay','elevation_meters','accommodation_type','is_acclimatization_day','meals_included'] as const;
+const itineraryFields=['day_number','title','description','overnight_stay','elevation_meters','accommodation_type','is_acclimatization_day','meals_included','latitude','longitude'] as const;
+// Coordinates come back as 7-place decimal strings; compare numerically to that precision.
+const coordinates=new Set(['latitude','longitude']);
 
 function same(expected:unknown,actual:unknown,key:string):boolean{
   if(key==='destination'||key==='category'){
     const assigned=actual&&typeof actual==='object'?'id' in actual?(actual as {id:unknown}).id:undefined:actual;
     return String(expected)===String(assigned);
+  }
+  if(coordinates.has(key)){
+    const blank=(value:unknown)=>value==null||value==='';
+    return blank(expected)?blank(actual):!blank(actual)&&Math.abs(Number(expected)-Number(actual))<5e-8;
   }
   if(numbers.has(key)){
     if(key==='single_supplement_usd'&&(expected==null||expected==='')&&Number(actual)===0)return true;

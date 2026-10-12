@@ -9,3 +9,11 @@ test('trip editor verifies a fresh CMS read and names fields that did not persis
   assert.deepEqual(unpersistedTripFields(expected,{...saved,category:{id:'tour-id'},gallery_images:[]}),['category','gallery_images']);
   assert.deepEqual(unpersistedTripFields(expected,{...saved,inclusions:['Local guide'],exclusions:[],packing_list:[]}),['inclusions','exclusions','packing_list']);
 });
+
+test('itinerary coordinates compare numerically against the API decimal strings',()=>{
+  const day={day_number:1,title:'Namche',description:'',overnight_stay:'Namche',elevation_meters:3440,accommodation_type:'TEAHOUSE',is_acclimatization_day:false,meals_included:[],latitude:27.8069,longitude:86.714};
+  const expected={itinerary_days:[day]};
+  assert.deepEqual(unpersistedTripFields(expected,{itinerary_days:[{...day,latitude:'27.8069000',longitude:'86.7140000'}]}),[]);
+  assert.deepEqual(unpersistedTripFields(expected,{itinerary_days:[{...day,latitude:null,longitude:null}]}),['itinerary_days']);
+  assert.deepEqual(unpersistedTripFields({itinerary_days:[{...day,latitude:null,longitude:null}]},{itinerary_days:[{...day,latitude:null,longitude:null}]}),[]);
+});

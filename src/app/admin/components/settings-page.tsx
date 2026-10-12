@@ -35,7 +35,7 @@ function useSaver(){
   return {busy,status,setStatus,run};
 }
 
-const contactKeys=['contact_email','contact_whatsapp','city','area','address','map_query','map_zoom','directions_note','youtube_channel'] as const;
+const contactKeys=['contact_email','contact_whatsapp','city','area','address','map_query','map_zoom','map_provider','directions_note','youtube_channel'] as const;
 type ContactDraft=Pick<SiteSettings,typeof contactKeys[number]>;
 
 function ContactSection({site}:{site:SiteSettingsState}){
@@ -62,6 +62,7 @@ function ContactSection({site}:{site:SiteSettingsState}){
       <label className={styles.wide}>Address<input value={draft.address} maxLength={300} required onChange={event=>set('address',event.target.value)}/></label>
       <label>Map search<input value={draft.map_query} maxLength={300} required onChange={event=>set('map_query',event.target.value)}/><small>An address or “latitude,longitude” for the map pin.</small></label>
       <label>Map zoom<input type="number" min={1} max={20} value={draft.map_zoom} required onChange={event=>set('map_zoom',Number(event.target.value))}/></label>
+      <label>Trek route maps<select value={draft.map_provider} onChange={event=>set('map_provider',event.target.value as typeof draft.map_provider)}><option value="auto">Automatic: Google, free map if Google fails</option><option value="free">Always free map (OpenStreetMap)</option><option value="google">Always Google Maps</option></select><small>Automatic switches to OpenStreetMap when Google is unavailable or over its daily quota.</small></label>
       <label className={styles.wide}>Arrival directions<textarea rows={2} value={draft.directions_note} maxLength={500} onChange={event=>set('directions_note',event.target.value)}/></label>
     </div>
     <h3 className={styles.groupTitle}>Video</h3>

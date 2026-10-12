@@ -10,6 +10,8 @@ import {BackendError} from '@/lib/backend';
 import {trekHref} from '@/lib/links';
 import JourneyDetail from '@/components/journey-detail';
 import JourneyShell from '@/components/journey-shell';
+import {getPublicSiteSettings} from '@/lib/site-settings';
+import {normaliseMapMode} from '@/lib/map-provider';
 import RelatedTreks from './components/related-treks';
 
 /** One request per render: metadata and the page share the fetched trek. */
@@ -29,7 +31,8 @@ export default async function TrekDetailPage({id}:{id:string}){
     return <JourneyShell><div className="container utility-page status" role="alert"><h1>This trail will be back soon.</h1><p>We couldn’t load the itinerary. Please try again shortly.</p><Link href="/treks" className="button green">Back to journeys</Link></div></JourneyShell>;
   }
   const t=data.journey;
+  const mapMode=normaliseMapMode((await getPublicSiteSettings()).map_provider);
   if(!data.demo&&t.id!==id)redirect(trekHref(t.id));
   const schema={"@context":"https://schema.org","@type":"TouristTrip",name:t.title,description:t.overview,url:absolutePublicUrl(trekHref(t.id)),image:t.image?absolutePublicUrl(asset(t.image)):undefined,provider:{"@type":"TravelAgency",name:"Dreamscape Treks"},itinerary:{"@type":"ItemList",itemListElement:t.itinerary_days.map(day=>({"@type":"ListItem",position:day.day_number,name:day.title,item:{"@type":"Place",name:day.overnight_stay||day.title}}))}};
-  return <>{!data.demo&&<StructuredData data={schema}/>}<JourneyDetail {...data} related={<Suspense key="related-treks" fallback={null}><RelatedTreks current={data.journey} preview={data.demo}/></Suspense>}/></>;
+  return <>{!data.demo&&<StructuredData data={schema}/>}<JourneyDetail {...data} mapMode={mapMode} related={<Suspense key="related-treks" fallback={null}><RelatedTreks current={data.journey} preview={data.demo}/></Suspense>}/></>;
 }

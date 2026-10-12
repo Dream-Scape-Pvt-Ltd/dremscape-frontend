@@ -5,7 +5,7 @@ import {isUuid} from './links';
 
 export type AvailabilityState='AVAILABLE'|'FEW_SEATS_LEFT'|'SOLD_OUT'|'WAITLIST'|'CANCELLED';
 export type Departure={id:string; start_date:string; end_date:string; price_usd:string; max_seats:number; available_seats:number; availability_state:AvailabilityState; status:string; is_guaranteed:boolean; waitlist_enabled:boolean};
-export type ItineraryDay={day_number:number; title:string; description:string; overnight_stay:string; elevation_meters:number|null; is_acclimatization_day:boolean; accommodation_type?:string};
+export type ItineraryDay={day_number:number; title:string; description:string; overnight_stay:string; elevation_meters:number|null; is_acclimatization_day:boolean; accommodation_type?:string; latitude?:number|string|null; longitude?:number|string|null};
 export type JourneyGuide={id:string;slug:string;name:string;role:string;photo?:string};
 export type Journey=Trip & {guides?:JourneyGuide[];overview:string; min_group_size:number; max_group_size:number; best_seasons:string[]; inclusions:string[]; exclusions:string[]; packing_list:string[]; gallery_images:string[]; itinerary_days:ItineraryDay[]; departures:Departure[]};
 type RawTrip=Trip & {hero_image_url?:string;gallery_images?:string[];destination?:{id?:string;name:string;slug:string};category?:{name:string;slug:string;menu?:string}};

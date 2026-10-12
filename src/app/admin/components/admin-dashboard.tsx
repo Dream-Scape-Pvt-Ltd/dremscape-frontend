@@ -2,6 +2,7 @@
 
 import React, {FormEvent, useEffect, useMemo, useState} from 'react';
 import RouteProfile,{profilePoints} from '@/components/route-profile';
+import LocationPicker from './location-picker';
 import {trekHref} from '@/lib/links';
 import {difficultyLevels} from '@/lib/format';
 import {editorialTagOptions} from '@/lib/editorial-tags';
@@ -152,7 +153,12 @@ export interface AdminItineraryDay {
   accommodation_type: string;
   is_acclimatization_day: boolean;
   meals_included?: string[];
+  latitude?: number | '';
+  longitude?: number | '';
 }
+
+/** Coordinates arrive as decimal strings from the API; the editor keeps numbers or blank. */
+const coordinateValue = (value: unknown): number | '' => value === null || value === undefined || value === '' || !Number.isFinite(Number(value)) ? '' : Number(value);
 
 export interface AdminTrekDetail {
   id?: string;
@@ -530,7 +536,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
           inclusions:journey.inclusions,exclusions:journey.exclusions,packing_list:journey.packing_list,overview:journey.overview,
           hero_image_url:journey.image?asset(journey.image):'',gallery_images:journey.gallery_images.map(asset),
           is_active:false,is_featured:false,
-          itinerary_days:journey.itinerary_days.map(day=>({...day,elevation_meters:day.elevation_meters??'',accommodation_type:'TEAHOUSE',meals_included:[]})),
+          itinerary_days:journey.itinerary_days.map(day=>({...day,elevation_meters:day.elevation_meters??'',latitude:coordinateValue(day.latitude),longitude:coordinateValue(day.longitude),accommodation_type:'TEAHOUSE',meals_included:[]})),
         });
         setSelectedTrekSlug('new');
         setMessage(`Sample “${journey.title}” copied into a new CMS draft. Review the destination, photos, route details and elevations before saving or publishing.`);
@@ -595,6 +601,8 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
             accommodation_type?: string;
             is_acclimatization_day?: boolean;
             meals_included?: string[];
+            latitude?: number | string | null;
+            longitude?: number | string | null;
           }>;
         }>(`/api/admin/treks/${slug}`);
 
@@ -640,7 +648,9 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
                 elevation_meters: d.elevation_meters ?? '',
                 accommodation_type: d.accommodation_type || 'TEAHOUSE',
                 is_acclimatization_day: Boolean(d.is_acclimatization_day),
-                meals_included: d.meals_included || []
+                meals_included: d.meals_included || [],
+                latitude: coordinateValue(d.latitude),
+                longitude: coordinateValue(d.longitude)
               }))
             : []
         });
@@ -689,7 +699,9 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
           elevation_meters: d.elevation_meters !== '' && d.elevation_meters !== null ? Number(d.elevation_meters) : null,
           accommodation_type: d.accommodation_type || 'TEAHOUSE',
           is_acclimatization_day: Boolean(d.is_acclimatization_day),
-          meals_included: d.meals_included || []
+          meals_included: d.meals_included || [],
+          latitude: d.latitude === '' || d.latitude === undefined ? null : Number(Number(d.latitude).toFixed(7)),
+          longitude: d.longitude === '' || d.longitude === undefined ? null : Number(Number(d.longitude).toFixed(7))
         }))
       };
 
@@ -2495,6 +2507,8 @@ function TrekFullDetailEditor({
       elevation_meters: '',
       accommodation_type: 'TEAHOUSE',
       is_acclimatization_day: false,
+      latitude: '',
+      longitude: '',
     };
     onChange(prev => prev ? {...prev, itinerary_days: [...prev.itinerary_days, newDay]} : null);
   };
@@ -3213,6 +3227,23 @@ function TrekFullDetailEditor({
                     </div>
                   </div>
                 )}
+
+                <div className={`${styles.formField} ${styles.formFieldFull}`}>
+                  <span className={styles.formLabel}>
+                    <span>Overnight location</span>
+                    <span className={styles.formLabelHint}>Optional · places this night on the trek route map</span>
+                  </span>
+                  <LocationPicker
+                    day={idx + 1}
+                    place={day.overnight_stay || day.title}
+                    value={day.latitude !== '' && day.latitude !== undefined && day.longitude !== '' && day.longitude !== undefined ? {lat: Number(day.latitude), lng: Number(day.longitude)} : null}
+                    nearby={trek.itinerary_days.flatMap((other, otherIdx) => other.latitude !== '' && other.latitude !== undefined && other.longitude !== '' && other.longitude !== undefined ? [{day: otherIdx + 1, lat: Number(other.latitude), lng: Number(other.longitude)}] : [])}
+                    onChange={point => {
+                      handleUpdateDay(idx, 'latitude', point ? point.lat : '');
+                      handleUpdateDay(idx, 'longitude', point ? point.lng : '');
+                    }}
+                  />
+                </div>
 
                 <div className={styles.formField}>
                   <label className={styles.formLabel}>
