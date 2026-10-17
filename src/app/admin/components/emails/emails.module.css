@@ -1,0 +1,27 @@
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #dfe7e2; }
+.tab { background: none; border: 0; padding: 10px 14px; font-weight: 700; color: #5d7266; cursor: pointer; border-bottom: 2px solid transparent; }
+.tabActive { color: #12392b; border-bottom-color: #12392b; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.toolbar input, .toolbar select { padding: 8px 10px; border: 1px solid #cfd9d3; border-radius: 8px; font: inherit; background: #fff; }
+.chip { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.good { background: #dff3e6; color: #17653a; }
+.warn { background: #fdf0d2; color: #8a5a00; }
+.bad { background: #fbe0dd; color: #a12b1f; }
+.neutral { background: #e8ecea; color: #44564c; }
+.form { display: grid; gap: 14px; max-width: 760px; }
+.form label { display: grid; gap: 6px; font-weight: 700; font-size: 13px; color: #33443a; }
+.form input, .form select, .form textarea { padding: 10px 12px; border: 1px solid #cfd9d3; border-radius: 8px; font: inherit; font-weight: 400; background: #fff; }
+.form textarea { min-height: 220px; resize: vertical; }
+.hint { font-size: 12.5px; color: #5d7266; font-weight: 400; }
+.vars { display: flex; flex-wrap: wrap; gap: 6px; }
+.var { font-family: monospace; font-size: 12px; background: #eef3f0; border: 1px solid #d5dfd9; border-radius: 6px; padding: 2px 7px; cursor: pointer; }
+.ok { color: #17653a; font-weight: 700; }
+.error { color: #a12b1f; font-weight: 700; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.split { display: grid; grid-template-columns: 260px 1fr; gap: 24px; align-items: start; }
+.list { display: grid; gap: 6px; }
+.listItem { text-align: left; padding: 10px 12px; border: 1px solid #dfe7e2; border-radius: 8px; background: #fff; cursor: pointer; font: inherit; }
+.listItemActive { border-color: #12392b; background: #f1f6f3; }
+.preview { border: 1px solid #dfe7e2; border-radius: 8px; padding: 14px; background: #fff; }
+.link { background: none; border: 0; color: #12392b; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 0; font: inherit; }
+@media (max-width: 800px) { .split { grid-template-columns: 1fr; } }

@@ -9,6 +9,8 @@ import {authorName, holdsSeats, interestLabel, lostReasonOptions, statuses, type
 import LeadTags from './lead-tags';
 import {LeadFollowUps} from './follow-ups';
 import ContactLog from './contact-log';
+import Compose from '../emails/compose';
+import SentLog from '../emails/sent-log';
 import styles from '@/app/admin/admin.module.css';
 
 export default function InquiryDrawer({
@@ -22,7 +24,8 @@ export default function InquiryDrawer({
   onNoteText: (value: string) => void; onSubmit: (event: FormEvent) => void;
   onViewCustomer: () => void;
 }) {
-  const [tab, setTab] = useState<'details' | 'follow-ups' | 'contact'>('details');
+  const [tab, setTab] = useState<'details' | 'follow-ups' | 'contact' | 'emails'>('details');
+  const [emailsKey, setEmailsKey] = useState(0);
   const [pendingStatus, setPendingStatus] = useState<InquiryStatus | null>(null);
   const ownerId = typeof inquiry.assigned_agent === 'object' ? inquiry.assigned_agent?.id : inquiry.assigned_agent;
   const [lostReason, setLostReason] = useState<LostReason | ''>('');
@@ -60,12 +63,16 @@ export default function InquiryDrawer({
       <LeadTags reference={inquiry.inquiry_number} tags={inquiry.tags || []} allTags={allTags} onChange={onTags} onTagCreated={onTagCreated} />
 
       <div className={styles.drawerTabs} role="tablist">
-        {([['details', 'Details'], ['follow-ups', 'Follow-ups'], ['contact', 'Contact log']] as const).map(([value, text]) => (
+        {([['details', 'Details'], ['follow-ups', 'Follow-ups'], ['contact', 'Contact log'], ['emails', 'Emails']] as const).map(([value, text]) => (
           <button key={value} type="button" role="tab" aria-selected={tab === value} className={`${styles.drawerTab} ${tab === value ? styles.drawerTabActive : ''}`} onClick={() => setTab(value)}>{text}</button>
         ))}
       </div>
       {tab === 'follow-ups' && <LeadFollowUps reference={inquiry.inquiry_number} onChanged={onTasksChanged} />}
       {tab === 'contact' && <ContactLog reference={inquiry.inquiry_number} />}
+      {tab === 'emails' && <>
+        <Compose defaults={{recipient: inquiry.email, inquiry_number: inquiry.inquiry_number}} onSent={() => setEmailsKey(key => key + 1)} />
+        <SentLog inquiry={inquiry.inquiry_number} refreshKey={emailsKey} />
+      </>}
 
       {tab === 'details' && (
       <>

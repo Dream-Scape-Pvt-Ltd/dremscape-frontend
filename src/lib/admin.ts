@@ -67,11 +67,21 @@ export function projectPage(value: unknown, allowed: Set<string>) {
   return projectRecord(value, allowed);
 }
 
+const emailTemplateFields = new Set(['id','slug','name','subject','body_html','body_text','is_system','is_active','updated_at']);
+const outboundEmailFields = new Set([
+  'id','recipient','subject','body_html','body_text','reply_to','kind','status','inquiry_number','template_name',
+  'sent_by_name','attempts','last_error','sent_at','last_event_at','created_at',
+]);
+
 export const projectInquiry = (value: unknown) => projectRecord(value, inquiryFields);
 export const projectInquiries = (value: unknown) => projectPage(value, inquiryFields);
 export const projectDeparture = (value: unknown) => projectRecord(value, departureFields);
 export const projectDepartures = (value: unknown) => projectPage(value, departureFields);
 export const projectWaitlist = (value: unknown) => projectArray(value, waitlistFields);
+export const projectEmailTemplate = (value: unknown) => projectRecord(value, emailTemplateFields);
+export const projectEmailTemplates = (value: unknown) => projectArray(value, emailTemplateFields);
+export const projectOutboundEmail = (value: unknown) => projectRecord(value, outboundEmailFields);
+export const projectOutboundEmails = (value: unknown) => projectPage(value, outboundEmailFields);
 
 /** Some staff endpoints return a bare array rather than a paginated page. */
 export function projectArray(value: unknown, allowed: Set<string>) {

@@ -26,6 +26,7 @@ import ReviewEditor from './review-editor';
 import DeparturesEditor from './departures-editor';
 import ScheduleBoard from './schedule-board';
 import SettingsPage from './settings-page';
+import EmailsPage from './emails/emails-page';
 import DestinationEditor from './destination-editor';
 import TrekGuideEditor from './trek-guide-editor';
 import RevenueView from './revenue-view';
@@ -43,7 +44,7 @@ import {previewTrips as sampleTrekTemplates} from '@/lib/catalog';
 import {asset} from '@/lib/assets';
 import type {Journey} from '@/lib/journeys';
 
-type Tab = 'dashboard' | 'treks' | 'revenue' | 'journal' | 'inquiries' | 'pipeline' | 'reviews' | 'settings' | 'destinations' | 'trek-guides';
+type Tab = 'dashboard' | 'treks' | 'revenue' | 'journal' | 'inquiries' | 'pipeline' | 'reviews' | 'settings' | 'destinations' | 'trek-guides' | 'emails';
 interface AdminProfile {full_name: string; role: string; email?: string;}
 const emptySection = (): GuideSection => ({heading: '', body: '', image_url: '', image_caption: ''});
 const emptyGuide: GuidePayload = {title: '', slug: '', country: 'NEPAL', category: 'ADVENTURE', hero_image_url: '', gallery_images: [], sections: [emptySection()], is_published: false};
@@ -1096,6 +1097,16 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
       )
     },
     {
+      id: 'emails',
+      label: 'Emails',
+      icon: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="5" width="18" height="14" rx="2"/>
+          <polyline points="3 7 12 13 21 7"/>
+        </svg>
+      )
+    },
+    {
       id: 'settings',
       label: 'Settings',
       icon: (
@@ -1556,6 +1567,7 @@ export default function AdminDashboard({backgroundImage}: {backgroundImage?: str
         )}
 
         {/* Tab: Settings */}
+        {tab === 'emails' && <EmailsPage/>}
         {tab === 'settings' && <SettingsPage/>}
 
         {tab === 'reviews' && <ReviewEditor/>}
