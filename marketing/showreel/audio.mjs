@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync, mkdirSync, renameSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadBank } from '../sfx-bank/load.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 mkdirSync(join(here, 'out'), { recursive: true });
@@ -11,8 +12,9 @@ const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromi
 const page = await browser.newPage();
 await page.goto('about:blank');
 if (process.argv[2]) await page.evaluate(({ m, ref }) => { window.__AUDIO_MODE = m; window.__REF_PEAK = ref || undefined; }, { m: process.argv[2], ref: Number(process.argv[3] || 0) });
+await page.evaluate((b) => { window.SFX_BANK = b; }, loadBank());
 await page.addScriptTag({ content: readFileSync(join(here, 'src/timeline.js'), 'utf8') });
-await page.addScriptTag({ content: readFileSync(join(here, 'src/audio.js'), 'utf8') });
+await page.addScriptTag({ content: readFileSync(join(here, '../sfx-bank/engine.js'), 'utf8') });
 const res = await page.evaluate(() => window.renderAudio());
 await browser.close();
 

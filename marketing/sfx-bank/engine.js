@@ -1,6 +1,6 @@
-/* Soundtrack synthesised with the Web Audio API (OfflineAudioContext). 120 BPM, D major, 15 s.
-   Warm and open: a soft kick on every beat (its pitch follows the chord root), a hit on every scene change,
-   a musical ping on every cursor click. Sine / triangle voices only, consonant chord tones, no detuned saws. */
+/* Soundtrack for the motion showreel (OfflineAudioContext). 120 BPM, D major, 15 s.
+   Score: soft kick on every beat (pitch follows the chord root), a tuned hit on every scene change, a riser into the last full bar.
+   Sound design: CC0 library samples from ../sfx-bank placed by the cue sheet in timeline.js, plus smooth air for the camera pushes. */
 window.renderAudio = async function () {
   var TL = window.TL, SR = 48000, DUR = TL.dur, BEAT = TL.beat, MODE = window.__AUDIO_MODE || 'all';   /* 'music' | 'sfx' | 'all' (mix analysis) */
   var ctx = new OfflineAudioContext(2, Math.ceil(SR * DUR), SR);
@@ -134,108 +134,29 @@ window.renderAudio = async function () {
     e.gain.setValueAtTime(0.0001, t0); e.gain.exponentialRampToValueAtTime(g, tEnd - 0.01); e.gain.linearRampToValueAtTime(0.0001, tEnd);
     n.connect(h); h.connect(l); l.connect(e); e.connect(master); e.connect(revIn);
   }
-  function whoosh(t, p) {
-    var n = noise(t, 0.5), l = filt('lowpass', 500, 0.4), h = filt('highpass', 250, 0.5), e = ctx.createGain();
-    l.frequency.setValueAtTime(500, t); l.frequency.exponentialRampToValueAtTime(3600, t + 0.2);
-    e.gain.setValueAtTime(0.0001, t); e.gain.linearRampToValueAtTime(0.05, t + 0.09); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
-    n.connect(h); h.connect(l); l.connect(e); e.connect(pan(p)).connect(master);
-  }
 
-
-  /* ---------- UI sound design (Apple-style: soft, tactile, glassy, never harsh) ---------- */
-  function sine(t, f0, f1, dur, g, to, a) {      /* pitched blip with an exponential glide and a soft envelope */
-    var o = ctx.createOscillator(); o.type = 'sine';
-    o.frequency.setValueAtTime(f0, t); if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.7);
-    var e = ctx.createGain(); env(e, t, a || 0.002, g, dur); o.connect(e); e.connect(to || sfx); o.start(t); o.stop(t + dur + (a || 0.002) + 0.05);
-  }
-  function tap(t, g) {                           /* glass tap: soft body thock + a rounded high click */
-    var v = 0.97 + rnd() * 0.06;
-    sine(t, 210 * v, 118 * v, 0.055, g * 0.5);
-    sine(t, 2900 * v, 1900 * v, 0.018, g * 0.32);
-    sine(t, 5600 * v, 4200 * v, 0.008, g * 0.08);
-    var n = noise(t, 0.02), f = filt('bandpass', 4300, 1.1), e = ctx.createGain(); env(e, t, 0.001, g * 0.12, 0.006);
-    n.connect(f); f.connect(e); e.connect(sfx);
-  }
-  /* Premium keyboard: every press is a soft key-down + a lighter key-up, placed and pitched by where the key sits.
-     Muted plastic "tk" (band-passed noise) + a hollow body tone + a low cushion; the space bar is deeper and longer. */
-  function key(t, g, p, row) {
-    var v = 0.94 + rnd() * 0.12, r = row || 2, body = 640 - (r - 1) * 70;
-    var pn = ctx.createStereoPanner(); pn.pan.value = p || 0; pn.connect(sfx);
-    sine(t, body * v, body * 0.74 * v, 0.022, g * 0.11, pn); sine(t, 150 * v, 108 * v, 0.032, g * 0.2, pn);
-    var n = noise(t, 0.03), f = filt('bandpass', 2000 * v, 1.3), e = ctx.createGain(); env(e, t, 0.001, g * 0.15, 0.011);
-    n.connect(f); f.connect(e); e.connect(pn);
-    var u = t + 0.045 + rnd() * 0.01;                                    /* key-up: lighter and higher */
-    sine(u, body * 1.25 * v, body * v, 0.012, g * 0.045, pn);
-    var n2 = noise(u, 0.02), f2 = filt('bandpass', 3000, 1.2), e2 = ctx.createGain(); env(e2, u, 0.001, g * 0.05, 0.007);
-    n2.connect(f2); f2.connect(e2); e2.connect(pn);
-  }
-  function space(t, g, p) {
-    var pn = ctx.createStereoPanner(); pn.pan.value = p || 0; pn.connect(sfx);
-    sine(t, 330, 210, 0.05, g * 0.2, pn); sine(t, 110, 78, 0.07, g * 0.34, pn);
-    var n = noise(t, 0.04), f = filt('bandpass', 1500, 1.0), e = ctx.createGain(); env(e, t, 0.001, g * 0.17, 0.016); n.connect(f); f.connect(e); e.connect(pn);
-    var u = t + 0.06; sine(u, 520, 400, 0.014, g * 0.05, pn);
-  }
-  function keyshift(t, g, p) { var pn = ctx.createStereoPanner(); pn.pan.value = p || 0; pn.connect(sfx); sine(t, 260, 190, 0.03, g * 0.12, pn); var n = noise(t, 0.02), f = filt('bandpass', 1300, 1.0), e = ctx.createGain(); env(e, t, 0.001, g * 0.09, 0.01); n.connect(f); f.connect(e); e.connect(pn); }
-  /* Swipe: a finger dragging across glass. Fast soft attack, sibilant band that slides, stereo travel with the gesture. */
-  function swipe(t, dur, p0, p1, dir, g) {
-    var n = noise(t, dur + 0.1), bp = filt('bandpass', 3400, 0.75), hp = filt('highpass', 1200, 0.5), e = ctx.createGain(), pn = ctx.createStereoPanner();
-    bp.frequency.setValueAtTime(dir > 0 ? 2200 : 5200, t); bp.frequency.exponentialRampToValueAtTime(dir > 0 ? 5600 : 2000, t + dur);
-    e.gain.setValueAtTime(0.0001, t); e.gain.linearRampToValueAtTime(g * 0.11, t + dur * 0.22); e.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    pn.pan.setValueAtTime(p0, t); pn.pan.linearRampToValueAtTime(p1, t + dur);
-    n.connect(hp); hp.connect(bp); bp.connect(e); e.connect(pn); pn.connect(sfx);
-    sine(t, dir > 0 ? 520 : 900, dir > 0 ? 900 : 520, dur * 0.8, g * 0.03, sfx, dur * 0.2);   /* soft body of the gesture */
-  }
-  /* Send: the "message sent" gesture - a soft upward whoosh with a tiny pop at the start and a light flutter at the end. */
-  function send(t) {
-    pop(t, 1, 0.1);
-    whoosh(t + 0.02, 0.42, 0.1, -0.1, 0.5, 1); swipe(t + 0.03, 0.36, -0.1, 0.5, 1, 0.55);
-    sine(t + 0.34, 1760, 1760, 0.12, 0.02, sfx);
-  }
-  function flip(t, g) { sine(t, 880, 1320, 0.05, g * 0.5); sine(t + 0.04, 1320, 1760, 0.05, g * 0.3); }
-  function hover(t) { sine(t, 4200, 3800, 0.014, 0.05); }
-  function tick(t, m, g) { bell(t, m, g, (rnd() - 0.5) * 0.5, 0.2, sfx); }
-  function swish(t, p, dur, g) {                 /* small airy movement */
-    var n = noise(t, dur + 0.1), bp = filt('bandpass', 1500, 0.8), e = ctx.createGain();
-    bp.frequency.setValueAtTime(1400, t); bp.frequency.exponentialRampToValueAtTime(3300, t + dur);
-    e.gain.setValueAtTime(0.0001, t); e.gain.linearRampToValueAtTime(g * 0.07, t + dur * 0.4); e.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    n.connect(bp); bp.connect(e); e.connect(pan(p)).connect(sfx);
-  }
-  function whoosh(t, dur, g, p0, p1, dir) {      /* smooth travelling air; filters sweep, pan travels */
+  function whoosh(t, dur, g, p0, p1, dir) {      /* smooth travelling air for the camera pushes: filters sweep, pan travels */
     var n = noise(t, dur + 0.1), lo = filt('lowpass', 400, 0.45), hi = filt('highpass', 190, 0.5), e = ctx.createGain(), pn = ctx.createStereoPanner();
     var a = dir > 0 ? 380 : 5200, b = dir > 0 ? 5200 : 380;
     lo.frequency.setValueAtTime(a, t); lo.frequency.exponentialRampToValueAtTime(b, t + dur);
     e.gain.setValueAtTime(0.0001, t); e.gain.linearRampToValueAtTime(g, t + dur * 0.42); e.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     pn.pan.setValueAtTime(p0, t); pn.pan.linearRampToValueAtTime(p1, t + dur);
     n.connect(hi); hi.connect(lo); lo.connect(e); e.connect(pn); pn.connect(sfx);
-    var o = ctx.createOscillator(); o.type = 'sine';                          /* faint tonal whisper that follows the sweep */
-    o.frequency.setValueAtTime(dir > 0 ? mtof(62) : mtof(74), t); o.frequency.exponentialRampToValueAtTime(dir > 0 ? mtof(74) : mtof(62), t + dur);
-    var oe = ctx.createGain(); oe.gain.setValueAtTime(0.0001, t); oe.gain.linearRampToValueAtTime(g * 0.12, t + dur * 0.45); oe.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(oe); oe.connect(pn); o.start(t); o.stop(t + dur + 0.05);
   }
-  function pop(t, dir, g) {                      /* popover opening (rising) / closing (falling) */
-    if (dir > 0) { sine(t, 300, 560, 0.09, g * 0.6); sine(t + 0.01, 900, 1300, 0.05, g * 0.2); }
-    else { sine(t, 520, 280, 0.09, g * 0.55); }
-    var n = noise(t, 0.05), f = filt('bandpass', 2600, 0.9), e = ctx.createGain(); env(e, t, 0.003, g * 0.08, 0.03);
-    n.connect(f); f.connect(e); e.connect(sfx);
-  }
-  function chime(t, notes, g) { notes.forEach(function (m, i) { bell(t + i * 0.075, m, g, (i % 2 ? 0.25 : -0.25), 0.8, sfx); }); }
-  function success(t) {                          /* confirmation: bright rising major arpeggio with a long tail */
-    [81, 86, 90, 93].forEach(function (m, i) { bell(t + i * 0.07, m, 0.15 - i * 0.015, (i - 1.5) * 0.3, 1.8, sfx); });
-    bell(t, 62, 0.07, 0, 1.6, sfx); bell(t, 66, 0.05, 0, 1.6, sfx);
-    shimmer(t + 0.22, 1.0, 0.03);
-  }
-  function shimmer(t, dur, g) {                  /* soft glitter of D-major pentatonic partials */
-    var N = Math.max(3, Math.round(dur * 12)), P = [86, 88, 90, 93, 95, 98];
-    for (var i = 0; i < N; i++) bell(t + rnd() * dur, P[Math.floor(rnd() * P.length)], g * (0.4 + 0.6 * rnd()), rnd() * 1.6 - 0.8, 0.3 + rnd() * 0.3, sfx);
-  }
-  function scan(t, dur) {                        /* unfolding card: a rising run of glass ticks over soft air */
-    var P = [74, 76, 78, 81, 83, 86, 88, 90, 93, 95];
-    P.forEach(function (m, i) { bell(t + (i / (P.length - 1)) * dur * 0.92, m, 0.03, -0.5 + i * 0.11, 0.25, sfx); });
-    whoosh(t, dur, 0.04, -0.2, 0.2, 1);
-  }
-  function land(t) {                             /* logo arrives: warm open chord + deep tuned thump */
-    [62, 66, 69, 74, 78].forEach(function (m, i) { bell(t + i * 0.014, m, 0.075, (i - 2) * 0.28, 2.4, sfx); });
-    sine(t, mtof(38), mtof(38) * 0.96, 1.1, 0.5, master, 0.006);
+
+  /* ---------- library samples ---------- */
+  var BANK = {};
+  Object.keys(window.SFX_BANK || {}).forEach(function (k) {
+    var bin = atob(window.SFX_BANK[k]), u8 = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    var f32 = new Float32Array(u8.buffer), b = ctx.createBuffer(1, f32.length, SR); b.getChannelData(0).set(f32); BANK[k] = b;
+  });
+  var sfxLp = filt('lowpass', 7500, 0.5); sfxLp.connect(sfx);
+  function smp(t, name, g, p, rate) {
+    var b = BANK[name]; if (!b) { console.warn('missing sample', name); return; }
+    var s = ctx.createBufferSource(); s.buffer = b; s.playbackRate.value = rate || 1;
+    var e = ctx.createGain(); e.gain.value = g * 1.15; var pn = ctx.createStereoPanner(); pn.pan.value = p || 0;
+    s.connect(e); e.connect(pn); pn.connect(sfxLp); s.start(t);
   }
 
   /* ---------- arrangement ---------- */
@@ -251,10 +172,9 @@ window.renderAudio = async function () {
     shaker(t + 0.25, 0.04, 0.25);
     if (t >= 2.0) { shaker(t + 0.125, 0.022, -0.3); shaker(t + 0.375, 0.026, 0.3); }
     if (t >= 4.0 && (bt % 4 === 1 || bt % 4 === 3) && t < 14.9) clap(t, t >= 12 ? 0.11 : 0.17);
-    if (t >= 2.0) {                                           /* gentle bass on the off-beat, root then octave */
+    if (t >= 2.0) {
       bass(t + 0.25, sg.root + (bt % 2 ? 12 : 0), 0.24, 0.34);
       if (bt % 4 === 2) bass(t, sg.root, 0.2, 0.2);
-      /* soft arpeggio an octave under the melody */
       bell(t + 0.25, sg.arp[ARP[(bt * 2 + 1) % 8]] - 12, 0.022, bt % 2 ? -0.35 : 0.35, 0.4, bus);
       bell(t, sg.arp[ARP[(bt * 2) % 8]] - 12, 0.018, bt % 2 ? 0.3 : -0.3, 0.4, bus);
     }
@@ -264,18 +184,13 @@ window.renderAudio = async function () {
     var isBig = TL.big.indexOf(th) >= 0, s = segAt(th);
     impact(th, isBig, s.root);
     stab(th, [s.arp[0], s.arp[1], s.arp[2]], isBig ? 0.095 : 0.055);
-    swell(th, th === 2.0 ? 0.95 : th === 12.0 ? 0.5 : 0.42, th === 2.0 ? 0.07 : 0.06);
+    swell(th, th === 2.0 ? 0.95 : 0.42, th === 2.0 ? 0.07 : 0.06);
   });
-  /* UI sound design: every cue mirrors a visual event (see timeline.js) */
+  /* sound design from the cue sheet */
   var VOICE = {
-    tap: function (c) { tap(c[1], c[2] === undefined ? 1 : c[2]); }, key: function (c) { key(c[1], (c[2] === undefined ? 1 : c[2]) * 2.4, c[3], c[4]); },
-    space: function (c) { space(c[1], (c[2] || 1) * 2.4, c[3]); }, keyshift: function (c) { keyshift(c[1], (c[2] || 1) * 2.4, c[3]); },
-    swipe: function (c) { swipe(c[1], c[2], c[3], c[4], c[5], (c[6] === undefined ? 0.5 : c[6]) * 1.6); }, send: function (c) { send(c[1]); }, flip: function (c) { flip(c[1], (c[2] || 0.05) * 2); },
-    tick: function (c) { tick(c[1], c[2], (c[3] || 0.04) * 2.4); }, hover: function (c) { hover(c[1]); },
-    swish: function (c) { swish(c[1], c[2] || 0, c[3] || 0.2, (c[4] === undefined ? 0.4 : c[4]) * 1.5); },
-    whoosh: function (c) { whoosh(c[1], c[2], c[3] * 1.8, c[4], c[5], c[6]); }, pop: function (c) { pop(c[1], c[2], (c[3] || 0.08) * 1.5); },
-    chime: function (c) { chime(c[1], c[2], (c[3] || 0.08) * 0.8); }, success: function (c) { success(c[1]); },
-    shimmer: function (c) { shimmer(c[1], c[2], (c[3] || 0.03) * 1.6); }, scan: function (c) { scan(c[1], c[2]); }, land: function (c) { land(c[1]); }
+    s: function (c) { smp(c[1], c[2], c[3], c[4], c[5]); },
+    whoosh: function (c) { whoosh(c[1], c[2], c[3], c[4], c[5], c[6]); },
+    swell: function (c) { swell(c[1], c[2], c[3]); }
   };
   if (MODE !== 'music') TL.cues.forEach(function (c) { if (VOICE[c[0]]) VOICE[c[0]](c); });
 
