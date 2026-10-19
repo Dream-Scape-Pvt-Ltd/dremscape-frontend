@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dreamscape Treks — 15s showreel</title>
+<meta name="viewport" content="width=1920,height=1080">
+<style>
+@font-face{font-family:PJS;src:url(data:font/woff2;base64,{{FONT}}) format('woff2');font-weight:200 800;font-style:normal}
+:root{--forest:#153d2f;--dark:#092419;--paper:#f9faf8;--gold:#e4c98a;--ink:#14382a;--muted:#5f7167;--line:#e2e8e4;--cream:#f9f8f1}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;background:var(--dark);overflow:hidden}
+body{font-family:PJS,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision;color:var(--paper)}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;background:var(--dark)}
+.world{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
+.screen{position:absolute;left:0;top:0;width:1920px;height:1080px}
+.abs{position:absolute}
+img{display:block}
+svg{display:block}
+
+/* masked word rise */
+.wm{display:inline-block;overflow:hidden;vertical-align:top;padding:.1em .1em .26em;margin:-.1em -.1em -.26em}
+.wm>.w{display:inline-block}
+.gold{color:var(--gold)}
+.caps{text-transform:uppercase}
+
+/* ---------- hook ---------- */
+#eb{left:0;top:236px;width:1920px;display:flex;justify-content:center;align-items:center;gap:16px;height:52px}
+#ebSlot{width:32px;height:4px}
+#ebMask{overflow:hidden;display:block;white-space:nowrap}
+#ebText{display:block;text-transform:uppercase;font-size:23px;font-weight:700;letter-spacing:.24em;color:#e6ece8}
+.line{left:0;width:1920px;text-align:center;font-weight:800;letter-spacing:-.055em;line-height:1;white-space:nowrap;color:var(--paper)}
+
+/* ---------- finder ---------- */
+#pill{left:140px;top:480px;width:1640px;height:120px;border-radius:60px;background:#fbfcfb;border:1px solid rgba(255,255,255,.8)}
+.fld{position:absolute;top:12px;height:96px;width:440px;border-radius:48px}
+.fld .lab{position:absolute;left:36px;top:21px;font-size:14px;font-weight:700;letter-spacing:.14em;color:#4e6157;text-transform:uppercase}
+.fld .valm{position:absolute;left:36px;top:46px;height:38px;width:340px;overflow:hidden}
+.fld .val{position:absolute;left:0;top:0;font-size:26px;font-weight:650;color:var(--ink);letter-spacing:-.02em;line-height:38px;white-space:nowrap}
+.fld .cv{position:absolute;right:34px;top:42px;width:20px;height:12px}
+.fld .cv path{fill:none;stroke:#4e6157;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.fbg{position:absolute;left:0;top:0;width:100%;height:100%;border-radius:48px;background:#e9efeb}
+.divd{position:absolute;top:30px;width:1px;height:60px;background:#dfe6e1}
+#btn{left:1376px;top:12px;width:250px;height:96px;border-radius:20px;background:var(--forest);overflow:hidden}
+#btn .bt{position:absolute;left:30px;top:0;height:96px;line-height:96px;font-size:23px;font-weight:650;color:#fff;letter-spacing:-.01em;white-space:nowrap}
+#btnArrow{position:absolute;right:26px;top:34px;width:30px;height:28px}
+.list{width:500px;border-radius:24px;background:#fdfdfc;border:1px solid #e3e9e5;overflow:hidden;padding:0 12px 12px}
+.list .lh{height:56px;padding:24px 14px 0;font-size:14px;font-weight:700;letter-spacing:.14em;color:#5f7167}
+.row{position:relative;height:78px;border-radius:18px}
+.row .rb{position:absolute;left:0;top:0;width:100%;height:100%;border-radius:18px;background:#e8efea}
+.row .num{position:absolute;left:14px;top:17px;width:44px;height:44px;border-radius:50%;border:1.5px solid #cdd8d1;font-size:14px;font-weight:600;color:#6c7d73;text-align:center;line-height:41px}
+.row .rt{position:absolute;left:76px;top:0;height:78px;line-height:78px;font-size:24px;font-weight:650;color:var(--ink);letter-spacing:-.015em}
+#listDest{left:152px;top:616px}
+#listDiff{left:632px;top:616px}
+
+/* ---------- header + menu ---------- */
+#header{left:190px;top:34px;width:1540px;height:92px;border-radius:24px;background:#123a2c;border:1px solid rgba(255,255,255,.14)}
+#hLogo{position:absolute;left:44px;top:22px;width:236px;height:46px}
+.nv{position:absolute;top:0;height:92px;line-height:90px;font-size:19px;font-weight:550;color:#eef3ef;letter-spacing:-.005em;white-space:nowrap}
+.nv .cv2{display:inline-block;width:14px;height:9px;margin-left:10px;vertical-align:middle;position:relative;top:-1px}
+.nv .cv2 path{fill:none;stroke:#b9c9c0;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#navTreksBg{position:absolute;left:330px;top:20px;width:112px;height:52px;border-radius:16px;background:rgba(255,255,255,.13)}
+#hCta{position:absolute;right:28px;top:20px;width:228px;height:52px;border-radius:16px;border:1px solid rgba(255,255,255,.26);background:rgba(255,255,255,.08);font-size:18px;font-weight:600;line-height:50px;padding-left:24px;color:#fff;white-space:nowrap}
+#hCta svg{position:absolute;right:20px;top:19px}
+#hSearch{position:absolute;left:1228px;top:30px}
+#menu{left:190px;top:140px;width:1540px;height:540px;border-radius:26px;background:var(--cream);border:1px solid #ece8da;overflow:hidden}
+#menu .mine{position:absolute;left:52px;top:46px;font-size:14px;font-weight:700;letter-spacing:.16em;color:#5f7167}
+#menu .mh{position:absolute;left:52px;top:92px;width:470px;font-size:50px;line-height:1.08;white-space:nowrap;font-weight:800;letter-spacing:-.045em;color:var(--forest)}
+#menu .mp{position:absolute;left:52px;top:232px;width:420px;font-size:20px;line-height:1.5;color:var(--muted)}
+#menu .ml{position:absolute;left:52px;top:340px;font-size:19px;font-weight:650;color:var(--ink)}
+.mi{position:absolute;width:318px;height:116px;border-radius:18px}
+.mi .mb{position:absolute;left:0;top:0;width:100%;height:100%;border-radius:18px;background:rgba(21,61,47,.07)}
+.mi .mn{position:absolute;left:20px;top:22px;font-size:24px;font-weight:650;color:var(--ink);letter-spacing:-.02em;white-space:nowrap}
+.mi .md{position:absolute;left:20px;top:60px;font-size:17px;color:var(--muted);white-space:nowrap}
+.mi .ma{position:absolute;right:20px;top:26px;width:22px;height:20px}
+.mi .ma path{fill:none;stroke:#3d5a4c;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#phWrap{left:1160px;top:36px;width:344px;height:396px;border-radius:20px;overflow:hidden;background:#cfd9d3}
+#phWrap img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover}
+#mSep{left:52px;top:456px;width:1436px;height:1px;background:#e7e3d6}
+.mfl{position:absolute;top:478px;font-size:18px;font-weight:600;color:var(--ink)}
+
+/* ---------- tailor-made ---------- */
+#photoB{overflow:hidden;background:#0e2a20}
+#photoB img{position:absolute;left:-96px;top:-54px;width:2112px;height:1188px;object-fit:cover}
+#photoB .tint{position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(9,36,25,.38)}
+#tEb{left:170px;top:214px;display:flex;align-items:center;gap:16px;height:44px}
+#tSlot{width:32px;height:4px}
+#tEbMask{overflow:hidden;display:block;white-space:nowrap}
+#tEbText{display:block;text-transform:uppercase;font-size:21px;font-weight:700;letter-spacing:.22em;color:#e6ece8}
+.tl{left:170px;font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--paper);font-size:118px;white-space:nowrap}
+.step{left:170px;font-size:38px;font-weight:650;letter-spacing:-.02em;color:var(--paper);white-space:nowrap}
+.step .sn{opacity:.62;margin-right:6px}
+#form{left:1010px;top:150px;width:740px;height:760px;border-radius:32px;background:#fbfcfa;overflow:hidden}
+#form .h2{position:absolute;left:46px;top:42px;width:650px;font-size:42px;font-weight:800;letter-spacing:-.045em;line-height:1.1;color:var(--forest)}
+#form .sub{position:absolute;left:46px;top:100px;width:640px;font-size:18px;line-height:1.5;color:var(--muted)}
+.fl{position:absolute;font-size:17px;font-weight:650;color:var(--ink)}
+.fl small{font-weight:500;color:#7b8a81;font-size:14px}
+.inp{position:absolute;height:56px;border-radius:14px;border:1.5px solid #cfd9d3;background:#fff}
+.inp.focus{border-color:var(--forest)}
+#txt{position:absolute;left:46px;top:446px;width:648px;height:146px;border-radius:14px;border:1.5px solid #cfd9d3;background:#fff;padding:16px 18px;font-size:19px;line-height:1.5;color:var(--ink)}
+#txt .caret{display:inline-block;width:2px;height:1.1em;background:var(--forest);vertical-align:-.18em;margin-left:1px}
+#send{left:46px;top:622px;width:648px;height:66px;border-radius:16px;background:var(--forest);color:#fff;font-size:21px;font-weight:650;text-align:center;line-height:66px}
+#foot{left:46px;top:706px;font-size:15px;color:#7b8a81}
+#formBody{left:0;top:0;width:740px;height:760px}
+#success{left:46px;top:46px;width:648px;border-radius:20px;background:#e8f4ec;padding:46px 46px 46px 46px}
+#success .sh{font-size:44px;font-weight:800;letter-spacing:-.045em;line-height:1.1;color:var(--forest);padding-left:78px;position:relative}
+#success .sp{font-size:21px;line-height:1.5;color:var(--muted);margin-top:20px;padding-left:78px}
+#sTick{position:absolute;left:46px;top:46px;width:48px;height:48px}
+
+/* ---------- end card ---------- */
+#disc{background:var(--forest)}
+#logo{left:210px;top:318px;width:1500px;height:292px}
+#cta{left:0;top:700px;width:1920px;padding-right:110px;text-align:center;font-size:84px;font-weight:800;letter-spacing:-.045em;line-height:1;color:var(--paper);white-space:nowrap}
+#ctaArrow{position:absolute;width:64px;height:58px}
+#dom{left:0;top:846px;width:1920px;text-align:center;font-size:26px;font-weight:650;letter-spacing:.26em;color:rgba(249,250,248,.74);text-transform:uppercase}
+#dom .wm,#cta .wm{padding-left:.12em;padding-right:.12em}
+
+/* ---------- cursor ---------- */
+#cursor{width:40px;height:56px}
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <div id="photoB" class="screen"><img id="imgSun" src="data:image/jpeg;base64,{{IMG_SUN}}" alt=""><div class="tint"></div></div>
+
+  <div id="cam" class="world">
+
+    <!-- HOOK -->
+    <div id="hook" class="abs">
+      <div id="eb" class="abs"><span id="ebSlot"></span><span id="ebMask"><span id="ebText">Local journeys · Since 2005</span></span></div>
+      <div id="l1" class="abs line"><span class="wm"><span class="w">So</span></span> <span class="wm"><span class="w">many</span></span> <span class="wm"><span class="w">trails.</span></span></div>
+      <div id="l2" class="abs line"><span class="wm"><span class="w">Which</span></span> <span class="wm"><span class="w gold">one?</span></span></div>
+    </div>
+
+    <!-- FINDER -->
+    <div id="finder" class="abs">
+      <div id="pill" class="abs">
+        <div id="f1" class="fld" style="left:36px"><div class="fbg" id="f1bg"></div><div class="lab">Destination</div><div class="valm"><div class="val" id="f1old">Anywhere</div><div class="val" id="f1new">Nepal</div></div><svg class="cv" viewBox="0 0 20 12"><path d="M2 2l8 8 8-8"/></svg></div>
+        <div class="divd" style="left:484px"></div>
+        <div id="f2" class="fld" style="left:496px"><div class="fbg" id="f2bg"></div><div class="lab">Difficulty</div><div class="valm"><div class="val" id="f2old">Any difficulty</div><div class="val" id="f2new">Normal</div></div><svg class="cv" viewBox="0 0 20 12"><path d="M2 2l8 8 8-8"/></svg></div>
+        <div class="divd" style="left:944px"></div>
+        <div id="f3" class="fld" style="left:956px;width:400px"><div class="lab">Budget · USD / person</div><div class="valm"><div class="val">Any budget</div></div><svg class="cv" viewBox="0 0 20 12"><path d="M2 2l8 8 8-8"/></svg></div>
+        <div id="btn" class="abs"><div class="bt">Find my trek</div><svg id="btnArrow" viewBox="0 0 30 28"><path id="btnArrowPath" d="M3 14h24M17 5l10 9-10 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div id="listDest" class="abs list"><div class="lh">DESTINATION</div>
+        <div class="row" id="rA0"><div class="rb"></div><div class="num">01</div><div class="rt">Anywhere</div></div>
+        <div class="row" id="rA1"><div class="rb"></div><div class="num">02</div><div class="rt">Nepal</div></div>
+        <div class="row" id="rA2"><div class="rb"></div><div class="num">03</div><div class="rt">Beyond Nepal</div></div>
+      </div>
+      <div id="listDiff" class="abs list"><div class="lh">DIFFICULTY</div>
+        <div class="row" id="rB0"><div class="rb"></div><div class="num">01</div><div class="rt">Any difficulty</div></div>
+        <div class="row" id="rB1"><div class="rb"></div><div class="num">02</div><div class="rt">Easy</div></div>
+        <div class="row" id="rB2"><div class="rb"></div><div class="num">03</div><div class="rt">Normal</div></div>
+        <div class="row" id="rB3"><div class="rb"></div><div class="num">04</div><div class="rt">Difficult</div></div>
+        <div class="row" id="rB4"><div class="rb"></div><div class="num">05</div><div class="rt">Extreme</div></div>
+      </div>
+    </div>
+
+    <!-- HEADER + MENU -->
+    <div id="header" class="abs">
+      <svg id="hLogo" viewBox="0 0 3337 650"><path id="hLogoMark" fill="#fff" fill-rule="evenodd" d=""/><path id="hLogoText" fill="#fff" fill-rule="evenodd" d=""/></svg>
+      <div id="navTreksBg"></div>
+      <div class="nv" id="nvTreks" style="left:350px">Treks<svg class="cv2" id="chevTreks" viewBox="0 0 14 9"><path d="M1.5 1.5L7 7l5.5-5.5"/></svg></div>
+      <div class="nv" style="left:476px">Tours<svg class="cv2" viewBox="0 0 14 9"><path d="M1.5 1.5L7 7l5.5-5.5"/></svg></div>
+      <div class="nv" style="left:586px">Climbing<svg class="cv2" viewBox="0 0 14 9"><path d="M1.5 1.5L7 7l5.5-5.5"/></svg></div>
+      <div class="nv" style="left:728px">Beyond Nepal<svg class="cv2" viewBox="0 0 14 9"><path d="M1.5 1.5L7 7l5.5-5.5"/></svg></div>
+      <div class="nv" style="left:914px">Company<svg class="cv2" viewBox="0 0 14 9"><path d="M1.5 1.5L7 7l5.5-5.5"/></svg></div>
+      <div class="nv" style="left:1046px">Journal</div>
+      <div class="nv" style="left:1138px">Contact</div>
+      <svg id="hSearch" width="32" height="32" viewBox="0 0 32 32"><circle cx="14" cy="14" r="8" fill="none" stroke="#eef3ef" stroke-width="2.2"/><path d="M20 20l7 7" stroke="#eef3ef" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <div id="hCta">Plan my journey<svg width="22" height="20" viewBox="0 0 30 28"><path d="M3 14h24M17 5l10 9-10 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+
+    <div id="menu" class="abs">
+      <div class="mine" id="mEyebrow">NEPAL, ONE TRAIL AT A TIME</div>
+      <div class="mh" id="mHead"><span class="wm"><span class="w">Find your mountain</span></span><br><span class="wm"><span class="w">trail.</span></span></div>
+      <div class="mp" id="mIntro">Choose a region and explore the journeys that take you there.</div>
+      <div class="ml" id="mLink">Explore all treks</div>
+      <div class="mi" id="mi0" style="left:496px;top:46px"><div class="mb"></div><div class="mn">Everest Region</div><div class="md">Khumbu trails, lakes &amp; high passes</div><svg class="ma" viewBox="0 0 22 20"><path d="M3 10h16M12 3l7 7-7 7"/></svg></div>
+      <div class="mi" id="mi1" style="left:836px;top:46px"><div class="mb"></div><div class="mn">Langtang Region</div><div class="md">Valley walks &amp; mountain villages</div><svg class="ma" viewBox="0 0 22 20"><path d="M3 10h16M12 3l7 7-7 7"/></svg></div>
+      <div class="mi" id="mi2" style="left:496px;top:178px"><div class="mb"></div><div class="mn">Annapurna Region</div><div class="md">Classic circuits &amp; glacial lakes</div><svg class="ma" viewBox="0 0 22 20"><path d="M3 10h16M12 3l7 7-7 7"/></svg></div>
+      <div class="mi" id="mi3" style="left:836px;top:178px"><div class="mb"></div><div class="mn">Manaslu Region</div><div class="md">Remote trails &amp; the Tsum Valley</div><svg class="ma" viewBox="0 0 22 20"><path d="M3 10h16M12 3l7 7-7 7"/></svg></div>
+      <div class="mi" id="mi4" style="left:496px;top:310px"><div class="mb"></div><div class="mn">Mustang Region</div><div class="md">Red cliffs &amp; ancient kingdoms</div><svg class="ma" viewBox="0 0 22 20"><path d="M3 10h16M12 3l7 7-7 7"/></svg></div>
+      <div class="mi" id="mi5" style="left:836px;top:310px"><div class="mb"></div><div class="mn">Off the Beaten Path</div><div class="md">Dolpo, Kanchenjunga &amp; quieter trails</div><svg class="ma" viewBox="0 0 22 20"><path d="M3 10h16M12 3l7 7-7 7"/></svg></div>
+      <div id="phWrap" class="abs"><img id="phA" src="data:image/jpeg;base64,{{IMG_RIDGE}}" alt=""><img id="phB" src="data:image/jpeg;base64,{{IMG_KYANGJIN}}" alt=""></div>
+      <div id="mSep" class="abs"></div>
+      <div class="mfl" id="mf1" style="left:52px">Upcoming departures</div>
+      <div class="mfl" id="mf2" style="right:52px">Journal &amp; travel notes</div>
+    </div>
+
+    <!-- TAILOR-MADE -->
+    <div id="tailor" class="abs">
+      <div id="tEb" class="abs"><span id="tSlot"></span><span id="tEbMask"><span id="tEbText">YOUR JOURNEY, YOUR PACE</span></span></div>
+      <div id="tl1" class="abs tl" style="top:292px"><span class="wm"><span class="w">Make the trail</span></span></div>
+      <div id="tl2" class="abs tl" style="top:412px"><span class="wm"><span class="w">your <span class="gold">own.</span></span></span></div>
+      <div id="st1" class="abs step" style="top:620px"><span class="wm"><span class="w"><span class="sn">01 ·</span> Share your idea</span></span></div>
+      <div id="st2" class="abs step" style="top:706px"><span class="wm"><span class="w"><span class="sn">02 ·</span> Talk through the route</span></span></div>
+      <div id="st3" class="abs step" style="top:792px"><span class="wm"><span class="w"><span class="sn">03 ·</span> Review a personal proposal</span></span></div>
+    </div>
+
+    <div id="form" class="abs">
+      <div id="formBody" class="abs">
+        <div class="h2">Tell us what you have in mind.</div>
+        <div class="sub">Your preferred date is a starting point. This form sends an inquiry, not a confirmed booking.</div>
+        <div class="fl" style="left:46px;top:200px">Your name</div><div class="inp" style="left:46px;top:228px;width:648px"></div>
+        <div class="fl" style="left:46px;top:306px">Email address</div><div class="inp" style="left:46px;top:334px;width:310px"></div>
+        <div class="fl" style="left:384px;top:306px">Phone / WhatsApp <small>(optional)</small></div><div class="inp" style="left:384px;top:334px;width:96px"></div><div class="abs" style="left:402px;top:350px;font-size:17px;font-weight:600;color:var(--ink)">Code</div><div class="inp" style="left:492px;top:334px;width:202px"></div>
+        <div class="fl" style="left:46px;top:412px">Your journey</div>
+        <div id="txt"><span id="txtBase">I’d like to plan a tailor-made journey. The places and experiences I’m interested in are: </span><span id="txtTyped"></span><span class="caret" id="caret"></span></div>
+        <div id="send" class="abs">Send Inquiry</div>
+        <div id="foot" class="abs">We’ll use these details to respond to your journey request.</div>
+      </div>
+      <div id="success" class="abs"><svg id="sTick" viewBox="0 0 48 48"><circle cx="24" cy="24" r="23" fill="none" stroke="#bdd9c7" stroke-width="2"/></svg><div class="sh">Your inquiry is with the team.</div><div class="sp">This is an inquiry, not a confirmed booking.</div></div>
+    </div>
+  </div>
+
+  <div id="photoExp" class="abs" style="left:0;top:0;width:1920px;height:1080px;overflow:hidden"><img id="imgExp" src="data:image/jpeg;base64,{{IMG_KYANGJIN}}" alt="" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover"></div>
+  <div id="disc" class="screen"></div>
+
+  <div id="cam2" class="world">
+    <div id="end" class="abs" style="left:0;top:0;width:1920px;height:1080px">
+      <svg id="logo" class="abs" viewBox="0 0 3337 650" style="overflow:visible">
+        <defs>
+          <clipPath id="cpMark"><rect id="cpMarkRect" x="0" y="0" width="3337" height="650"/></clipPath>
+          <clipPath id="cpB0"><rect x="1380" y="40" width="1957" height="260"/></clipPath>
+          <clipPath id="cpB1"><rect x="1380" y="318" width="1957" height="156"/></clipPath>
+          <clipPath id="cpB2"><rect x="1380" y="496" width="1957" height="154"/></clipPath>
+        </defs>
+        <g clip-path="url(#cpMark)"><path id="logoMark" fill="#f9faf8" fill-rule="evenodd" d=""/></g>
+        <g clip-path="url(#cpB0)"><g id="tg0"><g clip-path="url(#cpB0)"><path class="logoText" fill="#f9faf8" fill-rule="evenodd" d=""/></g></g></g>
+        <g clip-path="url(#cpB1)"><g id="tg1"><g clip-path="url(#cpB1)"><path class="logoText" fill="#f9faf8" fill-rule="evenodd" d=""/></g></g></g>
+        <g clip-path="url(#cpB2)"><g id="tg2"><g clip-path="url(#cpB2)"><path class="logoText" fill="#f9faf8" fill-rule="evenodd" d=""/></g></g></g>
+      </svg>
+      <div id="cta" class="abs"><span class="wm"><span class="w" id="ctaA">Plan my</span></span> <span class="wm"><span class="w gold" id="ctaB">journey</span></span><svg id="ctaArrow" viewBox="0 0 30 28"><path id="ctaArrowPath" d="M3 14h24M17 5l10 9-10 9" fill="none" stroke="#f9faf8" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div id="dom" class="abs"><span class="wm"><span class="w" id="domT">dreamscapetreks.com</span></span></div>
+    </div>
+    <svg id="tokSvg" class="abs" width="1920" height="1080" viewBox="0 0 1920 1080" style="left:0;top:0;overflow:visible"><path id="tok" fill="none" stroke="#e4c98a" stroke-linecap="round" stroke-linejoin="round" d=""/></svg>
+    <svg id="cursor" class="abs" viewBox="0 0 40 56" style="left:0;top:0;overflow:visible"><g id="curG"><path d="M2 2 L2 40 L11 31.5 L17.5 46.5 L24 43.7 L17.4 29 L29.5 29 Z" fill="#ffffff" stroke="#0c2a1f" stroke-width="2.6" stroke-linejoin="round"/></g></svg>
+  </div>
+
+  <svg width="0" height="0" style="position:absolute"><defs>
+    <filter id="mbTok" filterUnits="userSpaceOnUse" x="-400" y="-300" width="2720" height="1680" color-interpolation-filters="sRGB"><feGaussianBlur id="mbTokB" stdDeviation="0 0"/></filter>
+    <filter id="mbCur" x="-100%" y="-100%" width="300%" height="300%" color-interpolation-filters="sRGB"><feGaussianBlur id="mbCurB" stdDeviation="0 0"/></filter>
+    <filter id="mbCam" filterUnits="userSpaceOnUse" x="-400" y="-300" width="2720" height="1680" color-interpolation-filters="sRGB"><feGaussianBlur id="mbCamB" stdDeviation="0 0"/></filter>
+    <filter id="mbL1" x="-10%" y="-60%" width="120%" height="220%" color-interpolation-filters="sRGB"><feGaussianBlur id="mbL1B" stdDeviation="0 0"/></filter>
+    <filter id="mbL2" x="-10%" y="-60%" width="120%" height="220%" color-interpolation-filters="sRGB"><feGaussianBlur id="mbL2B" stdDeviation="0 0"/></filter>
+  </defs></svg>
+</div>
+<script>window.LOGO={{LOGO}};</script>
+<script>
+{{ENGINE}}
+</script>
+</body>
+</html>

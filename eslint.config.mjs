@@ -14,5 +14,5 @@ export default defineConfig([
       '@next/next/no-html-link-for-pages': 'warn',
     },
   },
-  globalIgnores(['.next/**','out/**','build/**','next-env.d.ts','coverage/**']),
+  globalIgnores(['.next/**','out/**','build/**','next-env.d.ts','coverage/**','marketing/**']),
 ]);
