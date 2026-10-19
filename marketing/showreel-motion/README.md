@@ -1,6 +1,6 @@
 # Dreamscape Treks — "One Trail" (15 s motion showreel)
 
-A 1920×1080, 60 fps, 120 BPM motion-design film built entirely from `window.seek(t)`: no CSS animation, no timers, no carried state. The first frame and the last frame are the same lockup, so it loops. Beat table and the facts it draws on: [storyboard.md](storyboard.md).
+A 1920×1080, 60 fps motion-design film built entirely from `window.seek(t)`: no CSS animation, no timers, no carried state. It is authored on a 15 s / 120 BPM grid and played 1.6× slower (24 s, 75 BPM; `SLOW` in `src/core.js`, `k` in `src/timeline.js`) so every idea has room to be read. The first frame and the last frame are the same lockup, so it loops. Beat table and the facts it draws on: [storyboard.md](storyboard.md).
 
 One gold line is the through-line. It is the ridge of the logo, then the site's dotted trail, a card's edge, a chart line, the edge of a wipe, and a ribbon behind the type, and every shot grows out of the one before it (no cuts, no fades).
 

@@ -2,7 +2,7 @@
    Score: soft kick on every beat (pitch follows the chord root), a tuned hit on every scene change, a riser into the last full bar.
    Sound design: CC0 library samples from ../sfx-bank placed by the cue sheet in timeline.js, plus smooth air for the camera pushes. */
 window.renderAudio = async function () {
-  var TL = window.TL, SR = 48000, DUR = TL.dur, BEAT = TL.beat, MODE = window.__AUDIO_MODE || 'all';   /* 'music' | 'sfx' | 'all' (mix analysis) */
+  var TL = window.TL, SR = 48000, K = TL.k || 1, DUR = TL.dur * K, BEAT = TL.beat * K, MODE = window.__AUDIO_MODE || 'all';   /* 'music' | 'sfx' | 'all' (mix analysis) */
   var ctx = new OfflineAudioContext(2, Math.ceil(SR * DUR), SR);
   var mtof = function (m) { return 440 * Math.pow(2, (m - 69) / 12); };
   var seed = 20050607;                                    /* seeded so every render is identical */
@@ -19,6 +19,8 @@ window.renderAudio = async function () {
     { t0: 11, t1: 12, root: 33, pad: [52, 57, 61, 64], arp: [73, 76, 81, 85], mel: [[11.25, 85], [11.75, 81]], g: 0.11 },
     { t0: 12, t1: 15, root: 38, pad: [50, 57, 62, 66], arp: [74, 78, 81, 86], mel: [[12.0, 86], [12.5, 81], [13.0, 78], [13.5, 74], [14.0, 78], [14.5, 81]], g: 0.09 }
   ];
+  SEG.forEach(function (s) { s.t0 *= K; s.t1 *= K; s.mel = s.mel.map(function (n) { return [n[0] * K, n[1]]; }); });   /* the picture is retimed by K (calmer pace): scale the score with it */
+  var HITS = TL.hits.map(function (x) { return x * K; }), BIG = TL.big.map(function (x) { return x * K; });
   var segAt = function (t) { for (var i = SEG.length - 1; i >= 0; i--) if (t >= SEG[i].t0 - 1e-6) return SEG[i]; return SEG[0]; };
 
   /* ---------- buses ---------- */
@@ -52,7 +54,7 @@ window.renderAudio = async function () {
   var sfx = ctx.createGain(); sfx.gain.value = 1.0; sfx.connect(master);   /* UI sound design: dry + a little plate */
   var sfxRev = ctx.createGain(); sfxRev.gain.value = 0.32; sfx.connect(sfxRev); sfxRev.connect(revIn);
   for (var b = 0; b < DUR / BEAT; b++) { var tb = b * BEAT; bus.gain.setValueAtTime(0.66, tb); bus.gain.linearRampToValueAtTime(1, tb + 0.2); }
-  TL.hits.forEach(function (th) { bus.gain.setValueAtTime(0.4, th); bus.gain.linearRampToValueAtTime(1, th + 0.45); });
+  HITS.forEach(function (th) { bus.gain.setValueAtTime(0.4, th); bus.gain.linearRampToValueAtTime(1, th + 0.45); });
 
   var nb = ctx.createBuffer(1, SR * 2, SR), nd = nb.getChannelData(0);
   for (var k = 0; k < nd.length; k++) nd[k] = rnd() * 2 - 1;
@@ -162,35 +164,35 @@ window.renderAudio = async function () {
   /* ---------- arrangement ---------- */
   if (MODE !== 'sfx') SEG.forEach(function (s, i) {
     pad(s.t0, s.pad, (s.t1 - s.t0) + (i === SEG.length - 1 ? 0 : 0.1), i === 0 ? 0.1 : 0.125);
-    s.mel.forEach(function (n) { bell(n[0], n[1], s.g * 1.25 * (n[0] === 12.0 ? 1.25 : 1), n[1] % 2 ? 0.25 : -0.25, n[0] >= 14.5 ? 2.2 : 1.0); });
+    s.mel.forEach(function (n) { bell(n[0], n[1], s.g * 1.25 * (Math.abs(n[0] - 12.0 * K) < 1e-6 ? 1.25 : 1), n[1] % 2 ? 0.25 : -0.25, n[0] >= 14.5 * K ? 2.2 : 1.0); });
   });
   var nBeats = Math.round(DUR / BEAT), ARP = [0, 1, 2, 1, 3, 2, 1, 2];
   for (var bt = 0; bt < (MODE === 'sfx' ? 0 : nBeats); bt++) {
     var t = bt * BEAT, sg = segAt(t), rootHz = mtof(sg.root);
-    var big = TL.big.some(function (x) { return Math.abs(x - t) < 1e-6; });
+    var big = BIG.some(function (x) { return Math.abs(x - t) < 1e-6; });
     kick(t, big ? 0.7 : 0.5, rootHz, big);
-    shaker(t + 0.25, 0.04, 0.25);
-    if (t >= 2.0) { shaker(t + 0.125, 0.022, -0.3); shaker(t + 0.375, 0.026, 0.3); }
-    if (t >= 4.0 && (bt % 4 === 1 || bt % 4 === 3) && t < 14.9) clap(t, t >= 12 ? 0.11 : 0.17);
-    if (t >= 2.0) {
-      bass(t + 0.25, sg.root + (bt % 2 ? 12 : 0), 0.24, 0.34);
-      if (bt % 4 === 2) bass(t, sg.root, 0.2, 0.2);
-      bell(t + 0.25, sg.arp[ARP[(bt * 2 + 1) % 8]] - 12, 0.022, bt % 2 ? -0.35 : 0.35, 0.4, bus);
+    shaker(t + 0.5 * BEAT, 0.04, 0.25);
+    if (t >= 2.0 * K) { shaker(t + 0.25 * BEAT, 0.022, -0.3); shaker(t + 0.75 * BEAT, 0.026, 0.3); }
+    if (t >= 4.0 * K && (bt % 4 === 1 || bt % 4 === 3) && t < 14.9 * K) clap(t, t >= 12 * K ? 0.11 : 0.17);
+    if (t >= 2.0 * K) {
+      bass(t + 0.5 * BEAT, sg.root + (bt % 2 ? 12 : 0), 0.24 * K, 0.34);
+      if (bt % 4 === 2) bass(t, sg.root, 0.2 * K, 0.2);
+      bell(t + 0.5 * BEAT, sg.arp[ARP[(bt * 2 + 1) % 8]] - 12, 0.022, bt % 2 ? -0.35 : 0.35, 0.4, bus);
       bell(t, sg.arp[ARP[(bt * 2) % 8]] - 12, 0.018, bt % 2 ? 0.3 : -0.3, 0.4, bus);
     }
   }
   /* scene-change hits: tuned thump + chord stab, with an airy swell leading in */
-  if (MODE !== 'sfx') TL.hits.forEach(function (th) {
-    var isBig = TL.big.indexOf(th) >= 0, s = segAt(th);
+  if (MODE !== 'sfx') HITS.forEach(function (th) {
+    var isBig = BIG.indexOf(th) >= 0, s = segAt(th);
     impact(th, isBig, s.root);
     stab(th, [s.arp[0], s.arp[1], s.arp[2]], isBig ? 0.095 : 0.055);
-    swell(th, th === 2.0 ? 0.95 : 0.42, th === 2.0 ? 0.07 : 0.06);
+    swell(th, (th === 2.0 * K ? 0.95 : 0.42) * K, th === 2.0 * K ? 0.07 : 0.06);
   });
   /* sound design from the cue sheet */
   var VOICE = {
-    s: function (c) { smp(c[1], c[2], c[3], c[4], c[5]); },
-    whoosh: function (c) { whoosh(c[1], c[2], c[3], c[4], c[5], c[6]); },
-    swell: function (c) { swell(c[1], c[2], c[3]); }
+    s: function (c) { smp(c[1] * K, c[2], c[3], c[4], c[5]); },
+    whoosh: function (c) { whoosh(c[1] * K, c[2] * K, c[3], c[4], c[5], c[6]); },
+    swell: function (c) { swell(c[1] * K, c[2] * K, c[3]); }
   };
   if (MODE !== 'music') TL.cues.forEach(function (c) { if (VOICE[c[0]]) VOICE[c[0]](c); });
 

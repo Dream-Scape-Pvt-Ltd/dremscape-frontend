@@ -9,7 +9,8 @@ const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromi
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 0.25 });
 await page.goto('file://' + resolve(here, 'dist/motion.html'));
 await page.waitForFunction('window.__ready === true', null, { timeout: 30000 });
-for (let n = 0; n <= 900; n++) {
+const dur = await page.evaluate(() => window.__dur);
+for (let n = 0; n <= Math.round(dur * 60); n++) {
   await page.evaluate((tt) => window.seek(tt), n / 60);
   await page.screenshot({ path: join(out, `f${String(n).padStart(4, '0')}.png`) });
 }

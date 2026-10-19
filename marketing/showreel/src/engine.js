@@ -3,6 +3,8 @@
 (function () {
 'use strict';
 var W = 1920, H = 1080, DUR = 15, BEAT = 0.5;
+/* authored on a 15 s / 120 BPM grid, played SLOW times slower (24 s / 75 BPM) so every step can be read */
+var SLOW = window.TL.k || 1;
 
 /* ------------------------------------------------------------------ math */
 var $ = function (id) { return document.getElementById(id); };
@@ -340,10 +342,10 @@ function speedBlur(bEl, p0, p1, k, c) {
   return sx > 0.9 || sy > 0.9;
 }
 
-window.seek = function (t) {
+function seekAt(t) {
   t = Math.max(0, Math.min(DUR, t));
   var cam = camAt(t); applyCam(cam);
-  var DT = 1 / 180;
+  var DT = 1 / 180 / SLOW;                    /* shutter in authored time: 1/180 s of output time */
 
   /* camera motion blur: direction and amount follow the camera's screen-space velocity */
   var c0 = camAt(t - DT), c1 = camAt(t + DT);
@@ -524,7 +526,9 @@ window.seek = function (t) {
   E.cursor.style.transform = 'translate(' + (cu.x - 2).toFixed(2) + 'px,' + (cu.y - 2).toFixed(2) + 'px) scale(' + (cs * (1 - 0.13 * curPress(t)) * 0.78).toFixed(4) + ')';
   vis(E.cursor, cu.vis && t < 11.95);
   E.curG.style.filter = speedBlur(E.mbCurB, [cu0.x, cu0.y], [cu1.x, cu1.y], 0.25, cam) ? 'url(#mbCur)' : 'none';
-};
+}
+window.__dur = DUR * SLOW;
+window.seek = function (t) { seekAt(t / SLOW); };
 
 /* ---------------------------------------------------------------- init */
 function init() {

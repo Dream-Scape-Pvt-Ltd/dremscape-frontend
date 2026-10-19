@@ -1,5 +1,5 @@
 /* ONE TRAIL — Dreamscape Treks motion showreel.  window.seek(t) draws every frame from time alone. */
-var W = 1920, H = 1080, DUR = 15, DT = 1 / 180;
+var W = 1920, H = 1080, DUR = 15, SLOW = window.TL_K || 1.6, DT = 1 / 180 / SLOW;
 var FOREST = '#153d2f', GOLD = '#e4c98a', MIST = '#b9cfc5', BLACK = '#06140e', WHITE = '#f9faf8';
 
 /* ------------------------------------------------------------------ math */

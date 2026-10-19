@@ -10,7 +10,8 @@ import os from 'node:os';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
-const FPS = 60, SUB = 3, DUR = 15, N = FPS * DUR, CHUNK = 12;
+const FPS = 60, SUB = 3, CHUNK = 12;
+const DUR = Number(arg('dur', 24)), N = Math.round(FPS * DUR);   // 24 s: the film is authored on 15 s and played 1.6x slower
 const SCALE = Number(arg('scale', 1));
 const html = resolve(here, arg('html', 'dist/motion.html'));
 const out = resolve(here, arg('out', 'out/dreamscape-one-trail.mp4'));

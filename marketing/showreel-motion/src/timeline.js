@@ -6,7 +6,7 @@
      ['whoosh', t, dur, gain, panFrom, panTo, dir]     smooth air for the camera pushes
      ['swell', tEnd, len, gain]                        riser that lands on tEnd */
 window.TL = {
-  bpm: 120, beat: 0.5, dur: 15,
+  bpm: 120, beat: 0.5, dur: 15, k: 1.6,   /* authored at 120 BPM / 15 s, played k times slower: 75 BPM / 24 s */
   hits: [2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0],
   big: [12.0],
   cues: (function () {

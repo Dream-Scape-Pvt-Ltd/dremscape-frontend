@@ -7,7 +7,7 @@
      ['swell', tEnd, len, gain]                        riser that lands on tEnd
    One sound per meaningful event only: clicks, menus opening, the send, the logo landing. No hover ticks, no glitter. */
 window.TL = {
-  bpm: 120, beat: 0.5, dur: 15,
+  bpm: 120, beat: 0.5, dur: 15, k: 1.6,   /* authored at 120 BPM / 15 s, played k times slower: 75 BPM / 24 s */
   hits: [2.0, 4.5, 7.0, 9.0, 11.0, 12.0],       /* scene changes */
   big: [11.0, 12.0],                             /* Send Inquiry click, logo lands */
   clicks: [2.5, 3.0, 3.5, 4.0, 4.25, 5.0, 6.0, 9.5, 11.0],
