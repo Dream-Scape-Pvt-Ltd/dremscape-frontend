@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dreamscape Treks — Your Trail (32 s film with voiceover)</title>
+<meta name="viewport" content="width=1920,height=1080">
+<style>
+@font-face{font-family:PJS;src:url(data:font/woff2;base64,{{FONT}}) format('woff2');font-weight:200 800;font-style:normal}
+:root{--forest:#153d2f;--dark:#0b2a1f;--paper:#f9faf8;--gold:#e4c98a;--mist:#b9cfc5;--ink:#14382a;--muted:#5f7167}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;background:#000;overflow:hidden}
+body{font-family:PJS,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision;color:var(--paper)}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;background:var(--dark)}
+.l{position:absolute;left:0;top:0;width:1920px;height:1080px}
+.abs{position:absolute}
+img{display:block;max-width:none}
+svg{display:block;overflow:visible}
+
+/* photographs: a frame that moves (whip pans) holding an image that pushes in */
+.ph{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;background:#0b2a1f}
+.ph img{position:absolute;left:0;top:0;width:1920px;height:1080px;object-fit:cover;transform-origin:50% 50%}
+.ph .vig{position:absolute;left:0;top:0;width:100%;height:100%;background:radial-gradient(ellipse 75% 70% at 50% 48%,rgba(0,0,0,0) 55%,rgba(4,16,11,.42) 100%)}
+
+/* captions: words rise inside their own masks */
+.cap{position:absolute;white-space:nowrap;font-weight:800;letter-spacing:-.035em;line-height:1;color:var(--paper);text-shadow:0 2px 28px rgba(0,10,6,.38)}
+.wm{display:inline-block;overflow:hidden;vertical-align:top;padding:.12em .06em .24em;margin:-.12em -.06em -.24em}
+.wm>.w{display:inline-block}
+.gold{color:var(--gold)}
+.eyebrow{position:absolute;white-space:nowrap;font-size:24px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#e7eee9;text-shadow:0 1px 18px rgba(0,10,6,.4)}
+.dash{display:inline-block;width:34px;height:4px;border-radius:2px;background:var(--gold);vertical-align:middle;margin-right:18px;position:relative;top:-3px}
+
+/* the site's journey finder (src/components/home.tsx), at the site's own proportions */
+#finder{left:0;top:-70px;width:1920px;height:1080px}
+#pill{left:140px;top:480px;width:1640px;height:120px;border-radius:60px;background:#fbfcfb;box-shadow:0 30px 80px rgba(3,14,9,.35),0 6px 18px rgba(3,14,9,.18)}
+.fld{position:absolute;top:12px;height:96px;width:440px;border-radius:48px}
+.fld .lab{position:absolute;left:36px;top:21px;font-size:14px;font-weight:700;letter-spacing:.14em;color:#4e6157;text-transform:uppercase}
+.fld .valm{position:absolute;left:36px;top:46px;height:38px;width:340px;overflow:hidden}
+.fld .val{position:absolute;left:0;top:0;font-size:26px;font-weight:650;color:var(--ink);letter-spacing:-.02em;line-height:38px;white-space:nowrap}
+.fld .cv{position:absolute;right:34px;top:42px;width:20px;height:12px}
+.fld .cv path{fill:none;stroke:#4e6157;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.fbg{position:absolute;left:0;top:0;width:100%;height:100%;border-radius:48px;background:#e9efeb}
+.divd{position:absolute;top:30px;width:1px;height:60px;background:#dfe6e1}
+#btn{left:1376px;top:12px;width:250px;height:96px;border-radius:20px;background:var(--forest);overflow:hidden}
+#btn .bt{position:absolute;left:30px;top:0;height:96px;line-height:96px;font-size:23px;font-weight:650;color:#fff;letter-spacing:-.01em;white-space:nowrap}
+#btn svg{position:absolute;right:26px;top:34px;width:30px;height:28px}
+#btn svg path{fill:none;stroke:#fff;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.list{width:500px;border-radius:24px;background:#fdfdfc;overflow:hidden;padding:0 12px 12px;box-shadow:0 30px 70px rgba(3,14,9,.32),0 4px 14px rgba(3,14,9,.14);transform-origin:50% 0}
+.list .lh{height:56px;padding:24px 14px 0;font-size:14px;font-weight:700;letter-spacing:.14em;color:#5f7167}
+.row{position:relative;height:78px;border-radius:18px}
+.row .rb{position:absolute;left:0;top:0;width:100%;height:100%;border-radius:18px;background:#e8efea}
+.row .num{position:absolute;left:14px;top:17px;width:44px;height:44px;border-radius:50%;border:1.5px solid #cdd8d1;font-size:14px;font-weight:600;color:#6c7d73;text-align:center;line-height:41px}
+.row .rt{position:absolute;left:76px;top:0;height:78px;line-height:78px;font-size:24px;font-weight:650;color:var(--ink);letter-spacing:-.015em}
+.row .ok{position:absolute;right:22px;top:29px;width:22px;height:18px}
+.row .ok path{fill:none;stroke:var(--forest);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+#listDest{left:152px;top:616px}
+#listDiff{left:632px;top:616px}
+#cursor{left:0;top:0;width:44px;height:60px;z-index:40;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
+#ripple{left:0;top:0;width:10px;height:10px;border-radius:50%;border:3px solid rgba(255,255,255,.9);z-index:39}
+
+/* steps (the site's tailor-made page: "Make the trail your own.") */
+#steps{background:var(--forest)}
+.st{position:absolute;left:150px;height:96px;white-space:nowrap}
+.st .n{position:absolute;left:0;top:10px;width:76px;height:76px;border-radius:50%;border:2px solid rgba(228,201,138,.85);color:var(--gold);font-size:24px;font-weight:700;text-align:center;line-height:72px;letter-spacing:.02em}
+.st .t{position:absolute;left:112px;top:0;height:96px;line-height:96px;font-size:58px;font-weight:800;letter-spacing:-.035em;color:var(--paper)}
+#card{overflow:hidden;background:#0b2a1f}
+#card img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:50% 46%}
+#cardDim{position:absolute;left:0;top:0;width:100%;height:100%;background:#0b2a1f}
+#cardCap{position:absolute;white-space:nowrap;font-size:22px;font-weight:650;letter-spacing:.02em;color:var(--mist)}
+
+/* end title */
+#cta{position:absolute;height:96px;border-radius:48px;background:var(--gold);color:var(--forest);font-size:36px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;justify-content:center;gap:18px;overflow:hidden;white-space:nowrap}
+#cta svg path{fill:none;stroke:var(--forest);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round}
+#url{position:absolute;left:0;width:1920px;text-align:center;font-size:24px;font-weight:700;letter-spacing:.3em;color:rgba(249,250,248,.82)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="finder" class="l">
+    <div id="pill" class="abs">
+      <div id="f1" class="fld" style="left:12px"><div class="fbg" id="f1bg"></div><div class="lab">Destination</div><div class="valm"><div class="val" id="v1a">Anywhere</div><div class="val" id="v1b">Nepal</div></div><svg class="cv" viewBox="0 0 20 12"><path d="M2 2l8 8 8-8"/></svg></div>
+      <div class="divd" style="left:466px"></div>
+      <div id="f2" class="fld" style="left:478px"><div class="fbg" id="f2bg"></div><div class="lab">Difficulty</div><div class="valm"><div class="val" id="v2a">Any difficulty</div><div class="val" id="v2b">Normal</div></div><svg class="cv" viewBox="0 0 20 12"><path d="M2 2l8 8 8-8"/></svg></div>
+      <div class="divd" style="left:932px"></div>
+      <div id="f3" class="fld" style="left:944px;width:420px"><div class="lab">Budget · USD / person</div><div class="valm"><div class="val">Any budget</div></div><svg class="cv" viewBox="0 0 20 12"><path d="M2 2l8 8 8-8"/></svg></div>
+      <div id="btn" class="abs"><div class="bt">Find my trek</div><svg viewBox="0 0 30 28"><path d="M3 14h24M17 5l10 9-10 9"/></svg></div>
+    </div>
+    <div id="listDest" class="abs list"><div class="lh">DESTINATION</div>
+      <div class="row" id="rA0"><div class="rb"></div><div class="num">01</div><div class="rt">Anywhere</div></div>
+      <div class="row" id="rA1"><div class="rb"></div><div class="num">02</div><div class="rt">Nepal</div><svg class="ok" viewBox="0 0 22 18"><path d="M2 9l6 6L20 3"/></svg></div>
+      <div class="row" id="rA2"><div class="rb"></div><div class="num">03</div><div class="rt">Beyond Nepal</div></div>
+    </div>
+    <div id="listDiff" class="abs list"><div class="lh">DIFFICULTY</div>
+      <div class="row" id="rB0"><div class="rb"></div><div class="num">01</div><div class="rt">Any difficulty</div></div>
+      <div class="row" id="rB1"><div class="rb"></div><div class="num">02</div><div class="rt">Easy</div></div>
+      <div class="row" id="rB2"><div class="rb"></div><div class="num">03</div><div class="rt">Normal</div><svg class="ok" viewBox="0 0 22 18"><path d="M2 9l6 6L20 3"/></svg></div>
+      <div class="row" id="rB3"><div class="rb"></div><div class="num">04</div><div class="rt">Difficult</div></div>
+      <div class="row" id="rB4"><div class="rb"></div><div class="num">05</div><div class="rt">Extreme</div></div>
+    </div>
+  </div>
+</div>
+<script>window.LOGO={{LOGO}};window.LETTERS={{LETTERS}};window.IMG={{IMG}};window.VOLINES={{VOLINES}};</script>
+<script>{{TIMELINE}}</script>
+<script>
+(function(){
+'use strict';
+{{ENGINE}}
+})();
+</script>
+</body>
+</html>
