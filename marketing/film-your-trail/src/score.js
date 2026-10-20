@@ -1,6 +1,6 @@
 /* "Your Trail" mix, rendered offline (OfflineAudioContext, 48 kHz stereo).
-   The music itself is played on sampled instruments by music.mjs (real grand piano, strings, cello, bass, harp, timpani,
-   a light kit) and arrives here as dry stems; this file places the voiceover, builds the rooms, ducks the music under
+   The music itself is the upbeat Dreamscape theme played on sampled instruments by music.mjs (grand piano, steel guitar,
+   strings, glockenspiel, finger bass, kit) and arrives here as dry stems; this file places the voiceover, builds the rooms, ducks the music under
    every line and adds the only two kinds of sound design the film uses:
      - one soft whoosh per scene change, shaped by the camera's actual speed (loudest where the move is fastest);
      - the musical UI notes from music.mjs (each choice, step and press is a note of the chord).
@@ -36,7 +36,7 @@ window.renderAudio = async function () {
   var mMute = gain(MODE === 'vo' || MODE === 'sfx' ? 0 : 1), vMute = gain(MODE === 'music' || MODE === 'sfx' ? 0 : 1), sMute = gain(MODE === 'music' || MODE === 'vo' ? 0 : 1);
   mMute.connect(master); vMute.connect(master); sMute.connect(master);
   var duck = gain(1), music = gain(1); chain(music, duck, mMute);                  /* everything musical, ducked under the voice */
-  var hall = verb(room(3.2, 0.42, [[0.019, 0.5], [0.031, 0.35], [0.047, 0.3], [0.063, 0.22]]), 0.022, 160, 7000, 0.36, music);
+  var hall = verb(room(2.0, 0.5, [[0.017, 0.5], [0.029, 0.35], [0.043, 0.3]]), 0.018, 200, 8000, 0.3, music);
   var small = verb(room(0.55, 0.5, [[0.007, 0.6], [0.013, 0.4], [0.021, 0.3]]), 0.004, 200, 9000, 1, master);
   var vSend = gain(0), sSend = gain(0); vMute.connect(vSend); vSend.connect(small); sMute.connect(sSend); sSend.connect(small);
 
@@ -48,16 +48,16 @@ window.renderAudio = async function () {
     for (var i = 0; i < n; i++) { L[i] = f[2 * i]; R[i] = f[2 * i + 1]; }
     var s = ctx.createBufferSource(); s.buffer = b; s.start(0); return s;
   }
-  /* [stem, level, hall send, tone] — the piano is a bright C5 grand: a little lower shelf and a soft top make it warmer */
-  var LV = { piano: [0.62, 0.42], strings: [3.1, 0.62], harp: [0.75, 0.55], perc: [0.6, 0.18], fx: [1.1, 0.5], ui: [0.62, 0.45] };
+  /* [level, hall send] per stem of the upbeat theme; the room is kept small and bright so the groove stays tight */
+  var LV = { piano: [0.6, 0.2], guitar: [1.6, 0.15], strings: [1.25, 0.3], mallets: [4.5, 0.3], bass: [0.9, 0], drums: [1.4, 0.08], fx: [1.0, 0.4], ui: [0.62, 0.45] };
   Object.keys(LV).forEach(function (k) {
     var s = stem(k); if (!s) return;
     var g = gain(LV[k][0]), out = k === 'ui' ? sMute : music, last = s;
-    if (k === 'piano') last = chain(s, filt('lowshelf', 220, 0.7, -1.5), filt('highshelf', 5200, 0.7, -3.5));
-    if (k === 'strings') last = chain(s, filt('lowpass', 9000, 0.5));
-    if (k === 'perc') last = chain(s, filt('highshelf', 6000, 0.7, -4), filt('lowpass', 11000, 0.5));
+    if (k === 'piano') last = chain(s, filt('lowshelf', 200, 0.7, -2), filt('highshelf', 6000, 0.7, -1.5));
+    if (k === 'drums') last = chain(s, filt('highshelf', 7000, 0.7, -2));
+    if (k === 'bass') last = chain(s, filt('lowpass', 2500, 0.5));
     chain(last, g, out);
-    var send = gain(LV[k][1]); g.connect(send); send.connect(k === 'ui' ? small : hall);
+    if (LV[k][1]) { var send = gain(LV[k][1]); g.connect(send); send.connect(k === 'ui' ? small : hall); }
   });
 
   /* ---------------- voiceover ---------------- */

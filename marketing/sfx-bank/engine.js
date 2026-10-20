@@ -162,12 +162,25 @@ window.renderAudio = async function () {
   }
 
   /* ---------- arrangement ---------- */
-  if (MODE !== 'sfx') SEG.forEach(function (s, i) {
+  var STEMS = window.STEMS;
+  if (STEMS && MODE !== 'sfx') {                 /* the film's score on real instruments (music.mjs): it replaces the synthesised one */
+    var hallIn = ctx.createGain(); hallIn.gain.value = 0.3; hallIn.connect(revIn);
+    var LV = { piano: [0.6, 0.2], guitar: [1.6, 0.15], strings: [1.25, 0.3], mallets: [4.5, 0.3], bass: [0.9, 0], drums: [1.4, 0.08], fx: [1.0, 0.4] };
+    Object.keys(LV).forEach(function (k) {
+      var f = STEMS[k]; if (!f) return;
+      var n = f.length / 2, b = ctx.createBuffer(2, n, SR), L0 = b.getChannelData(0), R0 = b.getChannelData(1);
+      for (var i = 0; i < n; i++) { L0[i] = f[2 * i]; R0[i] = f[2 * i + 1]; }
+      var src = ctx.createBufferSource(); src.buffer = b; src.start(0);
+      var g = ctx.createGain(); g.gain.value = LV[k][0] * 0.55; src.connect(g); g.connect(master);
+      if (LV[k][1]) { var sd = ctx.createGain(); sd.gain.value = LV[k][1]; g.connect(sd); sd.connect(hallIn); }
+    });
+  }
+  if (MODE !== 'sfx' && !STEMS) SEG.forEach(function (s, i) {
     pad(s.t0, s.pad, (s.t1 - s.t0) + (i === SEG.length - 1 ? 0 : 0.1), i === 0 ? 0.1 : 0.125);
     s.mel.forEach(function (n) { bell(n[0], n[1], s.g * 1.25 * (Math.abs(n[0] - 12.0 * K) < 1e-6 ? 1.25 : 1), n[1] % 2 ? 0.25 : -0.25, n[0] >= 14.5 * K ? 2.2 : 1.0); });
   });
   var nBeats = Math.round(DUR / BEAT), ARP = [0, 1, 2, 1, 3, 2, 1, 2];
-  for (var bt = 0; bt < (MODE === 'sfx' ? 0 : nBeats); bt++) {
+  for (var bt = 0; bt < (MODE === 'sfx' || STEMS ? 0 : nBeats); bt++) {
     var t = bt * BEAT, sg = segAt(t), rootHz = mtof(sg.root);
     var big = BIG.some(function (x) { return Math.abs(x - t) < 1e-6; });
     kick(t, big ? 0.7 : 0.5, rootHz, big);
@@ -182,7 +195,7 @@ window.renderAudio = async function () {
     }
   }
   /* scene-change hits: tuned thump + chord stab, with an airy swell leading in */
-  if (MODE !== 'sfx') HITS.forEach(function (th) {
+  if (MODE !== 'sfx' && !STEMS) HITS.forEach(function (th) {
     var isBig = BIG.indexOf(th) >= 0, s = segAt(th);
     impact(th, isBig, s.root);
     stab(th, [s.arp[0], s.arp[1], s.arp[2]], isBig ? 0.095 : 0.055);

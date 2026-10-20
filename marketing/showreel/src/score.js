@@ -1,6 +1,6 @@
 /* Showreel mix, rendered offline (OfflineAudioContext, 48 kHz stereo).
-   music.mjs plays the score on sampled instruments and synthesises the keystrokes and mouse clicks; this file mixes those
-   stems in two rooms (a warm hall for the music, a small room for the interface sounds), lets the music step back while
+   music.mjs plays the upbeat Dreamscape theme on sampled instruments and synthesises the keystrokes and mouse clicks;
+   this file mixes those stems in two rooms (a small bright hall for the music, a small room for the interface sounds), lets the music step back while
    the visitor types, and adds soft air on the three real scene changes only (TL.air).
    Mutes sit before every send so the music / sfx stems come out clean for mix checks. */
 window.renderAudio = async function () {
@@ -27,7 +27,7 @@ window.renderAudio = async function () {
   var mMute = gain(MODE === 'sfx' ? 0 : 1), sMute = gain(MODE === 'music' ? 0 : 1);
   mMute.connect(master); sMute.connect(master);
   var duck = gain(1), music = gain(1); chain(music, duck, mMute);
-  var hall = verb(room(3.0, 0.42, [[0.019, 0.5], [0.031, 0.35], [0.047, 0.3], [0.063, 0.22]]), 0.022, 160, 7000, 0.34, music);
+  var hall = verb(room(2.0, 0.5, [[0.017, 0.5], [0.029, 0.35], [0.043, 0.3]]), 0.018, 200, 8000, 0.3, music);
   var small = verb(room(0.45, 0.55, [[0.006, 0.6], [0.011, 0.4], [0.018, 0.3]]), 0.003, 250, 10000, 1, master);
   var sSend = gain(0.16); sMute.connect(sSend); sSend.connect(small);
 
@@ -43,17 +43,17 @@ window.renderAudio = async function () {
     for (var i = 0; i < n; i++) { L[i] = f[2 * i]; R[i] = f[2 * i + 1]; }
     var s = ctx.createBufferSource(); s.buffer = b; s.start(0); return s;
   }
-  /* [level, send]; ui and keys go to the small room, outside the ducked music */
-  var LV = { piano: [0.6, 0.42], strings: [3.0, 0.6], harp: [0.75, 0.55], perc: [0.62, 0.18], fx: [1.0, 0.5], ui: [0.55, 0.5], keys: [2.1, 0.6] };
+  /* [level, hall send] per stem of the upbeat theme; ui and keys go to the small room, outside the ducked music */
+  var LV = { piano: [0.6, 0.2], guitar: [1.6, 0.15], strings: [1.25, 0.3], mallets: [4.5, 0.3], bass: [0.9, 0], drums: [1.4, 0.08], fx: [1.0, 0.4], ui: [0.55, 0.5], keys: [2.1, 0.6] };
   Object.keys(LV).forEach(function (k) {
     var s = stem(k); if (!s) return;
     var g = gain(LV[k][0]), dry = k === 'ui' || k === 'keys', last = s;
-    if (k === 'piano') last = chain(s, filt('lowshelf', 220, 0.7, -1.5), filt('highshelf', 5200, 0.7, -3.5));
-    if (k === 'strings') last = chain(s, filt('lowpass', 9000, 0.5));
-    if (k === 'perc') last = chain(s, filt('highshelf', 6000, 0.7, -4), filt('lowpass', 11000, 0.5));
+    if (k === 'piano') last = chain(s, filt('lowshelf', 200, 0.7, -2), filt('highshelf', 6000, 0.7, -1.5));
+    if (k === 'drums') last = chain(s, filt('highshelf', 7000, 0.7, -2));
+    if (k === 'bass') last = chain(s, filt('lowpass', 2500, 0.5));
     if (k === 'keys') last = chain(s, filt('highpass', 120, 0.6), filt('peaking', 3200, 1, 1.5));
     chain(last, g, dry ? sMute : music);
-    if (!dry) { var send = gain(LV[k][1]); g.connect(send); send.connect(hall); }
+    if (!dry && LV[k][1]) { var send = gain(LV[k][1]); g.connect(send); send.connect(hall); }
   });
 
   /* soft air on the real scene changes: a quick rise and a long tail, pink noise through a moving band */

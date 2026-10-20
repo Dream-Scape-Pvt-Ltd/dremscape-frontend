@@ -1,6 +1,7 @@
-// Renders the soundtrack (src/audio.js) to out/soundtrack.wav via an OfflineAudioContext inside headless Chromium.
+// Renders the soundtrack (../sfx-bank/engine.js: the cue sheet's sound design, and the score's stems from music.mjs when
+// present) to out/soundtrack.wav via an OfflineAudioContext inside headless Chromium.   node music.mjs && node audio.mjs
 import { chromium } from 'playwright';
-import { readFileSync, writeFileSync, mkdirSync, renameSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,9 +9,18 @@ import { loadBank } from '../sfx-bank/load.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 mkdirSync(join(here, 'out'), { recursive: true });
+// the score's stems from music.mjs (real instruments) are served to the page over a routed origin (too big for evaluate)
+const stemDir = join(here, 'out/stems'), FILES = {};
+const stems = existsSync(join(stemDir, 'stems.json')) ? JSON.parse(readFileSync(join(stemDir, 'stems.json'), 'utf8')).stems : [];
+for (const k of stems) FILES[k] = spawnSync('ffmpeg', ['-v', 'error', '-i', join(stemDir, k + '.wav'), '-f', 'f32le', '-ac', '2', '-ar', '48000', '-'], { maxBuffer: 1 << 28 }).stdout;
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] });
 const page = await browser.newPage();
-await page.goto('about:blank');
+await page.route('https://media.local/**', (route) => {
+  const name = decodeURIComponent(new URL(route.request().url()).pathname.slice(1));
+  route.fulfill(name ? { body: FILES[name], contentType: 'application/octet-stream' } : { body: '<!doctype html><title>mix</title>', contentType: 'text/html' });
+});
+await page.goto('https://media.local/');
+if (stems.length) await page.evaluate(async (names) => { window.STEMS = {}; for (const k of names) window.STEMS[k] = new Float32Array(await (await fetch('/' + k)).arrayBuffer()); }, stems);
 if (process.argv[2]) await page.evaluate(({ m, ref }) => { window.__AUDIO_MODE = m; window.__REF_PEAK = ref || undefined; }, { m: process.argv[2], ref: Number(process.argv[3] || 0) });
 await page.evaluate((b) => { window.SFX_BANK = b; }, loadBank());
 await page.addScriptTag({ content: readFileSync(join(here, 'src/timeline.js'), 'utf8') });

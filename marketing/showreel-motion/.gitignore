@@ -1,3 +1,4 @@
 dist/
 frames/
 out/*.wav
+out/stems/

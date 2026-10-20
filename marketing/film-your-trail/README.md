@@ -38,16 +38,19 @@ Kokoro-82M, offline. Two reads are kept: `assets/vo` (`am_michael`, the default)
 - Each paragraph is read in one take, so the intonation runs across sentences, then cut into lines at the pauses.
 - A recorded-VO finish: 48 kHz, low cut, split-band de-esser, a little high-frequency air above the model's 12 kHz limit, and a tone match to the long-term spectrum of natural speech.
 
-It is still a synthetic voice. A recorded read can replace the WAVs one line at a time.
+It is still a synthetic voice. For a more human read, `tools/voiceover-elevenlabs.mjs` regenerates every line with ElevenLabs into `assets/vo-eleven`. Then run `node audio.mjs --vo assets/vo-eleven --out soundtrack-eleven` and swap the audio track. It needs `api.elevenlabs.io` allowed in the environment's network settings and the key stored as the secret `ELEVENLABS_API_KEY`. A recorded read can also replace the WAVs one line at a time.
 
 ## Music
 
-The score is played on real instruments by `music.mjs` (`../music-kit`): the Salamander grand piano, plus GeneralUser GS strings, cello, double bass, harp, timpani and a light kit. It is in D major at 96 BPM, 13 bars of 2.5 s, with every scene change on a bar line:
-- Bars 1-2: the piano alone over a soft string chord.
-- Bars 3-5: broken chords join with cello and bass. The F#-A-E motif plays in full only over the photographs, between two voice lines.
-- Bars 6-10: a pulse (piano ostinato, kick, shaker, then harp). Each choice in the finder and each step is a note of the chord.
-- Bar 11: a timpani roll and a harp glissando resolve on D under the logo.
-- Bars 12-13: the motif rings out.
+The score is the upbeat Dreamscape theme (`../music-kit/upbeat.mjs`), played on real instruments by `music.mjs`. It is in D major at 96 BPM, 13 bars of 2.5 s, with every scene change on a bar line and major chords only:
+- Bars 1-2: bright piano and glockenspiel under the first two lines.
+- Bars 3-4: the groove arrives with strummed guitar, finger bass and shaker.
+- Bars 5-9: the full band (kick, claps, tambourine, pizzicato). The hook plays between the lines.
+- Bar 10: a build with strings an octave up and a tom fill into the logo.
+- Bar 11: a crash and a low D on the logo.
+- Bars 12-13: the groove stops and the last D rings out.
+
+Each choice, step and press is a note of the chord.
 
 `src/score.js` mixes the stems in a warm hall and ducks them 4-9 dB under every line. Measured voice-over-music in the speech band is 10-21 dB. There is one soft whoosh per scene change, shaped by the camera's actual speed. The mix is normalised to -14 LUFS.
 
