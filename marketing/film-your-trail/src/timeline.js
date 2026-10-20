@@ -12,9 +12,9 @@ window.TL = {
   /* on-screen actions (each one gets a sound, nothing else does) */
   ui: {
     pickRegion: 14.375, pickLevel: 15.625, merge: 16.25, press: 17.0, open: 17.1,
-    disc: [19.55, 20.35],                       /* the route's end pin floods the frame with paper: the steps page */
+    disc: [19.55, 20.35],                       /* the route's end pin blooms into a gold ring that opens the steps page */
     steps: [20.625, 21.875, 23.125],
     rise: [24.4, 25.3],                         /* the forest page rises for the logo */
-    cta: 29.375
+    cta: 28.4
   }
 };

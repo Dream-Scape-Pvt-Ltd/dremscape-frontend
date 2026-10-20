@@ -61,7 +61,8 @@ function wordTimes(id, ws) {
 function rise(ws, times, t, outT, dir) {
   ws.forEach(function (w, i) {
     var u = sp(t, times[i], 16, 0.9), o = outT ? expoIn(prog(t, outT + 0.025 * i, outT + 0.32 + 0.025 * i)) : 0;
-    w.style.transform = 'translateY(' + ((1 - u) * 112 - o * 112 * (dir || 1)).toFixed(1) + '%)';
+    w.style.transform = 'translateY(' + ((1 - u) * 112 - o * 150 * (dir || 1)).toFixed(1) + '%)';
+    w.style.visibility = o >= 0.999 ? 'hidden' : '';                       /* fully gone: no descender left in the mask */
   });
 }
 /* a framed photograph: rounded window, the image pushing in slowly inside it */
@@ -156,7 +157,8 @@ function build() {
 
   /* C — since 2005 */
   G.fC = frame(w, 'night', S.C - 140, 0, 2200, H, '50% 45%'); G.fC.style.borderRadius = '0';     /* full bleed: the city at night */
-  el('div', { style: 'position:absolute;left:' + S.C + 'px;top:0;width:1920px;height:1080px;background:linear-gradient(90deg,#0b2a1ff0,#0b2a1fb3 42%,#0b2a1f40 72%,transparent),linear-gradient(0deg,#0b2a1fd9,transparent 38%)' }, w);
+  G.fC.img.style.filter = 'brightness(1.45) contrast(1.08) saturate(1.1)';
+  el('div', { style: 'position:absolute;left:' + S.C + 'px;top:0;width:1920px;height:1080px;background:linear-gradient(90deg,#0b2a1fe6,#0b2a1f99 40%,#0b2a1f26 70%,transparent),linear-gradient(0deg,#0b2a1fb3,transparent 34%)' }, w);
   G.hC1 = words(w, 'Since', S.C + 146, 236, 124, WHITE);
   G.hC2 = words(w, '*2005', S.C + 132, 360, 340, GOLD);
   G.labC = label(w, '', 'Our team · Thamel, Kathmandu', S.C + 150, 800, MIST);
@@ -228,9 +230,9 @@ function build() {
   G.G = el('div', { class: 'l forest' }, ST);
   buildLockup(G.G);
   G.gtrail = el('svg', { class: 'l', width: W, height: H, viewBox: '0 0 ' + W + ' ' + H }, G.G, true);
-  G.gtrailP = el('path', { d: 'M-20 638H960', fill: 'none', stroke: GOLD, 'stroke-width': 5, 'stroke-linecap': 'round', 'stroke-dasharray': '0 1000' }, G.gtrail, true);
-  G.gHeadHalo = el('circle', { r: 26, fill: GOLD, opacity: 0.16, cy: 638 }, G.gtrail, true);
-  G.gHead = el('circle', { r: 12, fill: GOLD, stroke: WHITE, 'stroke-width': 4, cy: 638 }, G.gtrail, true);
+  G.gtrailP = el('path', { d: 'M1714 753Q1400 640 960 638', fill: 'none', stroke: GOLD, 'stroke-width': 5, 'stroke-linecap': 'round', 'stroke-dasharray': '0 2000' }, G.gtrail, true);
+  G.gHeadHalo = el('circle', { r: 26, fill: GOLD, opacity: 0.16 }, G.gtrail, true);
+  G.gHead = el('circle', { r: 12, fill: GOLD, stroke: WHITE, 'stroke-width': 4 }, G.gtrail, true);
   G.cta = el('div', { id: 'cta', html: '<span>Plan my journey</span><svg width="38" height="30" viewBox="0 0 38 30"><path d="M2 15h32M22 4l12 11-12 11"/></svg>' }, G.G);
   G.url = el('div', { id: 'url', html: '<span class="wm"><span class="w">dreamscapetreks.com</span></span>' }, G.G);
   G.endStrip = ['walkers', 'together', 'flags', 'lastlight', 'path', 'golden'].map(function (k, i) { return frame(G.G, k, 0, 0, 250, 170, '50% 50%'); });
@@ -244,6 +246,7 @@ function build() {
   [G.trailP, G.trailF].forEach(function (p) { p.setAttribute('stroke-dasharray', '0 ' + (TRAIL.len + 10)); });
   STATIONS = STATIONS.map(function (x) { var c = el('circle', { cx: x, cy: 1010, r: 9, fill: '#153d2f', stroke: GOLD, 'stroke-width': 3 }, G.trail, true); G.stations.push(c); return x; });
   G.trail.appendChild(G.headHalo); G.trail.appendChild(G.headDot);
+  G.world.appendChild(G.trail);                                             /* on top of the page: it never crosses type or photos */
   HEADK = [[0, 150], [0.55, 160], [1.95, 760], [2.5, 1300], [3.0, sx - 200], [3.3, sx], [3.95, ex], [4.5, ex + 300], [5.6, 4000], [9.4, 5560], [10.6, 5900],
            [10.9375, STATIONS[0]], [11.25, STATIONS[1]], [11.5625, STATIONS[2]], [11.875, STATIONS[3]], [12.6, 8240], [13.1, 8330], [16.2, 8900], [PRESS, CARD.x + CARD_SHIFT + CARD.w / 2]];
   FTRAIL = polyline(function (x) { return mono(x, [[-40, 900], [150, 900], [560, 910], [960, 896], [1360, 910], [1770, 900]]); }, -40, 1770);
@@ -299,7 +302,7 @@ function seekAt(t) {
   rise([G.labA], [-0.4], t); rise(G.hA1, [-0.42, -0.36], t); rise(G.hA2, wordTimes('walk', G.hA1.concat(G.hA2)).slice(2), t);   /* frame one is already set */
   showFrame(G.fA, t, -0.45, 0.0, 0.8); par(G.fA, S.A);                    /* frame one is already a composition */
   /* ---- B ---- */
-  rise([G.labB], [2.25], t); rise(G.hB, wordTimes('stay', G.hB), t);
+  rise([G.labB], [2.25], t); rise(G.hB.slice(0, 2), [2.3, 2.36], t); rise(G.hB.slice(2), wordTimes('stay', G.hB).slice(2), t);
   showFrame(G.fB, t, 2.05, 2.05, 0.9); par(G.fB, S.B);                    /* built while the camera is still on its way */
   /* ---- C ---- */
   rise(G.hC1, [4.85], t); rise(G.hC2, [5.05], t); rise([G.labC], [5.6], t);
@@ -343,8 +346,9 @@ function sceneChoose(t, cx) {
   rise(G.hD1, [12.4, 12.5], t, 14.62, 1); rise(G.hD2, [15.05, 15.15], t, MERGE - 0.3, 1);   /* the first title is gone before the second rises */
   var chipAnim = function (c, i, tIn, picked, tSel) {
     var u = sp(t, tIn + 0.07 * i, 14, 0.95), sel = expo(prog(t, tSel, tSel + 0.32));
-    var hover = picked ? smooth(prog(t, tSel - 0.35, tSel - 0.1)) : 0;
+    var hover = picked ? smooth(prog(t, tSel - 0.35, tSel - 0.1)) : (c.row === 0 && i === 0 ? smooth(prog(t, 13.3, 13.5)) * (1 - smooth(prog(t, 13.85, 14.05))) : 0);
     if (!picked) {                                                       /* the others step back once the choice is made */
+      c.style.borderColor = 'rgba(21,61,47,' + (0.22 + 0.6 * hover).toFixed(3) + ')';
       var away = smooth(prog(t, MERGE - 0.3 + 0.03 * i, MERGE + 0.12 + 0.03 * i));   /* gone before the chosen chips fly over them */
       var shove = i > c.pickIdx ? 48 * expo(prog(t, tSel, tSel + 0.32)) : 0;   /* the chosen chip grows a tick; its neighbours make room */
       c.style.transform = 'translate(' + shove.toFixed(1) + 'px,' + ((1 - u) * 60 + away * 50).toFixed(1) + 'px) scale(' + (lerp(0.7, 1, clamp(u)) * (1 - 0.4 * away)).toFixed(4) + ')';
@@ -355,10 +359,10 @@ function sceneChoose(t, cx) {
     c.ok.style.width = (34 * sel).toFixed(1) + 'px'; c.ok.style.marginLeft = (14 * sel).toFixed(1) + 'px';
     c.style.borderColor = 'rgba(21,61,47,' + (0.22 + 0.6 * hover).toFixed(3) + ')';
     /* the chosen chips fly into the trip card */
-    var m = expoIO(prog(t, MERGE + (c.row ? 0.08 : 0), MERGE + 0.62 + (c.row ? 0.08 : 0)));
+    var m = expoIO(prog(t, MERGE + (c.row ? 0.18 : 0), MERGE + 0.62 + (c.row ? 0.18 : 0)));
     var tx = CARD.x + cardShift(t) + 44 + (c.row ? G.rc[PICK.r].w0 * 0.82 + 52 : 0) - c.x0 - c.w0 * 0.09, ty = CARD.y + 600 - c.y0;
     var tap = expo(prog(t, tSel, tSel + 0.06)) * (1 - expo(prog(t, tSel + 0.08, tSel + 0.3)));
-    c.style.transform = 'translate(' + (tx * m).toFixed(1) + 'px,' + ((1 - u) * 60 + ty * m + 36 * Math.sin(Math.PI * m)).toFixed(1) + 'px) scale(' + (lerp(0.7, 1, clamp(u)) * (1 - 0.06 * tap) * (1 - 0.18 * m)).toFixed(4) + ')';
+    c.style.transform = 'translate(' + (tx * m).toFixed(1) + 'px,' + ((1 - u) * 60 + ty * m + (c.row ? 56 : -28) * Math.sin(Math.PI * m)).toFixed(1) + 'px) scale(' + (lerp(0.7, 1, clamp(u)) * (1 - 0.06 * tap) * (1 - 0.18 * m)).toFixed(4) + ')';
     c.style.opacity = 1;
   };
   G.rc.forEach(function (c, i) { c.row = 0; c.pickIdx = PICK.r; c.style.zIndex = i === PICK.r ? 3 : 1; chipAnim(c, i, 12.6, i === PICK.r, SEL.r); });
@@ -372,8 +376,9 @@ function sceneChoose(t, cx) {
   [G.cardEb, G.cardTt].forEach(function (e) { e.style.opacity = tIn.toFixed(3); e.style.transform = 'translateY(' + (14 * (1 - tIn)).toFixed(1) + 'px)'; });
   G.card.style.clipPath = 'inset(' + ((1 - expo(prog(t, MERGE - 0.1, MERGE + 0.5))) * 100).toFixed(2) + '% 0 0 0 round 30px)';
   var glow = prog(t, PRESS, PRESS + 0.55);
-  G.btn.style.transform = 'scale(' + (1 - 0.06 * press).toFixed(4) + ')';
-  G.btn.style.boxShadow = glow > 0 && glow < 1 ? '0 0 0 ' + (4 + 18 * expo(glow)).toFixed(1) + 'px rgba(228,201,138,' + (0.6 * (1 - glow)).toFixed(3) + ')' : 'none';
+  G.btn.style.transform = 'scale(' + (1 - 0.09 * press).toFixed(4) + ')';
+  G.btn.style.background = press > 0.05 ? '#0f2f23' : '';
+  G.btn.style.boxShadow = glow > 0 && glow < 1 ? '0 0 0 ' + (6 + 26 * expo(glow)).toFixed(1) + 'px rgba(228,201,138,' + (0.85 * (1 - glow)).toFixed(3) + ')' : 'none';
   G.cardPh.firstChild.style.transform = 'scale(' + (1.12 - 0.08 * expo(prog(t, MERGE, MERGE + 0.8))).toFixed(4) + ')';
 }
 
@@ -392,7 +397,7 @@ function sceneRoute(t) {
   G.head.setAttribute('cx', hp.x.toFixed(1)); G.head.setAttribute('cy', hp.y.toFixed(1)); vis(G.head, t < UI.disc[0] + 0.05);
   var pr = expo(prog(t, 19.2, 19.85)), end = ROUTE[ROUTE.length - 1];
   G.pin.setAttribute('cx', end[0]); G.pin.setAttribute('cy', end[1]); G.pin.setAttribute('r', (15 + 40 * pr).toFixed(1)); G.pin.setAttribute('stroke-opacity', (1 - pr).toFixed(3)); vis(G.pin, t >= 19.2);
-  rise([G.labE], [17.7], t, UI.disc[0] - 0.2, 1); rise(G.hE, wordTimes('shape', G.hE), t, UI.disc[0] - 0.15, 1);   /* out before the ring reaches it */
+  rise([G.labE], [17.7], t, UI.disc[0] - 0.32, 1); rise(G.hE, wordTimes('shape', G.hE), t, UI.disc[0] - 0.3, 1);   /* out before the ring reaches it */
 }
 
 function sceneSteps(t) {
@@ -405,7 +410,7 @@ function sceneSteps(t) {
   var push = 1 + 0.035 * smooth(prog(t, UI.disc[0], UI.rise[1]));          /* and a slow push-in all the way, so the page never sits still */
   G.F.style.transformOrigin = '960px 560px';
   G.F.style.transform = 'translateY(' + (-140 * up - 18 * smooth(prog(t, UI.disc[0], UI.rise[0]))).toFixed(1) + 'px) scale(' + push.toFixed(4) + ')';
-  rise([G.labF], [UI.disc[0] + 0.3], t); rise(G.hF, G.hF.map(function (x, i) { return UI.disc[0] + 0.38 + 0.06 * i; }), t);
+  rise([G.labF], [UI.disc[0] + 0.3], t, UI.rise[0] + 0.05, 1); rise(G.hF, G.hF.map(function (x, i) { return UI.disc[0] + 0.38 + 0.06 * i; }), t, UI.rise[0] + 0.08, 1);
   var T = UI.steps;
   var fx = mono(t, [[UI.disc[1] - 0.1, -40], [T[0], 400], [T[1], 960], [T[2], 1520], [UI.rise[0], 1690]]), fa = FTRAIL.at(fx);
   G.ftrailP.setAttribute('stroke-dasharray', fa.l.toFixed(1) + ' ' + (FTRAIL.len + 10).toFixed(0));
@@ -431,19 +436,22 @@ function sceneEnd(t) {
   G.letters.forEach(function (p, i) { var u = sp(t, b + 0.1 + 0.035 * i, 15, 0.9); p.setAttribute('transform', 'translate(0,' + ((1 - u) * 300).toFixed(1) + ')'); });
   var u1 = sp(t, b + 0.55, 14, 0.9), u2 = sp(t, VOT.beyond - 0.02, 14, 0.9);
   G.tb1.setAttribute('transform', 'translate(0,' + ((1 - u1) * 170).toFixed(1) + ')'); G.tb2.setAttribute('transform', 'translate(0,' + ((1 - u2) * 170).toFixed(1) + ')');
-  var gx = lerp(-20, 960, smooth(prog(t, UI.rise[1] - 0.2, UI.cta))), gu = sp(t, UI.rise[1] - 0.3, 10, 0.95);
-  G.gtrailP.setAttribute('stroke-dasharray', (gx + 20).toFixed(1) + ' 1000');
-  G.gHead.setAttribute('cx', gx.toFixed(1)); G.gHead.setAttribute('r', (t < UI.cta ? 12 * gu : 0).toFixed(2));
-  G.gHeadHalo.setAttribute('cx', gx.toFixed(1)); G.gHeadHalo.setAttribute('r', (t < UI.cta ? (22 + 5 * Math.sin(t * Math.PI * 2 / 1.6)) * gu : 0).toFixed(2));
+  /* the head keeps the screen position the steps' head had, so it appears on the page's top edge as the page passes it */
+  var gl = G.gtrailP.getTotalLength(), gk = smooth(prog(t, UI.rise[1], UI.cta)), gp, gy0 = (1 - up) * H;
+  if (t < UI.rise[1]) gp = { x: 1714, y: 893 - 140 * up - gy0 }; else gp = G.gtrailP.getPointAtLength(gl * gk);
+  G.gtrailP.setAttribute('stroke-dasharray', (gl * gk).toFixed(1) + ' 2000'); vis(G.gtrailP, gl * gk > 1);   /* a zero-length dash would leave a round-cap dot */
+  var gon = t < UI.cta && gp.y >= -2, halo = (22 + 5 * Math.sin(t * Math.PI * 2 / 1.6));
+  G.gHead.setAttribute('cx', gp.x.toFixed(1)); G.gHead.setAttribute('cy', gp.y.toFixed(1)); G.gHead.setAttribute('r', gon ? 12 : 0);
+  G.gHeadHalo.setAttribute('cx', gp.x.toFixed(1)); G.gHeadHalo.setAttribute('cy', gp.y.toFixed(1)); G.gHeadHalo.setAttribute('r', gon ? halo.toFixed(2) : 0);
   var dot = 1, c = glide(prog(t, UI.cta, UI.cta + 0.7)), cw = lerp(96, 520, c); vis(G.cta, t >= UI.cta); vis(G.url, t >= UI.cta + 0.25);   /* the head becomes the button */
   G.cta.style.left = px(960 - cw / 2); G.cta.style.top = '590px'; G.cta.style.width = px(cw);
   G.cta.style.transform = 'scale(' + lerp(0.24 * dot, 1, glide(prog(t, UI.cta, UI.cta + 0.35))).toFixed(4) + ')';
   G.cta.firstChild.style.opacity = G.cta.lastChild.style.opacity = clamp((c - 0.55) / 0.35).toFixed(3);
   G.url.style.top = '722px'; rise([G.url.querySelector('.w')], [UI.cta + 0.3], t);
   /* a slow strip of the photographs along the bottom edge */
-  var s0 = 25.3, sx = -80 * (t - s0);
+  var sx = 240 * (1 - glide(prog(t, 25.3, 31.2)));                         /* drifts in and settles, centred */
   G.endStrip.forEach(function (f, i) {
-    f.style.left = px(60 + i * 280 + sx); f.style.top = '830px';
+    f.style.left = px(135 + i * 280 + sx); f.style.top = '830px';
     showFrame(f, t, 25.6 + 0.08 * i, 25.6, 0.7);
   });
   G.lk.style.transformOrigin = '960px 400px'; G.lk.style.transform = 'scale(' + (1 + 0.008 * Math.max(0, t - 25.3)).toFixed(4) + ')';
