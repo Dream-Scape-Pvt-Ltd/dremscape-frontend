@@ -55,6 +55,12 @@ const nextConfig: NextConfig = {
         hostname: "*.onrender.com",
         pathname: "/media/**",
       },
+      // The API's own origin (self-hosted deployments), where stored image URLs point.
+      {
+        protocol: backendOrigin.startsWith("https") ? "https" : "http",
+        hostname: new URL(backendOrigin).hostname,
+        pathname: "/media/**",
+      },
       {
         protocol: "https",
         hostname: "s3.eu-central-003.backblazeb2.com",
