@@ -42,6 +42,8 @@ JOBS = {  # name: source, focus x, focus y (crop centre for the 16:9 frame), asp
     'amphi':     ('mountain-amphitheatre', 0.5, 0.5, 16 / 9),
     'pause':     ('a-pause-on-the-ridge', 0.5, 0.55, 16 / 9),
     'flags':     ('prayer-flags-and-friends', 0.5, 0.5, 3 / 4),
+    'walkers':   ('ridge-walkers', 0.5, 0.5, 3 / 4),
+    'path':      ('mountain-path', 0.5, 0.5, 3 / 4),
 }
 if __name__ == '__main__':
     out = sys.argv[1] if len(sys.argv) > 1 else 'assets/'
@@ -51,3 +53,7 @@ if __name__ == '__main__':
             w, h = (W, round(W / ar)) if ar >= 1 else (round(W * 0.6), round(W * 0.6 / ar))
             im = cover(src, w, h, fx, fy); im.save(f'{out}{k}-{tag}.jpg', quality=90, optimize=True, subsampling=0)
         print(k, im.size)
+    # paper grain: a small tile of soft noise, laid over the whole film at low opacity
+    rng = np.random.default_rng(7); g = rng.normal(0, 1, (512, 512)).astype(np.float32)
+    g = (g - g.min()) / (g.max() - g.min()); a = (np.clip((g - 0.5) * 2.2, -1, 1) * 0.5 + 0.5) * 255
+    Image.fromarray(a.astype(np.uint8), 'L').save(out + 'grain.png', optimize=True); print('grain', (512, 512))

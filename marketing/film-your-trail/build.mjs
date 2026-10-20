@@ -6,8 +6,9 @@ const here = dirname(fileURLToPath(import.meta.url));
 const HI = process.argv.includes('--4k');
 const read = (p) => readFileSync(join(here, p));
 const img = (k) => 'data:image/jpeg;base64,' + read(`assets/${k}-${HI ? '4k' : '2k'}.jpg`).toString('base64');
-const IMG = Object.fromEntries(['lastlight', 'together', 'night', 'golden', 'pause', 'flags'].map((k) => [k, img(k)]));
+const IMG = Object.fromEntries(['lastlight', 'together', 'night', 'golden', 'flags', 'walkers', 'path'].map((k) => [k, img(k)]));
 const repl = {
+  GRAIN: 'data:image/png;base64,' + read('assets/grain.png').toString('base64'),
   FONT: read('assets/plus-jakarta-sans-latin-wght-normal.woff2').toString('base64'),
   IMG: JSON.stringify(IMG),
   LOGO: read('assets/logo.json').toString('utf8'),

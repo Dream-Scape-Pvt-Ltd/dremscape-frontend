@@ -2,21 +2,26 @@
 
 A calm, voice-led brand film built from the site's own trek photographs, its real journey finder, and its own words. Every frame is drawn by `window.seek(t)` (no CSS animation, no timers); the soundtrack is written in code to the same timeline.
 
-## Script (voice: Kokoro-82M `am_michael`, generated offline)
+## Script and picture
 
-| Time | Picture | Voice |
+An editorial page the camera travels along: paper and forest spreads, framed trek photographs with the site's own captions, the finder's options redrawn as chips, a trip card, a route and three steps. Built from the site's assets, not a copy of its screens.
+
+| Time | Picture | Voice (Kokoro-82M `am_michael`, offline) |
 |---|---|---|
-| 0.0 | Last light on the peaks, slow push | *Some trails you walk.* |
-| 2.5 | Whip pan to three trekkers, arms up | *Some trails stay with you.* |
-| 5.0 | Tilt up into Kathmandu at night, **Since 2005**, *Our team · Thamel, Kathmandu* | *Since 2005, our team in Kathmandu has planned journeys through the Himalaya.* |
-| 10.0 | Whip pan to sunrise on the range | |
-| 12.5 | The photo racks out of focus; the site's finder rises. Camera leans in: Destination → **Nepal**, Difficulty → **Normal**, **Find my trek** | *Tell us where you want to go, and how hard you want to climb.* |
-| 17.5 | The button becomes a gold dot; an iris opens on walkers resting on a ridge; the dot draws a route toward the range. **Shaped around you.** | *We'll shape the route around you.* |
-| 20.0 | Whip pan to *Make the trail your own*: 01 Share your idea · 02 Talk through the route · 03 Review a personal proposal, beside a summit photo | *Share your idea. Talk it through. Get a plan that's yours.* |
-| 25.0 | The photo opens to full frame; the lockup assembles | *Dreamscape Treks. Himalaya, and beyond.* |
+| 0.0 | Paper spread: *01 — A little longer in the light*, a framed alpenglow photo; the headline rises word by word | *Some trails you walk.* |
+| 2.5 | The camera glides on: a wide frame of three trekkers, *02 — The people beside you*; a gold rule draws under "stay with you." | *Some trails stay with you.* |
+| 5.0 | Onto forest: **Since 2005**, *Our team · Thamel, Kathmandu*, Kathmandu at night in a portrait frame | *Since 2005, our team in Kathmandu has planned journeys through the Himalaya.* |
+| 10.0 | *Journeys through the Himalaya.* Four real moments glide past, each with its site caption | |
+| 12.5 | Back on paper: **Where to?** Five region chips; **Langtang** is picked on the beat. **How hard?** **Normal** | *Tell us where you want to go, and how hard you want to climb.* |
+| 16.25 | The two choices fly into a trip card (Langtang Region · Valley walks & mountain villages); *Find my trek* is pressed | |
+| 17.1 | The card's photo opens to full frame under the site's hero shade; a gold route draws up the hillside. **Shaped around you.** | *We'll shape the route around you.* |
+| 20.0 | Whip pan to *Make the trail your own*: three cards, each icon drawing itself as the line is spoken | *Share your idea. Talk it through. Get a plan that's yours.* |
+| 25.0 | A forest page rises; the lockup assembles; a strip of the film's photographs drifts along the bottom | *Dreamscape Treks. Himalaya, and beyond.* |
 | 29.4 | **Plan my journey →** · dreamscapetreks.com | |
 
-All copy is the site's own (hero, finder options, tailor-made steps, photo captions, address). Photos: `public/images/trek-memories/` (together-in-the-mountains, last-light, nightfall-over-valley, home-slide-2, a-pause-on-the-ridge, prayer-flags-and-friends), graded by `tools/prep-photos.py`.
+All words on screen are the site's own: hero copy, region names, finder options, Treks menu text, tailor-made steps, photo captions (`src/lib/trek-memories.ts`), address. Photos: `public/images/trek-memories/`, graded by `tools/prep-photos.py`; a fine paper grain sits over the whole film.
+
+The voice uses Kokoro's own pronunciation dictionary (`tools/g2p.py`, misaki US lexicon with hand-checked part-of-speech tags) and slower pacing on the emotional lines. It is still a synthetic voice; a recorded read can replace `assets/vo/*.wav` one line at a time.
 
 ## Music
 

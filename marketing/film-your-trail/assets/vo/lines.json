@@ -2,56 +2,56 @@
  {
   "id": "walk",
   "text": "Some trails you walk.",
-  "duration": 1.528
+  "duration": 1.47
  },
  {
   "id": "stay",
   "text": "Some trails stay with you.",
-  "duration": 1.589
+  "duration": 1.495
  },
  {
   "id": "since",
-  "text": "Since two thousand and five, our team in Kathmandu has planned journeys through the Himalaya.",
-  "duration": 5.948
+  "text": "Since 2005, our team in Kathmandu has planned journeys through the Himalaya.",
+  "duration": 5.42
  },
  {
   "id": "tell",
   "text": "Tell us where you want to go,",
-  "duration": 1.607
+  "duration": 1.507
  },
  {
   "id": "climb",
   "text": "and how hard you want to climb.",
-  "duration": 1.766
+  "duration": 1.662
  },
  {
   "id": "shape",
   "text": "We'll shape the route around you.",
-  "duration": 1.69
+  "duration": 1.613
  },
  {
   "id": "idea",
   "text": "Share your idea.",
-  "duration": 1.196
+  "duration": 1.113
  },
  {
   "id": "talk",
   "text": "Talk it through.",
-  "duration": 0.984
+  "duration": 0.953
  },
  {
   "id": "plan",
   "text": "Get a plan that's yours.",
-  "duration": 1.576
+  "duration": 1.588
  },
  {
   "id": "brand",
   "text": "Dreamscape Treks.",
-  "duration": 1.377
+  "duration": 1.283
  },
  {
   "id": "beyond",
   "text": "Himalaya, and beyond.",
-  "duration": 1.612
+  "duration": 1.581
  }
 ]
