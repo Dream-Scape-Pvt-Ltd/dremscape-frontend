@@ -8,7 +8,7 @@
 //   node make.mjs --in <film-1080p.mp4> --out <vertical.mp4> [--captions captions.json] [--eyebrow "Local journeys · Since 2005"]
 // captions.json: [[start, end, "text"], ...] in seconds.
 import { chromium } from 'playwright';
-import { readFileSync, mkdirSync, mkdtempSync, existsSync, rmSync } from 'node:fs';
+import { readFileSync, mkdirSync, mkdtempSync, rmSync, renameSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -74,7 +74,8 @@ f += `;[${last}]format=yuv420p[out]`;
 mkdirSync(dirname(OUT), { recursive: true });
 const r = spawnSync('ffmpeg', ['-y', '-hide_banner', '-loglevel', 'error', ...inputs, '-filter_complex', f, '-map', '[out]', '-map', '0:a', '-t', String(dur),
   '-r', '60', '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-profile:v', 'high', '-level', '4.2', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709',
-  '-c:a', 'copy', '-movflags', '+faststart', OUT], { stdio: 'inherit' });
+  '-c:a', 'copy', '-movflags', '+faststart', OUT + '.part.mp4'], { stdio: 'inherit' });
 rmSync(work, { recursive: true, force: true });
 if (r.status !== 0) process.exit(r.status);
+renameSync(OUT + '.part.mp4', OUT);                                      // only a finished file ever carries the real name
 console.log('wrote', OUT, `${W}x${H}`);
