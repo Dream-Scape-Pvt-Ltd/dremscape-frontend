@@ -21,7 +21,7 @@ var expoIn = function (u) { u = clamp(u); return (Math.pow(2, 10 * u) - 1) / (Ma
 /* damped spring step response 0 -> 1 (zeta < 1 => small overshoot) */
 function spring(t, w, z) {
   if (t <= 0) return 0;
-  w = w || 24; z = z === undefined ? 0.78 : z;
+  w = w || 24; z = z === undefined ? 0.92 : Math.max(0.92, z);      /* no visible bounce anywhere: everything lands, nothing wobbles */
   if (z >= 1) return 1 - Math.exp(-w * t) * (1 + w * t);
   var a = z * w, wd = w * Math.sqrt(1 - z * z);
   return 1 - Math.exp(-a * t) * (Math.cos(wd * t) + (a / wd) * Math.sin(wd * t));
@@ -131,7 +131,7 @@ function buildShots() {
     { t: 14.0, x: 955, y: 604, keep: true, w: 12, z: 0.9 },
     { t: 14.5, x: 962, y: 598, keep: true, w: 12, z: 0.9 }
   ];
-  SHOTS.forEach(function (s) { s.push = s.t >= 12.5 ? 0.0067 : 0.04; });
+  SHOTS.forEach(function (s) { s.push = s.t >= 12.5 ? 0.0067 : 0.04; s.w *= 0.72; });   /* softer, longer camera glides */
 }
 function camAt(t) {
   var st = { x: SHOTS[0].x, y: SHOTS[0].y, z: Math.log(SHOTS[0].zoom) };
@@ -277,7 +277,7 @@ function buildCursorKeys() {
     { t: 6.64, p: [2050, 1130], d: 0.55 },
     { t: 9.08, p: [2420, 640], d: 0.02 },
     { t: 9.50, p: [A.txt.x + 330, A.txt.y + 58], d: 0.40 },
-    { t: 10.95, p: [A.send.cx + 40, A.send.cy + 4], d: 0.40 },
+    { t: 10.95, p: [A.send.cx + 40, A.send.cy + 4], d: 0.30 },
     { t: 11.50, p: [A.send.cx + 520, A.send.cy - 520], d: 0.40 }
   ];
 }
@@ -360,7 +360,7 @@ function seekAt(t) {
   vis(E.hook, hookOn);
   if (hookOn) {
     revealLR(E.ebMask, expo((t - 0.12) / 0.36) * (1 - expoIn(prog(t, 1.0, 1.3))));
-    [0.04, 0.10, 0.16].forEach(function (t0, i) { riseF(W1[i], function (tt) { return sp(tt, t0, 26, 0.8); }, t); });
+    [-0.34, -0.3, -0.26].forEach(function (t0, i) { riseF(W1[i], function (tt) { return sp(tt, t0, 26, 0.8); }, t); });   /* frame one is already set */
     [0.52, 0.58].forEach(function (t0, i) { riseF(W2[i], function (tt) { return sp(tt, t0, 26, 0.8); }, t); });
     var pushOut = function (tt) { return expoIn(prog(tt, 1.56, 1.98)) * 640 + sp(tt, 1.0, 20, 0.8) * 38; };
     tx(E.l1, 0, -pushOut(t)); tx(E.l2, 0, pushOut(t));
@@ -478,8 +478,8 @@ function seekAt(t) {
     var shrink = expo((t - 11.1) / 0.32), fh = lerp(760, 334, shrink);
     E.form.style.top = (A.form.y + (760 - fh) / 2).toFixed(1) + 'px'; E.form.style.height = fh.toFixed(1) + 'px';
     setClip(E.form, 0, 0, (1 - cardP(t)) * 100, 0, 32);
-    var phrase = 'Langtang Valley', nch = Math.floor(clamp((t - 9.84) * 30, 0, phrase.length));
-    E.txtTyped.textContent = phrase.slice(0, nch);
+    var nch = TL.typed.filter(function (k) { return t >= k[0]; }).length;      /* typed at a person's pace (timeline.js) */
+    E.txtTyped.textContent = TL.typed.slice(0, nch).map(function (k) { return k[1]; }).join('');
     var focus = t >= 9.5;
     E.txt.style.borderColor = focus ? '#153d2f' : '#cfd9d3';
     E.caret.style.visibility = (focus && t < 11.0 && (nch > 0 || Math.floor((t - 9.5) / 0.25) % 2 === 0)) ? 'inherit' : 'hidden';

@@ -88,20 +88,61 @@ function setBlur(e, sigma) {
 
 /* ------------------------------------------------------------------ the page the camera travels along */
 var S = { A: 0, B: 1920, C: 3840, R: 5760, D: 8160 };                    /* spread origins: walk, stay, since, range of photos, choose */
-/* camera x over time: holds drift slowly, moves between spreads land on the bar lines */
-var CAM = [[0, 0], [2.12, 64], [2.5, 990], [2.88, 1920], [4.62, 1972], [5.0, 2906], [5.38, 3840], [9.62, 3930], [10.0, 4840], [10.38, 5760],
-           [12.12, 6420], [12.5, 7290], [12.88, 8160], [17.5, 8250]];
-var camX = function (t) { return mono(t, CAM); };
+/* camera x over time: a slow drift that never stops, and four glides that leave a spread quickly and settle slowly.
+   Cubic Hermite through [t, x, velocity] keys, so speed is continuous everywhere */
+var CAMK = (function () {
+  var k = [[0, 0, TL.drift]], lt = 0, lx = 0;
+  TL.glides.forEach(function (g) {
+    var t0 = g[0] - TL.glideIn, t1 = g[0] + TL.glideOut, D = t1 - t0, x0 = lx + TL.drift * (t0 - lt), dx = g[1] - x0;
+    k.push([t0, x0, TL.drift], [t0 + 0.45 * D, x0 + 0.55 * dx, 1.55 * dx / D], [t1, g[1], TL.drift]);
+    lt = t1; lx = g[1];
+  });
+  k.push([TL.dur + 1, lx + TL.drift * (TL.dur + 1 - lt), TL.drift]);
+  return k;
+})();
+function herm(t, K) {
+  if (t <= K[0][0]) return K[0][1] + K[0][2] * (t - K[0][0]);
+  var i = 0; while (i < K.length - 2 && t > K[i + 1][0]) i++;
+  var a = K[i], b = K[i + 1], h = b[0] - a[0], u = clamp((t - a[0]) / h), u2 = u * u, u3 = u2 * u;
+  return (2 * u3 - 3 * u2 + 1) * a[1] + (u3 - 2 * u2 + u) * h * a[2] + (-2 * u3 + 3 * u2) * b[1] + (u3 - u2) * h * b[2];
+}
+var camX = function (t) { return herm(t, CAMK); };
+/* ease for one-off moves: cubic-bezier(.45,0,.15,1), out of the start briskly, long soft landing */
+function bez(x1, y1, x2, y2) {
+  return function (x) {
+    x = clamp(x); var t = x;
+    for (var i = 0; i < 8; i++) { var cx = 3 * x1 * t * (1 - t) * (1 - t) + 3 * x2 * t * t * (1 - t) + t * t * t - x, d = 3 * x1 * (1 - t) * (1 - 3 * t) + 3 * x2 * t * (2 - 3 * t) + 3 * t * t; if (Math.abs(d) < 1e-6) break; t = clamp(t - cx / d); }
+    return 3 * y1 * t * (1 - t) * (1 - t) + 3 * y2 * t * t * (1 - t) + t * t * t;
+  };
+}
+var glide = bez(0.45, 0, 0.15, 1);
+var UI = TL.ui;
 var REGIONS = ['Everest', 'Langtang', 'Annapurna', 'Manaslu', 'Mustang'], LEVELS = ['Easy', 'Normal', 'Difficult', 'Extreme'];
-var PICK = { r: 1, l: 1 }, SEL = { r: 14.375, l: 15.625 }, MERGE = 16.25, PRESS = 17.0, OPEN = 17.1;
-var CARD = { x: S.D + 1090, y: 120, w: 680, h: 840 };
+var PICK = { r: 1, l: 1 }, SEL = { r: UI.pickRegion, l: UI.pickLevel }, MERGE = UI.merge, PRESS = UI.press, OPEN = UI.open;
+var CARD = { x: S.D + 1090, y: 120, w: 680, h: 840 }, CARD_SHIFT = -470;     /* the card glides to the centre as the choices land */
+var cardShift = function (t) { return CARD_SHIFT * glide(prog(t, MERGE - 0.15, MERGE + 0.75)); };
 var ROUTE = [[610, 905], [760, 880], [905, 838], [1040, 790], [1160, 728], [1278, 662], [1384, 590], [1488, 512], [1590, 432], [1676, 360]];
+var GOLD_D = '#c4a35a';                                                     /* the gold, darkened for paper */
+/* the trail: one gold line that runs along the whole page under everything, drawn as the film walks it.
+   y as a monotone curve of x (never overshoots into the type); B's keys are added once the words are laid out */
+var TRAILY = [[150, 690], [700, 690], [905, 860], [1030, 1010]], TRAIL = null;
+var HEADK = null;                                                           /* where the trail's head is, in page x, over time */
+var STATIONS = [];                                                          /* one marker under each photo of the range */
 
 function build() {
   blurFilter();
   G.world = el('div', { class: 'l', style: 'width:10000px' }, ST);
   [['paper', S.A, 3840], ['forest', S.C, S.D - S.C], ['paper', S.D, 2400]].forEach(function (b) { el('div', { class: b[0], style: 'position:absolute;left:' + b[1] + 'px;top:0;width:' + b[2] + 'px;height:1080px' }, G.world); });
   var w = G.world;
+  G.trail = el('svg', { style: 'position:absolute;left:0;top:0', width: 10600, height: H, viewBox: '0 0 10600 ' + H }, w, true);
+  var td = el('defs', {}, G.trail, true);
+  var cpP = el('clipPath', { id: 'cpPaper' }, td, true); el('rect', { x: 0, y: 0, width: S.C, height: H }, cpP, true); el('rect', { x: S.D, y: 0, width: 3000, height: H }, cpP, true);
+  var cpF = el('clipPath', { id: 'cpForest' }, td, true); el('rect', { x: S.C, y: 0, width: S.D - S.C, height: H }, cpF, true);
+  G.trailP = el('path', { fill: 'none', stroke: GOLD_D, 'stroke-width': 5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'clip-path': 'url(#cpPaper)' }, G.trail, true);
+  G.trailF = el('path', { fill: 'none', stroke: GOLD, 'stroke-width': 5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'clip-path': 'url(#cpForest)' }, G.trail, true);
+  G.stations = [];
+  G.headHalo = el('circle', { r: 26, fill: GOLD, opacity: 0.18 }, G.trail, true);
+  G.headDot = el('circle', { r: 12, fill: GOLD_D, stroke: WHITE, 'stroke-width': 4 }, G.trail, true);
 
   /* A — "Some trails you walk." */
   G.labA = label(w, '01', 'A little longer in the light', S.A + 150, 196, 'rgba(21,61,47,.7)');
@@ -112,19 +153,20 @@ function build() {
   G.labB = label(w, '02', 'The people beside you', S.B + 150, 112, 'rgba(21,61,47,.7)');
   G.fB = frame(w, 'together', S.B + 150, 166, 1620, 580, '50% 58%');
   G.hB = words(w, 'Some trails stay with you.', S.B + 146, 792, 112, FOREST);
-  G.ulB = el('div', { style: 'position:absolute;height:10px;border-radius:5px;background:' + GOLD + ';transform-origin:0 50%' }, w);
 
   /* C — since 2005 */
+  G.fC = frame(w, 'night', S.C - 140, 0, 2200, H, '50% 45%'); G.fC.style.borderRadius = '0';     /* full bleed: the city at night */
+  el('div', { style: 'position:absolute;left:' + S.C + 'px;top:0;width:1920px;height:1080px;background:linear-gradient(90deg,#0b2a1ff0,#0b2a1fb3 42%,#0b2a1f40 72%,transparent),linear-gradient(0deg,#0b2a1fd9,transparent 38%)' }, w);
   G.hC1 = words(w, 'Since', S.C + 146, 236, 124, WHITE);
   G.hC2 = words(w, '*2005', S.C + 132, 360, 340, GOLD);
   G.labC = label(w, '', 'Our team · Thamel, Kathmandu', S.C + 150, 800, MIST);
-  G.fC = frame(w, 'night', S.C + 1080, 120, 690, 840, '50% 42%');
 
   /* R — a range of real moments */
   G.hR = words(w, 'Journeys through the Himalaya.', S.R + 146, 110, 78, WHITE);
-  G.fR = [['walkers', 'A path through the sky', 300], ['golden', 'A world above the ordinary', 360], ['flags', 'A moment at the top', 300], ['path', 'The next bend', 360]].map(function (r, i) {
-    var f = frame(w, r[0], S.R + 150 + i * 480, r[2], 430, 570, r[0] === 'golden' ? '62% 50%' : '50% 50%');
-    f.cap = label(w, '0' + (i + 1), r[1], S.R + 150 + i * 480, r[2] + 598, MIST); return f;
+  G.fR = [['walkers', 'A path through the sky'], ['golden', 'A world above the ordinary'], ['flags', 'A moment at the top'], ['path', 'The next bend']].map(function (r, i) {
+    var x = S.R + 150 + i * 420, f = frame(w, r[0], x, 290, 400, 560, r[0] === 'golden' ? '62% 50%' : '50% 50%');
+    f.cap = el('div', { class: 'lab', style: 'left:' + x + 'px;top:880px;font-size:16px;letter-spacing:.16em;color:' + MIST, html: '<span class="wm"><span class="w">' + r[1] + '</span></span>' }, w).querySelector('.w');
+    STATIONS.push(x + 200); return f;
   });
 
   /* D — where to, how hard: the finder's options as chips */
@@ -141,32 +183,42 @@ function build() {
   G.card = el('div', { class: 'tcard', style: 'z-index:2;left:' + CARD.x + 'px;top:' + CARD.y + 'px;width:' + CARD.w + 'px;height:' + CARD.h + 'px' }, w);
   G.cardPh = el('div', { class: 'ph', style: 'left:24px;top:24px;width:' + (CARD.w - 48) + 'px;height:400px' }, G.card);
   el('img', { src: IM.path }, G.cardPh);
-  el('div', { class: 'eb', style: 'left:44px;top:462px', text: 'LANGTANG REGION' }, G.card);
-  el('div', { class: 'tt', style: 'left:44px;top:500px;width:580px', text: 'Valley walks & mountain villages' }, G.card);
+  G.cardEb = el('div', { class: 'eb', style: 'left:44px;top:462px', text: 'LANGTANG REGION' }, G.card);
+  G.cardTt = el('div', { class: 'tt', style: 'left:44px;top:500px;width:580px', text: 'Valley walks & mountain villages' }, G.card);
   G.btn = el('div', { class: 'btn', style: 'left:24px;top:' + (CARD.h - 108) + 'px;width:' + (CARD.w - 48) + 'px', html: '<span>Find my trek</span><svg width="36" height="28" viewBox="0 0 36 28"><path d="M2 14h30M20 3l12 11-12 11"/></svg>' }, G.card);
 
   /* E — the card's photograph opens to full frame; a route is drawn up the hillside */
+  var hx0 = CARD.x + CARD_SHIFT + CARD.w / 2 - camX(OPEN);
+  ROUTE = [[hx0, 1010], [hx0 + 90, 935], [hx0 + 195, 860], [hx0 + 310, 790], [1270, 715], [1380, 630], [1480, 540], [1580, 450], [1676, 360]];
   G.E = el('div', { class: 'l', style: 'overflow:hidden' }, ST);
   G.Eph = el('div', { class: 'fr' }, G.E); G.Eimg = el('img', { src: IM.path, style: 'object-position:50% 62%' }, G.Eph);
   G.Eshade = el('div', { id: 'heroShade' }, G.Eph);
   G.route = el('svg', { class: 'l', width: W, height: H, viewBox: '0 0 ' + W + ' ' + H }, G.E, true);
   G.routePath = el('path', { d: catmull(ROUTE), fill: 'none', stroke: GOLD, 'stroke-width': 7, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', pathLength: 1, 'stroke-dasharray': '0 1' }, G.route, true);
   G.routeDots = el('path', { d: catmull(ROUTE), fill: 'none', stroke: '#fff', 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-dasharray': '0.1 22', opacity: 0.55 }, G.route, true);
-  G.head = el('circle', { r: 15, fill: GOLD, stroke: '#fff', 'stroke-width': 4 }, G.route, true);
+  G.head = el('circle', { r: 12, fill: GOLD, stroke: '#fff', 'stroke-width': 4 }, G.route, true);
   G.pin = el('circle', { r: 15, fill: 'none', stroke: GOLD, 'stroke-width': 3 }, G.route, true);
-  G.labE = label(G.E, '03', 'The next bend', 150, 712, 'rgba(249,250,248,.85)');
-  G.hE = words(G.E, 'Shaped around you.', 146, 770, 120, WHITE);
+  G.labE = label(G.E, '03', 'The next bend', 150, 150, 'rgba(249,250,248,.85)');
+  G.hE = words(G.E, 'Shaped around you.', 146, 200, 120, WHITE);
 
+  /* the route's end pin blooms: a gold ring opens the next page */
+  G.ring = el('div', { class: 'l', style: 'background:' + GOLD }, ST);
   /* F — make the trail your own: three steps */
   G.F = el('div', { class: 'l paper' }, ST);
-  G.labF = label(G.F, '', 'Make the trail your own', 150, 150, 'rgba(21,61,47,.7)');
+  G.labF = label(G.F, '04', 'Tailor-made', 150, 96, 'rgba(21,61,47,.7)');
+  G.hF = words(G.F, 'Make the trail *your *own.', 146, 136, 96, FOREST);
+  G.hF.forEach(function (x) { if (x.classList.contains('gold')) x.style.color = GOLD_D; });
+  G.ftrail = el('svg', { class: 'l', width: W, height: H, viewBox: '0 0 ' + W + ' ' + H }, G.F, true);
+  G.ftrailP = el('path', { fill: 'none', stroke: GOLD_D, 'stroke-width': 5, 'stroke-linecap': 'round' }, G.ftrail, true);
+  G.fHeadHalo = el('circle', { r: 26, fill: GOLD, opacity: 0.18 }, G.ftrail, true);
+  G.fHead = el('circle', { r: 12, fill: GOLD_D, stroke: WHITE, 'stroke-width': 4 }, G.ftrail, true);
   var icons = [
     '<path d="M14 18h52a6 6 0 0 1 6 6v26a6 6 0 0 1-6 6H38l-14 12V56H14a6 6 0 0 1-6-6V24a6 6 0 0 1 6-6z"/><path d="M24 33h32M24 43h20"/>',
     '<circle cx="18" cy="62" r="7"/><circle cx="62" cy="18" r="7"/><path d="M24 58c14-6 4-22 18-26s12-6 14-10" stroke-dasharray="2 9"/>',
     '<rect x="16" y="8" width="48" height="64" rx="6"/><path d="M27 26h26M27 37h26M27 48h14"/><path d="M44 58l6 6 12-14"/>'
   ];
   G.steps = [['01', 'Share your idea'], ['02', 'Talk through the route'], ['03', 'Review a personal proposal']].map(function (s, i) {
-    var c = el('div', { class: 'scard', style: 'left:' + (150 + i * 560) + 'px;top:262px', html: '<div class="no">' + s[0] + '</div><div class="ic"><svg viewBox="0 0 80 80">' + icons[i] + '</svg></div><div class="tt">' + s[1] + '</div>' }, G.F);
+    var c = el('div', { class: 'scard', style: 'left:' + (150 + i * 560) + 'px;top:300px', html: '<div class="no">' + s[0] + '</div><div class="ic"><svg viewBox="0 0 80 80">' + icons[i] + '</svg></div><div class="tt">' + s[1] + '</div>' }, G.F);
     c.paths = [].slice.call(c.querySelectorAll('svg path, svg circle, svg rect'));
     c.paths.forEach(function (p) { p.setAttribute('pathLength', 1); if (!p.getAttribute('stroke-dasharray')) p.setAttribute('stroke-dasharray', '1 1'); });
     return c;
@@ -175,14 +227,37 @@ function build() {
   /* G — forest page rises, the lockup assembles, then the call to action */
   G.G = el('div', { class: 'l forest' }, ST);
   buildLockup(G.G);
+  G.gtrail = el('svg', { class: 'l', width: W, height: H, viewBox: '0 0 ' + W + ' ' + H }, G.G, true);
+  G.gtrailP = el('path', { d: 'M-20 638H960', fill: 'none', stroke: GOLD, 'stroke-width': 5, 'stroke-linecap': 'round', 'stroke-dasharray': '0 1000' }, G.gtrail, true);
+  G.gHeadHalo = el('circle', { r: 26, fill: GOLD, opacity: 0.16, cy: 638 }, G.gtrail, true);
+  G.gHead = el('circle', { r: 12, fill: GOLD, stroke: WHITE, 'stroke-width': 4, cy: 638 }, G.gtrail, true);
   G.cta = el('div', { id: 'cta', html: '<span>Plan my journey</span><svg width="38" height="30" viewBox="0 0 38 30"><path d="M2 15h32M22 4l12 11-12 11"/></svg>' }, G.G);
   G.url = el('div', { id: 'url', html: '<span class="wm"><span class="w">dreamscapetreks.com</span></span>' }, G.G);
-  G.endStrip = ['walkers', 'together', 'flags', 'lastlight', 'path', 'golden', 'night'].map(function (k, i) { return frame(G.G, k, 0, 0, 250, 170, '50% 50%'); });
+  G.endStrip = ['walkers', 'together', 'flags', 'lastlight', 'path', 'golden'].map(function (k, i) { return frame(G.G, k, 0, 0, 250, 170, '50% 50%'); });
 
   el('div', { id: 'grain' }, ST);
-  /* gold underline under "stay with you.", measured from the laid-out words */
-  var a = G.hB[2].getBoundingClientRect(), b = G.hB[4].getBoundingClientRect(), wr = G.world.getBoundingClientRect();
-  G.ulB.style.left = px(a.left - wr.left); G.ulB.style.top = px(792 + 112 * 1.02); G.ulB.style.width = px(b.right - a.left - 14);
+  /* the trail rises to underline "stay with you.", measured from the laid-out words, then drops back to the foot of the page */
+  var wr = G.world.getBoundingClientRect(), sx = G.hB[2].getBoundingClientRect().left - wr.left, ex = G.hB[4].getBoundingClientRect().right - wr.left - 14;
+  TRAILY = TRAILY.concat([[sx - 170, 1010], [sx - 30, 921], [ex + 30, 921], [ex + 170, 1010], [CARD.x + CARD.w / 2, 1010]]);
+  TRAIL = polyline(function (x) { return mono(x, TRAILY); }, 150, CARD.x + CARD.w / 2);
+  G.trailP.setAttribute('d', TRAIL.d); G.trailF.setAttribute('d', TRAIL.d);
+  [G.trailP, G.trailF].forEach(function (p) { p.setAttribute('stroke-dasharray', '0 ' + (TRAIL.len + 10)); });
+  STATIONS = STATIONS.map(function (x) { var c = el('circle', { cx: x, cy: 1010, r: 9, fill: '#153d2f', stroke: GOLD, 'stroke-width': 3 }, G.trail, true); G.stations.push(c); return x; });
+  G.trail.appendChild(G.headHalo); G.trail.appendChild(G.headDot);
+  HEADK = [[0, 150], [0.55, 160], [1.95, 760], [2.5, 1300], [3.0, sx - 200], [3.3, sx], [3.95, ex], [4.5, ex + 300], [5.6, 4000], [9.4, 5560], [10.6, 5900],
+           [10.9375, STATIONS[0]], [11.25, STATIONS[1]], [11.5625, STATIONS[2]], [11.875, STATIONS[3]], [12.6, 8240], [13.1, 8330], [16.2, 8900], [PRESS, CARD.x + CARD_SHIFT + CARD.w / 2]];
+  FTRAIL = polyline(function (x) { return mono(x, [[-40, 900], [150, 900], [560, 910], [960, 896], [1360, 910], [1770, 900]]); }, -40, 1770);
+  G.ftrailP.setAttribute('d', FTRAIL.d); G.ftrailP.setAttribute('stroke-dasharray', '0 ' + (FTRAIL.len + 10));
+}
+var FTRAIL = null;
+/* sample y(x) every 4 px into an SVG polyline with its running length, so "draw up to x" is a lookup */
+function polyline(f, x0, x1) {
+  var X = [], Y = [], L = [0], d = '';
+  for (var x = x0; x <= x1 + 0.1; x += 4) { var y = f(x); if (X.length) L.push(L[L.length - 1] + Math.hypot(x - X[X.length - 1], y - Y[Y.length - 1])); X.push(x); Y.push(y); d += (d ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); }
+  return { X: X, Y: Y, L: L, len: L[L.length - 1], d: d, at: function (x) {
+    var k = clamp((x - x0) / 4, 0, X.length - 1.0001), i = Math.floor(k), u = k - i;
+    return { y: lerp(Y[i], Y[i + 1], u), l: lerp(L[i], L[i + 1], u) };
+  } };
 }
 function catmull(p) {
   var d = 'M' + p[0][0] + ' ' + p[0][1];
@@ -213,26 +288,27 @@ function buildLockup(parent) {
 /* ------------------------------------------------------------------ the frame */
 function seekAt(t) {
   var cx = camX(t), h = 1 / 240, v = (camX(t + h) - camX(t - h)) / (2 * h);
-  var onWorld = t < OPEN + 0.6;
+  var onWorld = t < OPEN + 0.86;                                         /* until the opened photo covers the frame */
   vis(G.world, onWorld);
   G.world.style.transform = 'translateX(' + (-cx).toFixed(1) + 'px)';
-  setBlur(G.world, Math.min(60, Math.abs(v) / 60 * 0.45));
+  setBlur(G.world, Math.min(28, Math.abs(v) / 60 * 0.3));
   /* photographs sit a little nearer the lens than the type: they travel 12% faster */
   var par = function (f, rest) { f.style.transform = 'translateX(' + ((cx - rest) * -0.12).toFixed(1) + 'px)'; };
 
   /* ---- A ---- */
-  rise([G.labA], [0.2], t); rise(G.hA1.concat(G.hA2), wordTimes('walk', G.hA1.concat(G.hA2)), t);
-  showFrame(G.fA, t, 0.0, 0.0, 0.8); par(G.fA, S.A);
+  rise([G.labA], [-0.4], t); rise(G.hA1, [-0.42, -0.36], t); rise(G.hA2, wordTimes('walk', G.hA1.concat(G.hA2)).slice(2), t);   /* frame one is already set */
+  showFrame(G.fA, t, -0.45, 0.0, 0.8); par(G.fA, S.A);                    /* frame one is already a composition */
   /* ---- B ---- */
-  rise([G.labB], [2.62], t); rise(G.hB, wordTimes('stay', G.hB), t);
-  showFrame(G.fB, t, 2.45, 2.45, 0.8); par(G.fB, S.B);
-  G.ulB.style.transform = 'scaleX(' + expo(prog(t, VOT.stay + 0.55, VOT.stay + 1.15)).toFixed(4) + ')';
+  rise([G.labB], [2.25], t); rise(G.hB, wordTimes('stay', G.hB), t);
+  showFrame(G.fB, t, 2.05, 2.05, 0.9); par(G.fB, S.B);                    /* built while the camera is still on its way */
   /* ---- C ---- */
-  rise(G.hC1, [5.3], t); rise(G.hC2, [5.55], t); rise([G.labC], [6.3], t);
-  showFrame(G.fC, t, 5.05, 5.05, 0.9); par(G.fC, S.C);
+  rise(G.hC1, [4.85], t); rise(G.hC2, [5.05], t); rise([G.labC], [5.6], t);
+  par(G.fC, S.C); G.fC.img.style.transform = 'scale(' + (1.02 + 0.015 * clamp(t - 4.3, 0, 6)).toFixed(4) + ')';   /* a slow push into the city lights */
   /* ---- R ---- */
-  rise(G.hR, wordTimes('since', G.hR).map(function (x, i) { return 9.95 + 0.07 * i; }), t);
-  G.fR.forEach(function (f, i) { showFrame(f, t, 9.9 + 0.12 * i, 10.0, 0.8); par(f, S.R + i * 160); f.style.transform += ' translateY(' + ((i % 2 ? 1 : -1) * (cx - S.R) * 0.02).toFixed(1) + 'px)'; rise([f.cap], [10.25 + 0.12 * i], t); });
+  rise(G.hR, G.hR.map(function (x, i) { return 9.7 + 0.07 * i; }), t);
+  G.fR.forEach(function (f, i) { showFrame(f, t, 9.55 + 0.1 * i, 9.6, 0.8); par(f, S.R); rise([f.cap], [10.0 + 0.1 * i], t); });
+  /* ---- the trail ---- */
+  sceneTrail(t, cx);
   /* ---- D: choose ---- */
   sceneChoose(t, cx);
   /* ---- E: the route ---- */
@@ -243,15 +319,33 @@ function seekAt(t) {
   sceneEnd(t);
 }
 
+function sceneTrail(t, cx) {
+  var on = t < OPEN + 0.35; vis(G.trail, on); if (!on) return;
+  var hx = mono(t, HEADK), a = TRAIL.at(hx), forest = hx > S.C && hx < S.D;
+  G.trailP.setAttribute('stroke-dasharray', a.l.toFixed(1) + ' ' + (TRAIL.len + 10).toFixed(0));
+  G.trailF.setAttribute('stroke-dasharray', a.l.toFixed(1) + ' ' + (TRAIL.len + 10).toFixed(0));
+  var grow = sp(t, -0.3, 10, 0.95), fade = 1 - smooth(prog(t, OPEN, OPEN + 0.3));
+  var ripple = prog(t, PRESS, PRESS + 0.6);                                 /* the press sends a ring out of the head */
+  G.headDot.setAttribute('cx', hx.toFixed(1)); G.headDot.setAttribute('cy', a.y.toFixed(1));
+  G.headDot.setAttribute('r', (t < OPEN ? 12 * grow : 0).toFixed(2)); G.headDot.setAttribute('fill', forest ? GOLD : GOLD_D);   /* the route's head takes over at OPEN */
+  G.headHalo.setAttribute('cx', hx.toFixed(1)); G.headHalo.setAttribute('cy', a.y.toFixed(1));
+  G.headHalo.setAttribute('r', ((22 + 5 * Math.sin(t * Math.PI * 2 / 1.6)) * grow * fade + 60 * expo(ripple)).toFixed(2));
+  G.headHalo.setAttribute('opacity', ((0.18 + 0.3 * (ripple > 0 ? 1 - ripple : 0)) * fade).toFixed(3));
+  G.stations.forEach(function (c, i) {
+    var x = STATIONS[i], k = clamp((hx - x + 24) / 24), b = Math.sin(Math.PI * clamp((hx - x + 24) / 220));
+    c.setAttribute('fill', k > 0.5 ? GOLD : '#153d2f'); c.setAttribute('r', (9 * smooth(prog(t, 10.2 + 0.08 * i, 10.6 + 0.08 * i)) + 6 * b).toFixed(2));
+  });
+}
+
 function sceneChoose(t, cx) {
   if (t > OPEN + 0.6) return;
-  rise([G.labD], [12.6], t);
-  rise(G.hD1, [12.72, 12.82], t, 14.92, 1); rise(G.hD2, [15.0, 15.1], t, MERGE + 0.05, 1);
+  rise([G.labD], [12.3], t);
+  rise(G.hD1, [12.4, 12.5], t, 14.62, 1); rise(G.hD2, [15.05, 15.15], t, MERGE - 0.3, 1);   /* the first title is gone before the second rises */
   var chipAnim = function (c, i, tIn, picked, tSel) {
-    var u = sp(t, tIn + 0.07 * i, 15, 0.82), sel = expo(prog(t, tSel, tSel + 0.32));
+    var u = sp(t, tIn + 0.07 * i, 14, 0.95), sel = expo(prog(t, tSel, tSel + 0.32));
     var hover = picked ? smooth(prog(t, tSel - 0.35, tSel - 0.1)) : 0;
     if (!picked) {                                                       /* the others step back once the choice is made */
-      var away = expoIn(prog(t, MERGE - 0.05 + 0.03 * i, MERGE + 0.3 + 0.03 * i));
+      var away = smooth(prog(t, MERGE - 0.3 + 0.03 * i, MERGE + 0.12 + 0.03 * i));   /* gone before the chosen chips fly over them */
       var shove = i > c.pickIdx ? 48 * expo(prog(t, tSel, tSel + 0.32)) : 0;   /* the chosen chip grows a tick; its neighbours make room */
       c.style.transform = 'translate(' + shove.toFixed(1) + 'px,' + ((1 - u) * 60 + away * 50).toFixed(1) + 'px) scale(' + (lerp(0.7, 1, clamp(u)) * (1 - 0.4 * away)).toFixed(4) + ')';
       c.style.opacity = (1 - away).toFixed(3); c.fill.style.transform = 'scale(0)';
@@ -262,52 +356,62 @@ function sceneChoose(t, cx) {
     c.style.borderColor = 'rgba(21,61,47,' + (0.22 + 0.6 * hover).toFixed(3) + ')';
     /* the chosen chips fly into the trip card */
     var m = expoIO(prog(t, MERGE + (c.row ? 0.08 : 0), MERGE + 0.62 + (c.row ? 0.08 : 0)));
-    var tx = CARD.x + 44 + (c.row ? G.rc[PICK.r].w0 * 0.82 + 52 : 0) - c.x0 - c.w0 * 0.09, ty = CARD.y + 600 - c.y0;
+    var tx = CARD.x + cardShift(t) + 44 + (c.row ? G.rc[PICK.r].w0 * 0.82 + 52 : 0) - c.x0 - c.w0 * 0.09, ty = CARD.y + 600 - c.y0;
     var tap = expo(prog(t, tSel, tSel + 0.06)) * (1 - expo(prog(t, tSel + 0.08, tSel + 0.3)));
-    c.style.transform = 'translate(' + (tx * m).toFixed(1) + 'px,' + ((1 - u) * 60 + ty * m - 60 * Math.sin(Math.PI * m)).toFixed(1) + 'px) scale(' + (lerp(0.7, 1, clamp(u)) * (1 - 0.06 * tap) * (1 - 0.18 * m)).toFixed(4) + ')';
+    c.style.transform = 'translate(' + (tx * m).toFixed(1) + 'px,' + ((1 - u) * 60 + ty * m + 36 * Math.sin(Math.PI * m)).toFixed(1) + 'px) scale(' + (lerp(0.7, 1, clamp(u)) * (1 - 0.06 * tap) * (1 - 0.18 * m)).toFixed(4) + ')';
     c.style.opacity = 1;
   };
-  G.rc.forEach(function (c, i) { c.row = 0; c.pickIdx = PICK.r; c.style.zIndex = i === PICK.r ? 3 : 1; chipAnim(c, i, 12.95, i === PICK.r, SEL.r); });
-  G.lc.forEach(function (c, i) { c.row = 1; c.pickIdx = PICK.l; c.style.zIndex = i === PICK.l ? 3 : 1; chipAnim(c, i, 15.05, i === PICK.l, SEL.l); vis(c, t >= 15.0); });
-  G.rc.forEach(function (c) { vis(c, t >= 12.9); });
+  G.rc.forEach(function (c, i) { c.row = 0; c.pickIdx = PICK.r; c.style.zIndex = i === PICK.r ? 3 : 1; chipAnim(c, i, 12.6, i === PICK.r, SEL.r); });
+  G.lc.forEach(function (c, i) { c.row = 1; c.pickIdx = PICK.l; c.style.zIndex = i === PICK.l ? 3 : 1; chipAnim(c, i, 15.1, i === PICK.l, SEL.l); vis(c, t >= 15.05); });
+  G.rc.forEach(function (c) { vis(c, t >= 12.55); });
   /* the card rises in as the choices arrive; the button is pressed on the beat */
-  var cu = sp(t, MERGE - 0.1, 13, 0.86); vis(G.card, t >= MERGE - 0.12);
+  var cu = sp(t, MERGE - 0.1, 12, 0.95); vis(G.card, t >= MERGE - 0.12);
   var press = expo(prog(t, PRESS, PRESS + 0.06)) * (1 - expo(prog(t, PRESS + 0.08, PRESS + 0.28)));
-  G.card.style.transform = 'translateY(' + ((1 - cu) * 220).toFixed(1) + 'px)';
+  G.card.style.transform = 'translate(' + cardShift(t).toFixed(1) + 'px,' + ((1 - cu) * 220).toFixed(1) + 'px)';
+  var tIn = smooth(prog(t, MERGE + 0.55, MERGE + 0.9));                     /* the card's words arrive once the choices have landed */
+  [G.cardEb, G.cardTt].forEach(function (e) { e.style.opacity = tIn.toFixed(3); e.style.transform = 'translateY(' + (14 * (1 - tIn)).toFixed(1) + 'px)'; });
   G.card.style.clipPath = 'inset(' + ((1 - expo(prog(t, MERGE - 0.1, MERGE + 0.5))) * 100).toFixed(2) + '% 0 0 0 round 30px)';
-  G.btn.style.transform = 'scale(' + (1 - 0.04 * press).toFixed(4) + ')';
+  var glow = prog(t, PRESS, PRESS + 0.55);
+  G.btn.style.transform = 'scale(' + (1 - 0.06 * press).toFixed(4) + ')';
+  G.btn.style.boxShadow = glow > 0 && glow < 1 ? '0 0 0 ' + (4 + 18 * expo(glow)).toFixed(1) + 'px rgba(228,201,138,' + (0.6 * (1 - glow)).toFixed(3) + ')' : 'none';
   G.cardPh.firstChild.style.transform = 'scale(' + (1.12 - 0.08 * expo(prog(t, MERGE, MERGE + 0.8))).toFixed(4) + ')';
 }
 
 function sceneRoute(t) {
-  var on = t >= OPEN && t < 20.3; vis(G.E, on); if (!on) return;
+  var on = t >= OPEN && t < UI.disc[1] + 0.05; vis(G.E, on); if (!on) return;
   /* the card's photo rect (on screen) opens to the full frame */
-  var cx = camX(OPEN), k = expoIO(prog(t, OPEN, OPEN + 0.55));
-  var r0 = { x: CARD.x - cx + 24, y: CARD.y + 24, w: CARD.w - 48, h: 400 };
+  var cx = camX(OPEN), k = glide(prog(t, OPEN, OPEN + 0.85));
+  var r0 = { x: CARD.x + CARD_SHIFT - cx + 24, y: CARD.y + 24, w: CARD.w - 48, h: 400 };
   var x = lerp(r0.x, 0, k), y = lerp(r0.y, 0, k), w = lerp(r0.w, W, k), h = lerp(r0.h, H, k);
-  /* then the whip pan to the steps */
-  var wp = expoIO(prog(t, 19.74, 20.22)), wv = (expoIO(prog(t + 1 / 240, 19.74, 20.22)) - expoIO(prog(t - 1 / 240, 19.74, 20.22))) * 120 * W;
   G.Eph.style.left = px(x); G.Eph.style.top = px(y); G.Eph.style.width = px(w); G.Eph.style.height = px(h); G.Eph.style.borderRadius = px(lerp(22, 0, k));
-  G.E.style.transform = 'translateX(' + (-W * wp).toFixed(1) + 'px)'; setBlur(G.E, Math.min(60, Math.abs(wv) / 60 * 0.45));
   G.Eimg.style.transform = 'scale(' + (1.04 + 0.016 * Math.max(0, t - OPEN)).toFixed(4) + ')';
   G.Eshade.style.opacity = smooth(prog(t, 17.45, 18.2)).toFixed(3);
   var dr = expoIO(prog(t, 17.8, 19.2)), len = G.routePath.getTotalLength(), hp = G.routePath.getPointAtLength(len * dr);
   G.routePath.setAttribute('stroke-dasharray', dr.toFixed(4) + ' 1');
   G.routeDots.style.opacity = (0.55 * smooth(prog(t, 17.6, 18.0))).toFixed(3);
-  G.head.setAttribute('cx', hp.x.toFixed(1)); G.head.setAttribute('cy', hp.y.toFixed(1)); vis(G.head, t >= 17.75);
-  G.head.setAttribute('r', (15 * sp(t, 17.75, 16, 0.8)).toFixed(2));
+  G.head.setAttribute('cx', hp.x.toFixed(1)); G.head.setAttribute('cy', hp.y.toFixed(1)); vis(G.head, t < UI.disc[0] + 0.05);
   var pr = expo(prog(t, 19.2, 19.85)), end = ROUTE[ROUTE.length - 1];
   G.pin.setAttribute('cx', end[0]); G.pin.setAttribute('cy', end[1]); G.pin.setAttribute('r', (15 + 40 * pr).toFixed(1)); G.pin.setAttribute('stroke-opacity', (1 - pr).toFixed(3)); vis(G.pin, t >= 19.2);
-  rise([G.labE], [17.7], t); rise(G.hE, wordTimes('shape', G.hE), t);
+  rise([G.labE], [17.7], t, UI.disc[0] - 0.2, 1); rise(G.hE, wordTimes('shape', G.hE), t, UI.disc[0] - 0.15, 1);   /* out before the ring reaches it */
 }
 
 function sceneSteps(t) {
-  var on = t >= 19.74 && t < 25.3; vis(G.F, on); if (!on) return;
-  var wp = expoIO(prog(t, 19.74, 20.22)), wv = (expoIO(prog(t + 1 / 240, 19.74, 20.22)) - expoIO(prog(t - 1 / 240, 19.74, 20.22))) * 120 * W;
-  var up = expoIO(prog(t, 24.55, 25.25));                                 /* the forest page rising pushes the steps up a little */
-  G.F.style.transform = 'translate(' + (W * (1 - wp)).toFixed(1) + 'px,' + (-140 * up).toFixed(1) + 'px)'; setBlur(G.F, Math.min(60, Math.abs(wv) / 60 * 0.45));
-  rise([G.labF], [20.2], t);
-  var T = [20.625, 21.875, 23.125];
+  vis(G.ring, false);
+  var on = t >= UI.disc[0] && t < UI.rise[1]; vis(G.F, on); if (!on) return;
+  var end = ROUTE[ROUTE.length - 1], dp = prog(t, UI.disc[0] + 0.08, UI.disc[1] + 0.08), r = 2100 * glide(dp), rr = 2160 * glide(prog(t, UI.disc[0], UI.disc[1]));
+  G.F.style.clipPath = r >= 2099 ? 'none' : 'circle(' + r.toFixed(1) + 'px at ' + end[0] + 'px ' + end[1] + 'px)';
+  vis(G.ring, dp < 1); G.ring.style.clipPath = 'circle(' + rr.toFixed(1) + 'px at ' + end[0] + 'px ' + end[1] + 'px)';
+  var up = glide(prog(t, UI.rise[0], UI.rise[1]));                        /* the forest page rising pushes the steps up a little */
+  var push = 1 + 0.035 * smooth(prog(t, UI.disc[0], UI.rise[1]));          /* and a slow push-in all the way, so the page never sits still */
+  G.F.style.transformOrigin = '960px 560px';
+  G.F.style.transform = 'translateY(' + (-140 * up - 18 * smooth(prog(t, UI.disc[0], UI.rise[0]))).toFixed(1) + 'px) scale(' + push.toFixed(4) + ')';
+  rise([G.labF], [UI.disc[0] + 0.3], t); rise(G.hF, G.hF.map(function (x, i) { return UI.disc[0] + 0.38 + 0.06 * i; }), t);
+  var T = UI.steps;
+  var fx = mono(t, [[UI.disc[1] - 0.1, -40], [T[0], 400], [T[1], 960], [T[2], 1520], [UI.rise[0], 1690]]), fa = FTRAIL.at(fx);
+  G.ftrailP.setAttribute('stroke-dasharray', fa.l.toFixed(1) + ' ' + (FTRAIL.len + 10).toFixed(0));
+  var fg = sp(t, UI.disc[1] - 0.2, 12, 0.95);
+  G.fHead.setAttribute('cx', fx.toFixed(1)); G.fHead.setAttribute('cy', fa.y.toFixed(1)); G.fHead.setAttribute('r', (12 * fg).toFixed(2));
+  G.fHeadHalo.setAttribute('cx', fx.toFixed(1)); G.fHeadHalo.setAttribute('cy', fa.y.toFixed(1)); G.fHeadHalo.setAttribute('r', ((22 + 5 * Math.sin(t * Math.PI * 2 / 1.6)) * fg).toFixed(2));
   G.steps.forEach(function (c, i) {
     var u = sp(t, T[i] - 0.05, 13, 0.84);
     c.style.transform = 'translateY(' + ((1 - u) * 120).toFixed(1) + 'px)';
@@ -319,22 +423,27 @@ function sceneSteps(t) {
 }
 
 function sceneEnd(t) {
-  var on = t >= 24.5; vis(G.G, on); if (!on) return;
-  var up = expoIO(prog(t, 24.55, 25.25));
+  var on = t >= UI.rise[0]; vis(G.G, on); if (!on) return;
+  var up = glide(prog(t, UI.rise[0], UI.rise[1]));
   G.G.style.transform = 'translateY(' + ((1 - up) * H).toFixed(1) + 'px)';
-  var b = VOT.brand, m = sp(t, b - 0.05, 12, 0.92);
+  var b = VOT.brand, m = sp(t, UI.rise[1] - 0.35, 11, 0.95);
   G.mk.setAttribute('transform', 'translate(0,' + ((1 - m) * 700).toFixed(1) + ')');
   G.letters.forEach(function (p, i) { var u = sp(t, b + 0.1 + 0.035 * i, 15, 0.9); p.setAttribute('transform', 'translate(0,' + ((1 - u) * 300).toFixed(1) + ')'); });
   var u1 = sp(t, b + 0.55, 14, 0.9), u2 = sp(t, VOT.beyond - 0.02, 14, 0.9);
   G.tb1.setAttribute('transform', 'translate(0,' + ((1 - u1) * 170).toFixed(1) + ')'); G.tb2.setAttribute('transform', 'translate(0,' + ((1 - u2) * 170).toFixed(1) + ')');
-  var c = expo(prog(t, 29.375, 29.95)), cw = lerp(96, 520, c); vis(G.cta, t >= 29.3); vis(G.url, t >= 29.6);
+  var gx = lerp(-20, 960, smooth(prog(t, UI.rise[1] - 0.2, UI.cta))), gu = sp(t, UI.rise[1] - 0.3, 10, 0.95);
+  G.gtrailP.setAttribute('stroke-dasharray', (gx + 20).toFixed(1) + ' 1000');
+  G.gHead.setAttribute('cx', gx.toFixed(1)); G.gHead.setAttribute('r', (t < UI.cta ? 12 * gu : 0).toFixed(2));
+  G.gHeadHalo.setAttribute('cx', gx.toFixed(1)); G.gHeadHalo.setAttribute('r', (t < UI.cta ? (22 + 5 * Math.sin(t * Math.PI * 2 / 1.6)) * gu : 0).toFixed(2));
+  var dot = 1, c = glide(prog(t, UI.cta, UI.cta + 0.7)), cw = lerp(96, 520, c); vis(G.cta, t >= UI.cta); vis(G.url, t >= UI.cta + 0.25);   /* the head becomes the button */
   G.cta.style.left = px(960 - cw / 2); G.cta.style.top = '590px'; G.cta.style.width = px(cw);
+  G.cta.style.transform = 'scale(' + lerp(0.24 * dot, 1, glide(prog(t, UI.cta, UI.cta + 0.35))).toFixed(4) + ')';
   G.cta.firstChild.style.opacity = G.cta.lastChild.style.opacity = clamp((c - 0.55) / 0.35).toFixed(3);
-  G.url.style.top = '722px'; rise([G.url.querySelector('.w')], [29.68], t);
+  G.url.style.top = '722px'; rise([G.url.querySelector('.w')], [UI.cta + 0.3], t);
   /* a slow strip of the photographs along the bottom edge */
   var s0 = 25.3, sx = -80 * (t - s0);
   G.endStrip.forEach(function (f, i) {
-    f.style.left = px(60 + i * 280 + sx); f.style.top = '860px';
+    f.style.left = px(60 + i * 280 + sx); f.style.top = '830px';
     showFrame(f, t, 25.6 + 0.08 * i, 25.6, 0.7);
   });
   G.lk.style.transformOrigin = '960px 400px'; G.lk.style.transform = 'scale(' + (1 + 0.008 * Math.max(0, t - 25.3)).toFixed(4) + ')';

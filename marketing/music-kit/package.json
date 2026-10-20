@@ -1,0 +1,9 @@
+{
+  "name": "dreamscape-music-kit",
+  "private": true,
+  "type": "module",
+  "description": "Sample-based score renderer for the Dreamscape marketing films (Salamander grand piano + GeneralUser GS soundfont).",
+  "dependencies": {
+    "spessasynth_core": "4.3.22"
+  }
+}
